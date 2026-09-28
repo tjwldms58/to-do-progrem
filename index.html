@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.14 | 2026-09-28 | 금요일 정기업무 제목 옆 '출장서류' 버튼(trip.html 새 탭), 출장서류 화면에서 로그인 요청 시 로그인 후 자동 복귀 -->
 <!-- v1.13 | 2026-09-28 | 배경화면 크기·위치 조절: 설정에서 위치(전체/오른쪽/왼쪽/가운데)·너비·높이·글자 크기·배경을 고르면 주소 그대로 배경화면에 바로 반영 -->
 <!-- v1.12 | 2026-09-28 | 구글 로그인을 '페이지 이동 방식'(리디렉션)으로 변경: 팝업·타사 쿠키 차단 환경(Edge)에서도 로그인·캘린더 연결 가능 -->
 <!-- v1.11 | 2026-09-28 | 구글 로그인: 새 방식이 준비되지 않았을 때 예전 방식으로 조용히 넘어가지 않고 안내, 스크립트 차단 시 재시도·해결 안내 -->
@@ -539,6 +540,9 @@ body.wall{overflow:hidden}
 .wall-lay input[type=range]{width:100%;accent-color:var(--primary)}
 .wall-lay .rv{display:flex;align-items:center;gap:8px}.wall-lay .rv span{min-width:3em;text-align:right;color:var(--text)}
 
+.trip-btn{text-decoration:none;color:var(--primary);border-color:var(--primary);gap:5px}
+.trip-btn:hover{background:var(--primary-soft)}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -751,6 +755,7 @@ body.wall{overflow:hidden}
       <section class="panel p-rt">
         <div class="panel-h">
           <h2><svg class="ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>매주 금요일 정기업무</h2>
+          <a href="trip.html" target="hwm_trip" class="btn btn-sm trip-btn" title="출장신청서·출장복명서·기타실비·대상자목록 (새 탭)"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg>출장서류</a>
           <span class="sp"></span>
           <button id="rt-edit" class="btn btn-ghost btn-sm">항목 편집</button>
         </div>
@@ -937,7 +942,7 @@ body.wall{overflow:hidden}
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.13';
+const APP_VERSION = 'v1.14';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -2641,6 +2646,8 @@ async function bootFirebase(cfg) {
     LOADED = false; S = emptyState();
     if (!user) { USER = null; cal.clear(); show('login-screen'); $('#file-warn').classList.toggle('hidden', location.protocol !== 'file:'); return; }
     USER = { uid: user.uid, email: user.email, displayName: user.displayName, photoURL: user.photoURL };
+    let nxt = null; try { nxt = sessionStorage.getItem('hwm_next'); sessionStorage.removeItem('hwm_next'); } catch {}
+    if (nxt === 'trip.html') { setTimeout(() => location.assign('trip.html'), 900); }
     cal.restore();
     $('#loading').classList.remove('hidden'); $('#grid').classList.add('hidden');
     enterApp();
@@ -2737,6 +2744,7 @@ function startDemo(forWall = false) {
 
 (async function boot() {
   const qp = new URLSearchParams(location.search);
+  if (qp.get('next') === 'trip') { try { sessionStorage.setItem('hwm_next', 'trip.html'); } catch {} history.replaceState(null, '', location.pathname); }
   if (qp.has('wall')) return startWall(qp.get('wall') || '');
   if (qp.has('demo')) return startDemo();
   const cfg = resolveConfig();
