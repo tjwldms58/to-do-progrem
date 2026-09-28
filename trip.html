@@ -1,6 +1,7 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>힐마루케어 출장서류 관리 v1.03</title>
+<title>힐마루케어 출장서류 관리 v1.04</title>
+<!-- v1.04 | 2026-09-28 | 출장신청서·출장복명서를 최근 4주(이번 주 포함)만 Firebase에 자동 저장, 그 이전 주차는 자동 삭제. 기타실비는 저장 안 함(그대로) -->
 <!-- v1.03 | 2026-09-28 | 대상자목록 저장소를 Firebase로 변경(업무관리와 같은 계정·같은 DB), 업무관리로 돌아가기 버튼, 공개 사이트용으로 내장 대상자 데이터 제거 -->
 <!-- 힐마루케어회복관리입력 v34.20 의 일정 메뉴 중 대상자목록·출장신청서·출장복명서·기타실비만 분리한 파일 -->
 <script>
@@ -544,12 +545,13 @@ tr.schedCancelledRow td:not(.schedMgmtCol){background:#f8fafc}
 <header>
   <a href="./" class="no-print" id="tripBackBtn" style="background:#334155;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:700;text-decoration:none">← 업무관리</a>
   <h1>출장서류 관리</h1>
-  <span class="badge">v1.03 · 2026-09-28</span>
+  <span class="badge">v1.04 · 2026-09-28</span>
   <span class="badge g" id="tripAcct">대상자목록 · Firebase 연결 중…</span>
   <button id="hdrExportBtn2" class="no-print" style="background:#0284c7;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;">📤 JSON 내보내기</button>
   <button id="hdrImportBtn2" class="no-print" style="background:#7c3aed;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;">📥 JSON 불러오기</button>
   <input type="file" id="hdrImportInput2" accept=".json" style="display:none">
   <div class="toolbar no-print">
+    <span id="docSaveStat" class="savestat ok" title="출장신청서·출장복명서 자동 저장 상태">출장신청서·복명서: 연결 중…</span>
     <span id="saveStatus2" class="savestat ok"></span>
   </div>
 </header>
@@ -660,7 +662,7 @@ window.SchedApp = (function(){
     // [분리판 v1.01] 자동저장 없음 — 입력 내용은 이 창에서만 유지되고, 다시 열면 빈칸으로 시작
     try{
       const el=document.getElementById('saveStatus2');
-      if(el){ el.textContent="대상자목록은 💾 저장 → Firebase · 출장서류는 저장 안 함(다시 열면 빈칸)"; el.className="savestat ok"; }
+      if(el){ el.textContent="대상자목록 💾 저장 · 신청서·복명서 최근 4주 자동 저장 · 기타실비 저장 안 함"; el.className="savestat ok"; }
       updatePatSaveMsg();
     }catch(e){
       const el=document.getElementById('saveStatus2');
@@ -3351,9 +3353,28 @@ window.SchedApp = (function(){
     if(s.dashFuTimes&&typeof s.dashFuTimes==='object') state.dashFuTimes=s.dashFuTimes;
     if(s.settings&&typeof s.settings==='object') state.settings=Object.assign(state.settings,s.settings);
   }
+  /* [v1.04] 출장신청서·출장복명서 — 최근 4주(이번 주 + 지난 3주)만 보관, 다음 주 이후(미리 쓴 주차)는 유지 */
+  const KEEP_WEEKS=4;
+  function ymdLocal(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+  function tripDocsCutoff(){ const d=new Date(getMondayOfWeek(getCurrentWeekKey())+"T00:00:00"); d.setDate(d.getDate()-7*(KEEP_WEEKS-1)); return ymdLocal(d); }
+  function pruneTripDocs(){
+    const cut=tripDocsCutoff(); let n=0;
+    ['tripApply','tripReport'].forEach(k=>{ Object.keys(state[k]||{}).forEach(wk=>{ const mon=getMondayOfWeek(wk); if(mon && mon<cut){ delete state[k][wk]; n++; } }); });
+    return n;
+  }
+  function getTripDocs(){ return { apply: state.tripApply||{}, report: state.tripReport||{} }; }
+  function fixArr(v){ return Array.isArray(v)? v : (v && typeof v==='object' ? Object.keys(v).sort((a,b)=>a-b).map(k=>v[k]) : []); }
+  function setTripDocs(d){
+    const ap={}, rp={};
+    Object.entries((d&&d.apply)||{}).forEach(([wk,x])=>{ ap[wk]={ meta:(x&&x.meta)||{}, rows:fixArr(x&&x.rows) }; });
+    Object.entries((d&&d.report)||{}).forEach(([wk,x])=>{ rp[wk]=Object.assign({}, x||{}, { meta:(x&&x.meta)||{}, visits:fixArr(x&&x.visits), expenses:fixArr(x&&x.expenses) }); });
+    state.tripApply=ap; state.tripReport=rp;
+    pruneTripDocs();
+    renderTripApply(); renderTripReport();
+  }
   function legacyPatients(){ try{ const a=JSON.parse(localStorage.getItem(PAT_KEY)||'null'); return Array.isArray(a)&&a.length? a : null; }catch(e){ return null; } }
   function clearLegacy(){ try{ localStorage.removeItem(PAT_KEY); }catch(e){} }
-  return {init:init, getState:getState, setState:setState, setPatientsFromCloud:setPatientsFromCloud, isPatDirty:isPatDirty, loadPatientsUnsaved:loadPatientsUnsaved, legacyPatients:legacyPatients, clearLegacy:clearLegacy};
+  return {init:init, getState:getState, setState:setState, pruneTripDocs:pruneTripDocs, getTripDocs:getTripDocs, setTripDocs:setTripDocs, setPatientsFromCloud:setPatientsFromCloud, isPatDirty:isPatDirty, loadPatientsUnsaved:loadPatientsUnsaved, legacyPatients:legacyPatients, clearLegacy:clearLegacy};
 })();
 </script>
 <script>
@@ -3392,22 +3413,71 @@ const gate = (show, title, msg) => { const g = $('tripGate'); g.style.display = 
 let noticeT = null;
 function notice(html, ms = 6000) { const n = $('tripNotice'); n.innerHTML = html; n.style.display = 'block'; clearTimeout(noticeT); if (ms) noticeT = setTimeout(() => n.style.display = 'none', ms); }
 window.TripFB = { uid: null, save: async () => { throw new Error('아직 연결되지 않았어요'); } };
+/* --- 출장신청서·출장복명서 자동 저장 (workmgr/{uid}/tripDocs) --- */
+const DOC = { uid: null, loaded: false, sig: '', timer: null, saving: false, pending: false, unsub: null, dbM: null, db: null };
+const docStat = (t, bad) => { const el = $('docSaveStat'); if (el) { el.textContent = t; el.className = 'savestat ' + (bad ? 'err' : 'ok'); } };
+const docSig = () => JSON.stringify(window.SchedApp.getTripDocs());
+function tripInputFocused() { const a = document.activeElement; return !!(a && a.closest && a.closest('#sp-trip-apply, #sp-trip-report') && /INPUT|TEXTAREA|SELECT/.test(a.tagName)); }
+async function saveDocsNow() {
+  if (!DOC.uid || !DOC.loaded) return;
+  const removed = window.SchedApp.pruneTripDocs();
+  const sig = docSig();
+  if (sig === DOC.sig && !removed) { DOC.pending = false; return; }
+  DOC.saving = true; docStat('출장신청서·복명서: 저장 중…');
+  try {
+    const d = JSON.parse(sig);
+    await DOC.dbM.set(DOC.dbM.ref(DOC.db, `workmgr/${DOC.uid}/tripDocs`), { apply: d.apply, report: d.report, updatedAt: Date.now() });
+    DOC.sig = sig; DOC.pending = false;
+    docStat('출장신청서·복명서: 저장됨 ' + new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) + ' (최근 4주 보관)');
+  } catch (e) { console.error(e); docStat('출장신청서·복명서: 저장 실패 — 인터넷·로그인 확인', true); }
+  finally { DOC.saving = false; }
+}
+window.hilmaruFileSave = () => {   // 출장서류 앱의 autosave()가 부를 때마다 → 1.2초 뒤 저장
+  if (!DOC.uid || !DOC.loaded) return;
+  if (docSig() === DOC.sig) return;
+  DOC.pending = true; docStat('출장신청서·복명서: 저장 대기…');
+  clearTimeout(DOC.timer); DOC.timer = setTimeout(saveDocsNow, 1200);
+};
+document.addEventListener('change', e => { if (e.target.closest && e.target.closest('#sp-trip-apply, #sp-trip-report')) window.hilmaruFileSave(); }, true);
+window.addEventListener('beforeunload', e => { if (DOC.pending || DOC.saving) { saveDocsNow(); e.preventDefault(); e.returnValue = ''; } });
+function startDocsSync(uid) {
+  if (DOC.unsub) { DOC.unsub(); DOC.unsub = null; }
+  DOC.uid = uid; DOC.loaded = false; DOC.sig = '';
+  const r = DOC.dbM.ref(DOC.db, `workmgr/${uid}/tripDocs`);
+  DOC.unsub = DOC.dbM.onValue(r, snap => {
+    const v = snap.val() || {};
+    const incoming = JSON.stringify({ apply: v.apply || {}, report: v.report || {} });
+    if (!DOC.loaded) {
+      window.SchedApp.setTripDocs(v);
+      DOC.sig = docSig(); DOC.loaded = true;
+      docStat('출장신청서·복명서: 불러옴 (최근 4주 보관)');
+      if (DOC.sig !== JSON.stringify({ apply: v.apply || {}, report: v.report || {} })) saveDocsNow();   // 오래된 주차 정리 반영
+      return;
+    }
+    if (DOC.saving || incoming === DOC.sig) return;
+    if (DOC.pending || tripInputFocused()) { notice('다른 기기에서 출장신청서·복명서가 바뀌었어요. 지금 입력한 내용이 저장되면 이 화면 기준으로 덮어써요.', 7000); return; }
+    window.SchedApp.setTripDocs(v); DOC.sig = docSig();
+    notice('다른 기기에서 바뀐 출장신청서·복명서를 반영했어요');
+  }, err => { console.error(err); docStat('출장신청서·복명서: 불러오기 실패', true); });
+}
 try {
   const B = 'https://www.gstatic.com/firebasejs/11.1.0/';
   const [appM, authM, dbM] = await Promise.all([import(B + 'firebase-app.js'), import(B + 'firebase-auth.js'), import(B + 'firebase-database.js')]);
   const app = appM.initializeApp(firebaseConfig);
   const auth = authM.getAuth(app), db = dbM.getDatabase(app);
+  DOC.dbM = dbM; DOC.db = db;
   let unsub = null, first = true;
   authM.onAuthStateChanged(auth, user => {
     if (unsub) { unsub(); unsub = null; }
-    if (!user) { window.TripFB.uid = null; $('tripAcct').textContent = '로그인 필요'; gate(true); return; }
+    if (!user) { window.TripFB.uid = null; DOC.uid = null; if (DOC.unsub) { DOC.unsub(); DOC.unsub = null; } $('tripAcct').textContent = '로그인 필요'; docStat('출장신청서·복명서: 로그인 필요', true); gate(true); return; }
     gate(false);
     const r = dbM.ref(db, `workmgr/${user.uid}/tripPatients`);
     window.TripFB = {
       uid: user.uid,
       save: async list => { await dbM.set(r, { list: JSON.parse(JSON.stringify(list || [])), updatedAt: Date.now() }); },
     };
-    $('tripAcct').textContent = `${user.email || ''} · 대상자목록 Firebase 저장`;
+    $('tripAcct').textContent = `${user.email || ''} · Firebase 저장`;
+    startDocsSync(user.uid);
     first = true;
     unsub = dbM.onValue(r, snap => {
       const v = snap.val();
