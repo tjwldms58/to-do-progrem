@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.03 | 2026-09-28 | 캘린더 연결 진단 화면 추가, 일정 불러오기 오류를 화면에 표시, 캘린더 목록 권한이 없을 때 연결이 끊기던 문제 수정, 연결된 구글 계정·숨겨진 캘린더 안내 -->
 <!-- v1.02 | 2026-09-28 | 방문보고서 '저장' 버튼(창 유지·Ctrl+S·하단 고정), 캘린더 › 크게 보기(구글 캘린더처럼 시간·제목 표시) -->
 <!-- v1.01 | 2026-09-28 | 박스 크기 확대, 방문보고서 아래 미니 캘린더(구글 캘린더 일정 표시), 오늘 방문·제출할 보고서 표시, 폰에서 바꾼 일정 자동 반영 -->
 <!-- v1.00 | 2026-09-28 | 최초 작성: 방문보고서 작성·제출, To-Do, 금요일 정기업무 알림, Firebase RTDB 저장, 구글 캘린더 자동 동기화 -->
@@ -304,6 +305,21 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
   .bc-ev:not(.allday){border-left:2px solid var(--c);border-radius:2px}
 }
 
+.mc-connect.warn{background:var(--warn-soft);color:var(--warn)}
+.mc-hint{font-size:12px;color:var(--text-2);margin:-2px 0 10px}
+.linkbtn{border:0;background:transparent;color:var(--primary);font-weight:700;font-size:12px;padding:0;text-decoration:underline;text-underline-offset:2px}
+.dg-list{display:flex;flex-direction:column;gap:8px}
+.dg-row{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.dg-ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;background:var(--muted)}
+.dg-row.ok .dg-ic{background:var(--ok)} .dg-row.bad .dg-ic{background:var(--danger)} .dg-row.warn .dg-ic{background:var(--warn)}
+.dg-t{font-weight:700;font-size:13px}
+.dg-d{font-size:12px;color:var(--text-2);margin-top:2px;word-break:break-word}
+.dg-cals{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.dg-cal{display:flex;align-items:center;gap:8px;font-size:12px}
+.dg-cal .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.dg-cal .cnt{margin-left:auto;font-weight:700;color:var(--text)}
+.dg-sum{font-size:13px;font-weight:600;background:var(--primary-soft);color:var(--primary-strong);border-radius:10px;padding:10px 12px;white-space:pre-line}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -590,6 +606,15 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
   </div>
 </div>
 
+<!-- ===== 캘린더 연결 진단 ===== -->
+<div id="diag-modal" class="modal-bg hidden">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dg-title" style="max-width:560px">
+    <div class="modal-h"><h3 id="dg-title">캘린더 연결 진단</h3><button class="btn btn-ghost btn-icon" data-close aria-label="닫기"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-b"><div id="dg-sum" class="dg-sum hidden"></div><div class="dg-list" id="dg-list"></div></div>
+    <div class="modal-f"><button class="btn" id="dg-copy">결과 복사</button><span class="sp"></span><button class="btn" id="dg-connect">캘린더 다시 연결</button><button class="btn btn-primary" id="dg-run">다시 검사</button></div>
+  </div>
+</div>
+
 <!-- ===== 설정 모달 ===== -->
 <div id="set-modal" class="modal-bg hidden">
   <div class="modal modal-sm" role="dialog" aria-modal="true">
@@ -606,6 +631,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
         <label class="field">방문 일정 키워드 <span style="font-weight:400;color:var(--muted)">(쉼표로 여러 개 · 비우면 모든 일정을 방문으로 봐요)</span>
           <input id="set-kw" class="input" placeholder="예: 방문, 상담, 님" maxlength="100"></label>
       </div>
+      <button id="set-diag" class="btn btn-sm" style="align-self:flex-start">캘린더 연결 진단</button>
       <button id="set-cfgreset" class="btn btn-ghost btn-sm hidden" style="align-self:flex-start">이 브라우저에 저장된 Firebase 설정 지우기</button>
     </div>
     <div class="modal-f"><span class="ver" data-ver style="margin:0"></span><span class="sp"></span><button id="logout-btn" class="btn">로그아웃</button></div>
@@ -624,7 +650,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.02';
+const APP_VERSION = 'v1.03';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -779,17 +805,18 @@ const cal = {
     if (!r.ok) {
       let msg = ''; try { msg = (await r.json()).error?.message || ''; } catch {}
       if (r.status === 403 && /has not been used|disabled/i.test(msg)) msg = 'Google Cloud 콘솔에서 Calendar API를 사용 설정해 주세요';
-      else if (r.status === 403 && /insufficient/i.test(msg)) { this.clear(); throw Object.assign(new Error('캘린더 권한이 허용되지 않았어요. 다시 연결하면서 캘린더 권한을 체크해 주세요'), { code: 'auth' }); }
+      else if (r.status === 403 && /insufficient/i.test(msg)) throw Object.assign(new Error('이 기능에 필요한 캘린더 권한이 허용되지 않았어요. [다시 연결]을 누르고 구글 권한 화면에서 캘린더 항목을 모두 체크해 주세요'), { code: 'scope' });
+      else if (r.status === 404) msg = '캘린더를 찾을 수 없어요 (삭제됐거나 접근 권한이 없는 캘린더)';
       throw Object.assign(new Error(msg || 'HTTP ' + r.status), { code: 'http' });
     }
     return r.status === 204 ? null : r.json();
   },
 };
 
-function makeProvider(hint) {
+function makeProvider(hint, consent) {
   const p = new FB.GoogleAuthProvider();
   CAL_SCOPES.forEach(sc => p.addScope(sc));
-  p.setCustomParameters(hint ? { login_hint: hint } : { prompt: 'select_account' });
+  p.setCustomParameters(hint ? (consent ? { login_hint: hint, prompt: 'consent' } : { login_hint: hint }) : { prompt: 'select_account' });
   return p;
 }
 function authErr(e) {
@@ -804,10 +831,10 @@ function authErr(e) {
   };
   toast(m[c] || ('로그인 오류: ' + (e?.message || c)), 'danger');
 }
-async function connectCalendar() {
+async function connectCalendar(consent = false) {
   if (MODE === 'demo') { cal.demoOn = true; updateCalUI(); toast('데모: 캘린더 연결됨'); afterConnect(); return; }
   try {
-    const res = await FB.reauthenticateWithPopup(FB.auth.currentUser, makeProvider(USER.email));
+    const res = await FB.reauthenticateWithPopup(FB.auth.currentUser, makeProvider(USER.email, consent === true));
     const cred = FB.GoogleAuthProvider.credentialFromResult(res);
     if (cred?.accessToken) { cal.set(cred.accessToken, USER.uid); toast('구글 캘린더에 연결됐어요'); }
   } catch (e) { authErr(e); }
@@ -903,16 +930,16 @@ async function processPending() {
       for (const [id, r] of Object.entries(S.reports)) {
         if (r.calState !== 'pending') continue;
         try { await syncReport(id); }
-        catch (e) { if (e.code === 'auth') throw e; r.calState = 'error'; await db.update('reports/' + id, { calState: 'error', calErr: e.message }); toast(`캘린더 반영 실패 (${r.customer}): ${e.message}`, 'danger'); }
+        catch (e) { if (e.code === 'auth' || e.code === 'scope') throw e; r.calState = 'error'; await db.update('reports/' + id, { calState: 'error', calErr: e.message }); toast(`캘린더 반영 실패 (${r.customer}): ${e.message}`, 'danger'); }
       }
       const c = S.routine.cal;
       if (c.state === 'pending') {
         try { await syncRoutine(); }
-        catch (e) { if (e.code === 'auth') throw e; c.state = 'error'; await db.update('routine/cal', { state: 'error', err: e.message }); toast('금요일 반복 일정 반영 실패: ' + e.message, 'danger'); }
+        catch (e) { if (e.code === 'auth' || e.code === 'scope') throw e; c.state = 'error'; await db.update('routine/cal', { state: 'error', err: e.message }); toast('금요일 반복 일정 반영 실패: ' + e.message, 'danger'); }
       }
     } while (syncAgain);
   } catch (e) {
-    if (e.code === 'auth') toast(e.message === '캘린더 연결 만료' ? '캘린더 연결이 만료됐어요' : e.message, 'warn', { label: '다시 연결', fn: connectCalendar });
+    if (e.code === 'auth' || e.code === 'scope') toast(e.message === '캘린더 연결 만료' ? '캘린더 연결이 만료됐어요' : e.message, 'warn', { label: '다시 연결', fn: () => connectCalendar(e.code === 'scope') });
     else { console.error(e); toast('캘린더 동기화 오류: ' + e.message, 'danger'); }
   } finally { syncBusy = false; render(); if (worked) loadEvents(); }
 }
@@ -939,7 +966,7 @@ $('#cal-pill').onclick = () => {
 };
 
 /* ===================== CALENDAR VIEW (미니 캘린더 · 오늘 방문) ===================== */
-const CV = { month: todayStr().slice(0, 7), sel: todayStr(), events: [], range: null, fetchedAt: 0, loading: false, err: null, seq: 0, cals: null, authWarned: false };
+const CV = { month: todayStr().slice(0, 7), sel: todayStr(), events: [], range: null, fetchedAt: 0, loading: false, err: null, seq: 0, cals: null, authWarned: false, calErrs: [], calListErr: null, account: '' };
 function afterConnect() { if (!cal.ok()) { renderCal(); renderDue(); return; } processPending(); loadCalList(); loadEvents(); }
 function parseEvTime(t) {
   if (t?.dateTime) return Date.parse(/([zZ]|[+-]\d\d:\d\d)$/.test(t.dateTime) ? t.dateTime : t.dateTime + '+09:00');
@@ -991,7 +1018,9 @@ async function loadCalList() {
   try {
     const r = await cal.req('GET', '/users/me/calendarList?minAccessRole=reader');
     CV.cals = (r.items || []).map(c => ({ id: c.id, summary: c.summaryOverride || c.summary, color: c.backgroundColor, primary: !!c.primary }));
-  } catch (e) { if (e.code !== 'auth') console.warn('calendarList', e.message); CV.cals = null; }
+    CV.calListErr = null;
+    const pc = CV.cals.find(c => c.primary); if (pc) CV.account = pc.id;
+  } catch (e) { console.warn('calendarList', e.message); CV.cals = null; CV.calListErr = e.message; }
   renderCal();
 }
 async function loadEvents() {
@@ -1002,16 +1031,18 @@ async function loadEvents() {
   const seq = ++CV.seq; CV.loading = true; renderCalStat();
   const qs = new URLSearchParams({ timeMin: `${a}T00:00:00+09:00`, timeMax: `${b}T00:00:00+09:00`, singleEvents: 'true', orderBy: 'startTime', maxResults: '500' }).toString();
   try {
+    const errs = [];
     const lists = await Promise.all(selectedCals().map(id => cal.req('GET', evPath(id) + '?' + qs)
-      .then(r => (r.items || []).filter(e => e.status !== 'cancelled').map(e => ({ ...e, _cal: id })))
-      .catch(e => { if (e.code === 'auth') throw e; console.warn('calendar', id, e.message); return []; })));
+      .then(r => { if (id === 'primary' && r.summary && !CV.account) CV.account = r.summary; return (r.items || []).filter(e => e.status !== 'cancelled').map(e => ({ ...e, _cal: id })); })
+      .catch(e => { if (e.code === 'auth') throw e; console.warn('calendar', id, e.message); errs.push({ id, msg: e.code === 'gone' ? '캘린더를 찾을 수 없어요 (삭제됐거나 공유가 해제된 캘린더)' : e.message, code: e.code }); return []; })));
     if (seq !== CV.seq) return;
+    CV.calErrs = errs;
     const seen = new Set(); CV.events = lists.flat().filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; });
     CV.range = [a, b]; CV.fetchedAt = Date.now(); CV.err = null; CV.authWarned = false;
     await reconcile(a, b);
   } catch (e) {
     if (seq !== CV.seq) return;
-    if (e.code === 'auth') { if (!CV.authWarned) { CV.authWarned = true; toast('캘린더 연결이 만료됐어요', 'warn', { label: '다시 연결', fn: connectCalendar }); } }
+    if (e.code === 'auth') { if (!CV.authWarned) { CV.authWarned = true; toast(e.message === '캘린더 연결 만료' ? '캘린더 연결이 만료됐어요' : e.message, 'warn', { label: '다시 연결', fn: connectCalendar }); } }
     else CV.err = e.message;
   } finally { if (seq === CV.seq) { CV.loading = false; renderCal(); renderDue(); renderReports(); } }
 }
@@ -1063,7 +1094,7 @@ function renderCalStat() {
   if (!cal.ok()) { el.textContent = ''; return; }
   if (CV.loading) { el.textContent = '불러오는 중…'; return; }
   if (CV.err) { el.textContent = '불러오기 실패: ' + CV.err; return; }
-  if (CV.fetchedAt) el.textContent = `${new Date(CV.fetchedAt).toLocaleTimeString('ko-KR', { timeZone: TZ, hour: '2-digit', minute: '2-digit' })} 업데이트 · 2분마다 자동 새로고침`;
+  if (CV.fetchedAt) el.textContent = `${CV.account ? CV.account + ' · ' : ''}${new Date(CV.fetchedAt).toLocaleTimeString('ko-KR', { timeZone: TZ, hour: '2-digit', minute: '2-digit' })} 업데이트 · 2분마다 자동 새로고침`;
 }
 function evRow(e) {
   const i = evInfo(e), r = linkedReport(e);
@@ -1072,12 +1103,25 @@ function evRow(e) {
     <span class="ev-bar"></span><span class="ev-time">${i.allDay ? '종일' : esc(i.start)}</span>
     <span class="ev-main"><div class="ev-sum">${esc(e.summary || '(제목 없음)')}</div>${e.location ? `<div class="ev-loc">${esc(e.location)}</div>` : ''}</span>${badge}</button>`;
 }
+function calNotices() {
+  if (!cal.ok()) return `<div class="mc-connect">${ICO.cal}<span>구글 캘린더를 연결하면 일정이 여기에 나타나요</span><span class="sp"></span><button class="btn btn-primary btn-sm" data-connect>연결</button></div>`;
+  let h = '';
+  const nameOf = id => { const c = CV.cals?.find(x => x.id === id || (id === 'primary' && x.primary)); return c?.summary || (id === 'primary' ? '기본 캘린더' : id); };
+  for (const e of CV.calErrs || []) h += `<div class="mc-connect warn"><span>‘${esc(nameOf(e.id))}’ 일정을 못 불러왔어요 — ${esc(e.msg)}</span><span class="sp"></span>${e.code === 'scope' ? '<button class="btn btn-sm" data-connect data-consent>다시 연결</button>' : ''}<button class="btn btn-sm" data-diag>진단</button></div>`;
+  if (CV.err) h += `<div class="mc-connect warn"><span>일정을 불러오지 못했어요 — ${esc(CV.err)}</span><span class="sp"></span><button class="btn btn-sm" data-diag>진단</button></div>`;
+  if (CV.cals) {
+    const sel = selectedCals(), hidden = CV.cals.filter(c => !sel.includes(c.primary ? 'primary' : c.id));
+    if (hidden.length) h += `<div class="mc-hint">표시 중인 캘린더 ${sel.length}개 · 숨겨진 캘린더 ${hidden.length}개 (${esc(hidden.slice(0, 3).map(c => c.summary).join(', '))}${hidden.length > 3 ? ' 등' : ''}) <button class="linkbtn" data-diag>캘린더별 일정 확인</button></div>`;
+  } else if (CV.calListErr) h += `<div class="mc-hint">캘린더 목록을 못 불러와 기본 캘린더만 보여요 (${esc(CV.calListErr)}) <button class="linkbtn" data-diag>진단</button></div>`;
+  return h;
+}
+
 function renderCal() {
   if (!USER || !$('#mc-grid')) return;
   const t = todayStr(), [y, m] = CV.month.split('-').map(Number);
   $('#mc-title').textContent = `${y}년 ${m}월`;
   renderCalStat();
-  $('#mc-connect').innerHTML = cal.ok() ? '' : `<div class="mc-connect">${ICO.cal}<span>구글 캘린더를 연결하면 일정이 여기에 나타나요</span><span class="sp"></span><button class="btn btn-primary btn-sm" data-connect>연결</button></div>`;
+  $('#mc-connect').innerHTML = calNotices();
   const g = monthGrid(CV.month);
   let h = WD.map((w, i) => `<div class="mc-wd ${i === 0 ? 'sun' : i === 6 ? 'sat' : ''}">${w}</div>`).join('');
   h += g.map(d => {
@@ -1163,7 +1207,7 @@ function openEvent(k) {
 $('#ev-rep').onclick = () => { closeModal($('#ev-modal')); closeModal($('#day-modal')); if (evOpen) openFromEvent(evOpen); };
 $('#mc-grid').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; CV.sel = b.dataset.d; if (CV.sel.slice(0, 7) !== CV.month) { CV.month = CV.sel.slice(0, 7); loadEvents(); } renderCal(); };
 $('#mc-day').onclick = e => { const b = e.target.closest('[data-k]'); if (b) openEvent(b.dataset.k); };
-$('#mc-connect').onclick = e => { if (e.target.closest('[data-connect]')) connectCalendar(); };
+$('#mc-connect').onclick = e => { const c = e.target.closest('[data-connect]'); if (c) connectCalendar(c.hasAttribute('data-consent')); else if (e.target.closest('[data-diag]')) openDiag(); };
 function shiftMonth(n) { const [y, m] = CV.month.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); CV.month = d.toISOString().slice(0, 7); CV.sel = CV.month === todayStr().slice(0, 7) ? todayStr() : CV.month + '-01'; renderCal(); loadEvents(); }
 $('#mc-prev').onclick = () => shiftMonth(-1);
 $('#mc-next').onclick = () => shiftMonth(1);
@@ -1230,6 +1274,104 @@ DAYM.addEventListener('click', e => { if (e.target.closest('[data-close]')) clos
 DAYM.addEventListener('mousedown', e => { if (e.target === DAYM) DAYM.dataset.down = '1'; });
 DAYM.addEventListener('mouseup', e => { if (e.target === DAYM && DAYM.dataset.down) closeModal(DAYM); delete DAYM.dataset.down; });
 let bigRT = null; window.addEventListener('resize', () => { clearTimeout(bigRT); bigRT = setTimeout(renderBig, 120); });
+
+/* ----- 캘린더 연결 진단 ----- */
+const DIAG = $('#diag-modal'); let dgRows = [], dgBusy = false;
+function openDiag() { DIAG.classList.remove('hidden'); runDiag(); }
+function paintDiag() {
+  const ic = { ok: '✓', bad: '!', warn: '!', info: 'i', run: '…' };
+  $('#dg-list').innerHTML = dgRows.map(r => `<div class="dg-row ${r.st}"><span class="dg-ic">${ic[r.st]}</span><div style="flex:1;min-width:0"><div class="dg-t">${esc(r.t)}</div>${r.d ? `<div class="dg-d">${esc(r.d)}</div>` : ''}${r.x || ''}</div></div>`).join('');
+}
+async function runDiag() {
+  if (dgBusy) return; dgBusy = true;
+  dgRows = []; const tips = [];
+  const push = (st, t, d, x) => { dgRows.push({ st, t, d, x }); paintDiag(); };
+  $('#dg-sum').classList.add('hidden'); $('#dg-run').disabled = true;
+  try {
+    const https = location.protocol === 'https:' || location.hostname === 'localhost';
+    push(https ? 'ok' : 'bad', '접속 주소', location.origin + (https ? '' : ' — https 웹 주소에서 열어야 구글 로그인이 돼요'));
+    if (MODE === 'demo') { push('warn', '데모 모드', '실제 구글 캘린더가 아니라 예시 일정이 보이는 상태예요. 주소 끝의 ?demo 를 빼고 열어 주세요.'); tips.push('데모 모드가 켜져 있어요. 주소에서 ?demo 를 빼고 로그인해 주세요.'); }
+    else {
+      const inFile = !!(firebaseConfig.apiKey && firebaseConfig.databaseURL);
+      push(inFile ? 'ok' : 'warn', 'Firebase 설정', inFile ? '파일 안에 들어 있어요' : '이 브라우저에만 저장돼 있어요. 폰이나 다른 PC에서 열면 처음 설정 화면이 떠요.');
+      if (!inFile) tips.push('Firebase 설정값을 파일(FIREBASE CONFIG)에 넣어 다시 올리면 폰에서도 바로 열려요.');
+    }
+    push('ok', '앱 로그인 계정', USER?.email || '-');
+    if (!cal.ok()) {
+      push('bad', '캘린더 연결', '연결돼 있지 않아요 (연결은 1시간마다 한 번 다시 눌러야 해요). 아래 [캘린더 다시 연결]을 눌러 주세요.');
+      tips.push('[캘린더 다시 연결]을 누른 뒤 다시 검사해 주세요.');
+      return;
+    }
+    push('ok', '캘린더 연결', MODE === 'demo' ? '연결됨 (데모)' : `연결됨 · 약 ${Math.max(0, Math.round((cal.exp - Date.now()) / 60000))}분 남음`);
+    let scopes = null, tokEmail = '';
+    if (MODE === 'demo') { scopes = CAL_SCOPES; tokEmail = USER.email; }
+    else {
+      try {
+        const r = await fetch('https://oauth2.googleapis.com/tokeninfo', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'access_token=' + encodeURIComponent(cal.token) });
+        if (r.ok) { const j = await r.json(); scopes = (j.scope || '').split(' '); tokEmail = j.email || ''; }
+      } catch {}
+    }
+    if (scopes) {
+      const hasEv = scopes.some(x => /\/auth\/calendar(\.events)?$/.test(x));
+      const hasList = scopes.some(x => /\/auth\/calendar(\.readonly|\.calendarlist|\.calendarlist\.readonly)?$/.test(x));
+      const miss = [!hasEv && '일정 보기·관리', !hasList && '캘린더 목록 보기'].filter(Boolean);
+      push(miss.length ? 'bad' : 'ok', '허용된 권한', miss.length ? `빠진 권한: ${miss.join(', ')} — [캘린더 다시 연결]을 누르고, 구글 권한 화면에서 캘린더 관련 체크박스를 모두 켜 주세요.` : '일정 보기·관리, 캘린더 목록 보기 모두 허용됨');
+      if (miss.length) tips.push('구글 권한 화면에서 캘린더 체크박스를 모두 켜고 다시 연결해 주세요.');
+    } else push('info', '허용된 권한', '직접 확인하지 못했어요 (아래 결과로 판단해요)');
+    let cals = null;
+    try {
+      const r = await cal.req('GET', '/users/me/calendarList?minAccessRole=reader');
+      cals = (r.items || []).map(c => ({ id: c.id, key: c.primary ? 'primary' : c.id, summary: c.summaryOverride || c.summary, color: c.backgroundColor, primary: !!c.primary }));
+      CV.cals = cals.map(c => ({ id: c.id, summary: c.summary, color: c.color, primary: c.primary })); CV.calListErr = null;
+      push('ok', 'Google Calendar API', `정상 · 이 계정에서 보이는 캘린더 ${cals.length}개`);
+    } catch (e) {
+      push('bad', 'Google Calendar API · 캘린더 목록', e.message);
+      if (/사용 설정/.test(e.message)) tips.push('Google Cloud 콘솔에서 Google Calendar API를 "사용"으로 켜 주세요 (Firebase와 같은 프로젝트).');
+    }
+    const account = cals?.find(c => c.primary)?.id || tokEmail;
+    if (account) { CV.account = account; push(MODE === 'demo' || !USER?.email || account === USER.email ? 'ok' : 'warn', '연결된 캘린더 계정', account + (MODE !== 'demo' && USER?.email && account !== USER.email ? ` — 앱 로그인 계정(${USER.email})과 달라요` : '')); }
+    const sel = selectedCals();
+    const list = cals || sel.map(k => ({ key: k, id: k, summary: k === 'primary' ? '기본 캘린더' : k }));
+    const t = todayStr();
+    const qs = new URLSearchParams({ timeMin: `${addDays(t, -30)}T00:00:00+09:00`, timeMax: `${addDays(t, 60)}T00:00:00+09:00`, singleEvents: 'true', maxResults: '2500' }).toString();
+    push('run', '캘린더별 일정 수 (지난 30일 ~ 앞으로 60일)', '확인하는 중…');
+    const res = await Promise.all(list.map(c => cal.req('GET', evPath(c.key) + '?' + qs)
+      .then(r => ({ c, n: (r.items || []).filter(e => e.status !== 'cancelled').length }))
+      .catch(e => ({ c, err: e.code === 'gone' ? '찾을 수 없음' : e.message }))));
+    dgRows.pop();
+    const total = res.reduce((a, x) => a + (x.n || 0), 0);
+    const shownN = res.filter(x => sel.includes(x.c.key)).reduce((a, x) => a + (x.n || 0), 0);
+    const errN = res.filter(x => x.err).length;
+    const x = `<div class="dg-cals">${res.map(r => `<label class="dg-cal"><input type="checkbox" data-dgcal="${esc(r.c.key)}" ${sel.includes(r.c.key) ? 'checked' : ''}><span class="sw" style="background:${esc(r.c.color || 'var(--primary)')}"></span>${esc(r.c.summary || r.c.id)}${r.c.primary ? ' (기본)' : ''}<span class="cnt">${r.err ? esc('오류: ' + r.err) : r.n + '건'}</span></label>`).join('')}</div>
+      <div class="dg-d" style="margin-top:6px">체크한 캘린더가 앱 캘린더에 표시돼요.</div>`;
+    const d = total ? (shownN ? `표시 중인 캘린더에 ${shownN}건 · 전체 ${total}건` : `일정 ${total}건이 있지만 모두 숨겨진 캘린더에 있어요 — 일정이 있는 캘린더를 체크해 주세요`)
+      : (errN ? '일정을 읽지 못한 캘린더가 있어요' : '이 계정의 캘린더에 이 기간 일정이 하나도 없어요');
+    push(total && shownN ? 'ok' : 'warn', '캘린더별 일정 수 (지난 30일 ~ 앞으로 60일)', d, x);
+    if (total && !shownN) tips.push('위 목록에서 방문 일정이 들어 있는 캘린더를 체크해 주세요.');
+    if (!total && !errN) tips.push(`폰의 구글 캘린더 앱에서 방문 일정이 어느 계정에 저장되는지 확인해 주세요. ${account || '연결된 계정'}이 아닌 다른 계정(예: 개인 Gmail)이라면, 그 캘린더를 ${account || '이 계정'}에 공유하거나 그 계정으로 로그인해야 보여요.`);
+  } catch (e) {
+    push('bad', '진단 중 오류', e.message);
+    if (e.code === 'auth') tips.push('[캘린더 다시 연결]을 누른 뒤 다시 검사해 주세요.');
+  } finally {
+    dgBusy = false; $('#dg-run').disabled = false;
+    const sum = $('#dg-sum');
+    sum.textContent = tips.length ? '해결 방법\n' + tips.map((x, i) => `${i + 1}. ${x}`).join('\n') : '문제를 찾지 못했어요. 그래도 일정이 안 보이면 [결과 복사]를 눌러 내용을 알려 주세요.';
+    sum.classList.remove('hidden');
+  }
+}
+$('#dg-run').onclick = runDiag;
+$('#dg-connect').onclick = async () => { await connectCalendar(true); if (cal.ok()) runDiag(); };
+$('#dg-copy').onclick = async () => {
+  const txt = [`[캘린더 진단] ${APP_VERSION} ${new Date().toLocaleString('ko-KR', { timeZone: TZ })}`, ...dgRows.map(r => `${r.st.toUpperCase()} · ${r.t}: ${r.d || ''}${r.x ? ' / ' + (document.createRange().createContextualFragment(r.x).textContent || '').replace(/\s+/g, ' ').trim() : ''}`), $('#dg-sum').textContent].join('\n');
+  toast(await copyText(txt) ? '진단 결과를 복사했어요' : '복사에 실패했어요');
+};
+$('#dg-list').addEventListener('change', e => {
+  if (!e.target.dataset.dgcal) return;
+  const cals = $$('#dg-list [data-dgcal]').filter(x => x.checked).map(x => x.dataset.dgcal);
+  if (!cals.length) { e.target.checked = true; return toast('캘린더를 하나 이상 골라 주세요', 'warn'); }
+  S.settings.cals = cals; db.update('settings', { cals }).catch(dbErr); loadEvents(); toast('표시할 캘린더를 바꿨어요');
+});
+$('#set-diag').onclick = () => { closeModal($('#set-modal')); openDiag(); };
 
 /* ===================== RENDER ===================== */
 const UI = { repF: 'all', repQ: '', todoF: 'open', tab: lsGet('hwm_tab') || 'rep', editTodo: null, editDraft: null, rtEdit: false };
@@ -1426,7 +1568,7 @@ async function requestCloseRep() {
 }
 $('#rep-modal').addEventListener('click', e => { if (e.target.closest('[data-close]')) requestCloseRep(); });
 const setM = $('#set-modal'), evM = $('#ev-modal');
-for (const m of [setM, evM]) {
+for (const m of [setM, evM, $('#diag-modal')]) {
   m.addEventListener('click', e => { if (e.target.closest('[data-close]')) closeModal(m); });
   m.addEventListener('mousedown', e => { if (e.target === m) m.dataset.down = '1'; });
   m.addEventListener('mouseup', e => { if (e.target === m && m.dataset.down) closeModal(m); delete m.dataset.down; });
@@ -1435,6 +1577,7 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   const cf = $('#cf-modal'); if (!cf.classList.contains('hidden')) { $('#cf-no').click(); return; }
   if (!evM.classList.contains('hidden')) { closeModal(evM); return; }
+  if (!$('#diag-modal').classList.contains('hidden')) { closeModal($('#diag-modal')); return; }
   if (!DAYM.classList.contains('hidden')) { closeModal(DAYM); return; }
   if (!$('#rep-modal').classList.contains('hidden')) { requestCloseRep(); return; }
   if (bigOpen()) { closeBig(); return; }
