@@ -1,6 +1,7 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>힐마루케어 출장서류 관리 v1.04</title>
+<title>힐마루케어 출장서류 관리 v1.05</title>
+<!-- v1.05 | 2026-09-28 | 출장신청서·출장복명서에 💾 저장 버튼 추가(누르면 바로 저장·저장 상태 표시), 자동 저장은 그대로 -->
 <!-- v1.04 | 2026-09-28 | 출장신청서·출장복명서를 최근 4주(이번 주 포함)만 Firebase에 자동 저장, 그 이전 주차는 자동 삭제. 기타실비는 저장 안 함(그대로) -->
 <!-- v1.03 | 2026-09-28 | 대상자목록 저장소를 Firebase로 변경(업무관리와 같은 계정·같은 DB), 업무관리로 돌아가기 버튼, 공개 사이트용으로 내장 대상자 데이터 제거 -->
 <!-- 힐마루케어회복관리입력 v34.20 의 일정 메뉴 중 대상자목록·출장신청서·출장복명서·기타실비만 분리한 파일 -->
@@ -545,7 +546,7 @@ tr.schedCancelledRow td:not(.schedMgmtCol){background:#f8fafc}
 <header>
   <a href="./" class="no-print" id="tripBackBtn" style="background:#334155;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:700;text-decoration:none">← 업무관리</a>
   <h1>출장서류 관리</h1>
-  <span class="badge">v1.04 · 2026-09-28</span>
+  <span class="badge">v1.05 · 2026-09-28</span>
   <span class="badge g" id="tripAcct">대상자목록 · Firebase 연결 중…</span>
   <button id="hdrExportBtn2" class="no-print" style="background:#0284c7;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;">📤 JSON 내보내기</button>
   <button id="hdrImportBtn2" class="no-print" style="background:#7c3aed;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;">📥 JSON 불러오기</button>
@@ -2372,6 +2373,7 @@ window.SchedApp = (function(){
     html+='<select id="tripApplyWeekSel" class="loginInput" style="min-width:200px;">'+weekOpts+'</select>';
     html+='<button class="dashBtn open" id="tripApplyAddWeekBtn" style="background:#e2e8f0;color:#1e293b;">+ 주차 추가</button>';
     html+='<button class="dashBtn open" id="tripApplyDelWeekBtn" style="background:#dc2626;color:#fff;">이 주차 삭제</button>';
+    html+='<button class="dashBtn open tripDocSaveBtn" style="background:#059669;color:#fff;">💾 저장</button><span class="tripDocSaveMsg" style="font-size:13px;font-weight:700;align-self:center"></span>';
     html+='<button class="dashBtn open" id="tripApplyExportBtn" style="background:#059669;color:#fff;">⬇ 엑셀 내보내기</button>';
     html+='<label class="dashBtn open" style="background:#e2e8f0;color:#1e293b;cursor:pointer;">📥 엑셀 불러오기<input type="file" id="tripApplyImportFile" accept=".xlsx" style="display:none"></label>';
     html+='</div>';
@@ -2555,6 +2557,7 @@ window.SchedApp = (function(){
     html+='<select id="tripReportWeekSel" class="loginInput" style="min-width:200px;">'+weekOpts+'</select>';
     html+='<button class="dashBtn open" id="tripReportAddWeekBtn" style="background:#e2e8f0;color:#1e293b;">+ 주차 추가</button>';
     html+='<button class="dashBtn open" id="tripReportDelWeekBtn" style="background:#dc2626;color:#fff;">이 주차 삭제</button>';
+    html+='<button class="dashBtn open tripDocSaveBtn" style="background:#059669;color:#fff;">💾 저장</button><span class="tripDocSaveMsg" style="font-size:13px;font-weight:700;align-self:center"></span>';
     html+='<button class="dashBtn open" id="tripReportExportBtn" style="background:#7c3aed;color:#fff;">⬇ 엑셀 내보내기</button>';
     html+='<label class="dashBtn open" style="background:#e2e8f0;color:#1e293b;cursor:pointer;">📥 엑셀 불러오기<input type="file" id="tripReportImportFile" accept=".xlsx" style="display:none"></label>';
     html+='<button class="dashBtn open" id="tripReportSyncBtn" style="background:#059669;color:#fff;">📋 출장신청서에서 불러오기</button>';
@@ -3415,29 +3418,38 @@ function notice(html, ms = 6000) { const n = $('tripNotice'); n.innerHTML = html
 window.TripFB = { uid: null, save: async () => { throw new Error('아직 연결되지 않았어요'); } };
 /* --- 출장신청서·출장복명서 자동 저장 (workmgr/{uid}/tripDocs) --- */
 const DOC = { uid: null, loaded: false, sig: '', timer: null, saving: false, pending: false, unsub: null, dbM: null, db: null };
-const docStat = (t, bad) => { const el = $('docSaveStat'); if (el) { el.textContent = t; el.className = 'savestat ' + (bad ? 'err' : 'ok'); } };
+let lastDocMsg = { t: '', color: '' };
+function paintDocMsgs() { document.querySelectorAll('.tripDocSaveMsg').forEach(el => { if (el.textContent !== lastDocMsg.t) el.textContent = lastDocMsg.t; if (el.style.color !== lastDocMsg.color) el.style.color = lastDocMsg.color; }); }
+const docStat = (t, bad, inline) => {
+  const el = $('docSaveStat'); if (el) { el.textContent = t; el.className = 'savestat ' + (bad ? 'err' : 'ok'); }
+  if (inline !== undefined) { lastDocMsg = inline; paintDocMsgs(); }
+};
+new MutationObserver(muts => { if (muts.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && (n.matches?.('.tripDocSaveMsg') || n.querySelector?.('.tripDocSaveMsg'))))) paintDocMsgs(); }).observe(document.getElementById('schedRoot'), { childList: true, subtree: true });
 const docSig = () => JSON.stringify(window.SchedApp.getTripDocs());
 function tripInputFocused() { const a = document.activeElement; return !!(a && a.closest && a.closest('#sp-trip-apply, #sp-trip-report') && /INPUT|TEXTAREA|SELECT/.test(a.tagName)); }
-async function saveDocsNow() {
-  if (!DOC.uid || !DOC.loaded) return;
+async function saveDocsNow(manual) {
+  if (!DOC.uid || !DOC.loaded) { if (manual) alert(DOC.uid ? '아직 불러오는 중이에요. 잠시 후 다시 눌러 주세요.' : '업무관리 로그인 후 저장할 수 있어요.'); return; }
+  clearTimeout(DOC.timer);
+  const tm = () => new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const removed = window.SchedApp.pruneTripDocs();
   const sig = docSig();
-  if (sig === DOC.sig && !removed) { DOC.pending = false; return; }
-  DOC.saving = true; docStat('출장신청서·복명서: 저장 중…');
+  if (sig === DOC.sig && !removed) { DOC.pending = false; if (manual) docStat('출장신청서·복명서: 저장됨 (최근 4주 보관)', false, { t: '✔ 저장돼 있어요 · ' + tm(), color: '#059669' }); return; }
+  DOC.saving = true; docStat('출장신청서·복명서: 저장 중…', false, { t: '저장 중…', color: '#64748b' });
   try {
     const d = JSON.parse(sig);
     await DOC.dbM.set(DOC.dbM.ref(DOC.db, `workmgr/${DOC.uid}/tripDocs`), { apply: d.apply, report: d.report, updatedAt: Date.now() });
     DOC.sig = sig; DOC.pending = false;
-    docStat('출장신청서·복명서: 저장됨 ' + new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) + ' (최근 4주 보관)');
-  } catch (e) { console.error(e); docStat('출장신청서·복명서: 저장 실패 — 인터넷·로그인 확인', true); }
+    docStat('출장신청서·복명서: 저장됨 ' + new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) + ' (최근 4주 보관)', false, { t: '✔ 저장됨 · ' + tm(), color: '#059669' });
+  } catch (e) { console.error(e); docStat('출장신청서·복명서: 저장 실패 — 인터넷·로그인 확인', true, { t: '⚠ 저장 실패 — 인터넷·로그인 확인', color: '#dc2626' }); if (manual) alert('저장에 실패했습니다: ' + (e.message || e)); }
   finally { DOC.saving = false; }
 }
 window.hilmaruFileSave = () => {   // 출장서류 앱의 autosave()가 부를 때마다 → 1.2초 뒤 저장
   if (!DOC.uid || !DOC.loaded) return;
   if (docSig() === DOC.sig) return;
-  DOC.pending = true; docStat('출장신청서·복명서: 저장 대기…');
+  DOC.pending = true; docStat('출장신청서·복명서: 저장 대기…', false, { t: '저장 전 — 곧 자동 저장돼요 (바로 저장하려면 💾)', color: '#b45309' });
   clearTimeout(DOC.timer); DOC.timer = setTimeout(saveDocsNow, 1200);
 };
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('.tripDocSaveBtn'); if (b) { e.preventDefault(); const a = document.activeElement; if (a && a.blur) a.blur(); setTimeout(() => saveDocsNow(true), 50); } });
 document.addEventListener('change', e => { if (e.target.closest && e.target.closest('#sp-trip-apply, #sp-trip-report')) window.hilmaruFileSave(); }, true);
 window.addEventListener('beforeunload', e => { if (DOC.pending || DOC.saving) { saveDocsNow(); e.preventDefault(); e.returnValue = ''; } });
 function startDocsSync(uid) {
@@ -3449,9 +3461,9 @@ function startDocsSync(uid) {
     const incoming = JSON.stringify({ apply: v.apply || {}, report: v.report || {} });
     if (!DOC.loaded) {
       window.SchedApp.setTripDocs(v);
-      DOC.sig = docSig(); DOC.loaded = true;
+      DOC.sig = incoming; DOC.loaded = true;   // DB에 있는 그대로를 기준으로 → 정리(오래된 주차 삭제)된 내용이 다르면 바로 저장
       docStat('출장신청서·복명서: 불러옴 (최근 4주 보관)');
-      if (DOC.sig !== JSON.stringify({ apply: v.apply || {}, report: v.report || {} })) saveDocsNow();   // 오래된 주차 정리 반영
+      if (docSig() !== incoming) saveDocsNow();
       return;
     }
     if (DOC.saving || incoming === DOC.sig) return;
