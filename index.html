@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.10 | 2026-09-28 | 구글 로그인 방식 변경(Google Identity Services): 'missing initial state' 오류 해결, 캘린더 재연결도 같은 방식, 예전 방식 로그인 버튼 유지 -->
 <!-- v1.09 | 2026-09-28 | 배경화면 전용 보기 모드(?wall=비밀키): 로그인 없이 오늘 방문·이번 주 일정·To-Do·금요일·프로젝트 요약을 실시간 표시, 설정에서 켜기/끄기/주소 재발급 -->
 <!-- v1.08 | 2026-09-28 | 프로젝트 할 일마다 노란색 확인 체크(여러 개) 추가: 누르면 체크 표시, 모두 체크하면 할 일 완료(취소선) -->
 <!-- v1.07 | 2026-09-28 | 금요일 정기업무 아래 '프로젝트' 박스 추가: 프로젝트명·마감일(D-day)·할 일 체크(취소선)·프로젝트 마감(비우고 새로 시작, 되돌리기) -->
@@ -629,6 +630,7 @@ body.wall{overflow:hidden}
         <svg viewBox="0 0 24 24"><path fill="#fff" d="M21.35 11.1H12v2.98h5.35c-.23 1.4-1.64 4.1-5.35 4.1-3.22 0-5.85-2.67-5.85-5.96S8.78 6.26 12 6.26c1.83 0 3.06.78 3.76 1.45l2.56-2.47C16.68 3.7 14.55 2.8 12 2.8 6.92 2.8 2.8 6.92 2.8 12s4.12 9.2 9.2 9.2c5.31 0 8.83-3.73 8.83-8.99 0-.6-.07-1.06-.15-1.51z"/></svg>
         Google 계정으로 로그인
       </button>
+      <div style="text-align:center;margin-top:10px"><button id="login-legacy" class="linkbtn" type="button">로그인이 안 되면 → 예전 방식으로 로그인</button></div>
       <div class="note">로그인할 때 <b>Google 캘린더 권한</b>(일정 보기·관리, 캘린더 목록 보기)을 함께 허용해 주세요. 캘린더 일정을 앱에 보여주고, 방문일정과 금요일 반복 일정을 자동으로 넣기 위해 필요해요.</div>
       <div id="file-warn" class="note warn hidden">지금 파일을 직접 연 상태(file://)라 구글 로그인이 동작하지 않아요. Firebase Hosting 같은 웹 주소나 localhost에서 열어 주세요.</div>
       <p class="ver" data-ver></p>
@@ -902,13 +904,15 @@ body.wall{overflow:hidden}
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.09';
+const APP_VERSION = 'v1.10';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
 const CAL_BASE = 'https://www.googleapis.com/calendar/v3';
 const POLL_MS = 2 * 60e3;           // 캘린더 자동 새로고침 주기 (화면이 켜져 있을 때)
 const FB_VER = '11.1.0';
+// Google 로그인(OAuth) 클라이언트 ID — Firebase가 자동으로 만든 웹 클라이언트. Google Cloud 콘솔에서 '승인된 자바스크립트 원본'에 사이트 주소가 있어야 해요.
+const GOOGLE_CLIENT_ID = '509716510385-b6h11lnf6rm9q5fkkfpl1gq5g5oc0027.apps.googleusercontent.com';
 const DEFAULT_ROUTINE = ['영양, 교수님 피드백 요청', '출장복명서 제출', '고객현황 업데이트해서 보내기', '차주 스케줄 보내주기'];
 
 /* ===================== FIREBASE CONFIG =====================
@@ -1037,8 +1041,8 @@ const cal = {
     if (MODE === 'demo') return;
     try { const t = JSON.parse(sessionStorage.getItem('hwm_gtok') || 'null'); if (t && t.uid === USER?.uid && t.exp > Date.now()) { this.token = t.token; this.exp = t.exp; } } catch {}
   },
-  set(tok, uid) {
-    this.token = tok; this.exp = Date.now() + 55 * 60e3;
+  set(tok, uid, expSec) {
+    this.token = tok; this.exp = Date.now() + (expSec ? Math.max(60, expSec - 120) * 1000 : 55 * 60e3);
     try { sessionStorage.setItem('hwm_gtok', JSON.stringify({ token: tok, exp: this.exp, uid })); } catch {}
     updateCalUI();
     if (LOADED) afterConnect();
@@ -1085,6 +1089,17 @@ function authErr(e) {
 }
 async function connectCalendar(consent = false) {
   if (MODE === 'demo') { cal.demoOn = true; updateCalUI(); toast('데모: 캘린더 연결됨'); afterConnect(); return; }
+  if (GIS && !connectCalendar.legacy) {
+    try {
+      const r = await gisRequest({ prompt: consent === true ? 'consent' : '', login_hint: USER.email });
+      cal.set(r.access_token, USER.uid, +r.expires_in || 3600);
+      toast(missingScopes(r) ? '연결됐지만 캘린더 권한 일부가 빠졌어요. 다시 연결하면서 모두 체크해 주세요' : '구글 캘린더에 연결됐어요', missingScopes(r) ? 'warn' : '');
+    } catch (e) {
+      if (e.code === 'gis/popup_closed') { toast('연결 창이 닫혔어요. 계속 안 되면 설정 → 캘린더 연결 진단을 열어 주세요', 'warn'); return; }
+      gisErr(e);
+    }
+    return;
+  }
   try {
     const res = await FB.reauthenticateWithPopup(FB.auth.currentUser, makeProvider(USER.email, consent === true));
     const cred = FB.GoogleAuthProvider.credentialFromResult(res);
@@ -2430,14 +2445,60 @@ $('#cfg-save').onclick = () => {
   lsSet('hwm_fbconfig', JSON.stringify(c)); location.reload();
 };
 $('#demo-start').onclick = () => startDemo();
-$('#login-btn').onclick = async () => {
+/* ----- Google Identity Services: 로그인·캘린더 권한을 구글 창에서 직접 받아요 (Firebase 중간 페이지를 거치지 않음) ----- */
+let GIS = null, gisCb = null;
+function initGis() {
+  if (!GOOGLE_CLIENT_ID || GIS) return;
+  const go = () => {
+    try {
+      GIS = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID, scope: ['openid', 'email', 'profile', ...CAL_SCOPES].join(' '),
+        callback: r => gisCb?.ok(r), error_callback: e => gisCb?.fail(e),
+      });
+    } catch (e) { console.warn('GIS init', e); }
+  };
+  if (window.google?.accounts?.oauth2) return go();
+  const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = go;
+  sc.onerror = () => console.warn('GIS script load failed'); document.head.appendChild(sc);
+}
+function gisRequest(opts) {   // 반드시 클릭 처리 안에서 바로 불러야 팝업이 막히지 않아요
+  return new Promise((ok, fail) => {
+    gisCb = {
+      ok: r => r.error ? fail(Object.assign(new Error(r.error_description || r.error), { code: 'gis/' + r.error })) : ok(r),
+      fail: e => fail(Object.assign(new Error(e?.message || e?.type || 'error'), { code: 'gis/' + (e?.type || 'unknown') })),
+    };
+    GIS.requestAccessToken(opts);
+  });
+}
+function gisErr(e) {
+  const c = e?.code || '';
+  if (c === 'gis/popup_closed') { toast('로그인 창이 닫혔어요. 창에 "오류 400"이 보였다면 아래 [예전 방식으로 로그인]을 눌러 주세요', 'warn'); return; }
+  if (c === 'gis/popup_failed_to_open') { toast('팝업이 차단됐어요. 브라우저에서 이 사이트의 팝업을 허용해 주세요', 'danger'); return; }
+  if (c === 'gis/access_denied') { toast('구글 권한 허용이 취소됐어요', 'warn'); return; }
+  if (/auth\//.test(c)) return authErr(e);
+  toast('로그인 오류: ' + (e?.message || c), 'danger');
+}
+function missingScopes(r) {
+  try { return !google.accounts.oauth2.hasGrantedAllScopes(r, ...CAL_SCOPES); } catch { return false; }
+}
+async function loginLegacy() {
   try {
     const res = await FB.signInWithPopup(FB.auth, makeProvider());
     const cred = FB.GoogleAuthProvider.credentialFromResult(res);
     if (cred?.accessToken) cal.set(cred.accessToken, res.user.uid);
     if (LOADED) processPending();
   } catch (e) { authErr(e); }
+}
+$('#login-btn').onclick = async () => {
+  if (!GIS) return loginLegacy();
+  try {
+    const r = await gisRequest({ prompt: 'select_account' });
+    const res = await FB.signInWithCredential(FB.auth, FB.GoogleAuthProvider.credential(null, r.access_token));
+    cal.set(r.access_token, res.user.uid, +r.expires_in || 3600);
+    if (missingScopes(r)) toast('캘린더 권한 일부가 허용되지 않았어요. 캘린더가 안 보이면 [캘린더 연결]을 다시 눌러 모두 체크해 주세요', 'warn');
+  } catch (e) { gisErr(e); }
 };
+$('#login-legacy').onclick = loginLegacy;
 
 function enterApp() {
   show('app-screen');
@@ -2452,10 +2513,11 @@ async function bootFirebase(cfg) {
   const app = appM.initializeApp(cfg);
   FB = {
     auth: authM.getAuth(app), db: dbM.getDatabase(app),
-    GoogleAuthProvider: authM.GoogleAuthProvider, signInWithPopup: authM.signInWithPopup, reauthenticateWithPopup: authM.reauthenticateWithPopup, signOut: authM.signOut,
+    GoogleAuthProvider: authM.GoogleAuthProvider, signInWithPopup: authM.signInWithPopup, reauthenticateWithPopup: authM.reauthenticateWithPopup, signInWithCredential: authM.signInWithCredential, signOut: authM.signOut,
     ref: dbM.ref, set: dbM.set, update: dbM.update, remove: dbM.remove, onValue: dbM.onValue,
   };
   FB.auth.languageCode = 'ko';
+  initGis();
   authM.onAuthStateChanged(FB.auth, user => {
     if (unsub) { unsub(); unsub = null; }
     LOADED = false; S = emptyState();
