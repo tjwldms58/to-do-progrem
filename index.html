@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.08 | 2026-09-28 | 프로젝트 할 일마다 노란색 확인 체크(여러 개) 추가: 누르면 체크 표시, 모두 체크하면 할 일 완료(취소선) -->
 <!-- v1.07 | 2026-09-28 | 금요일 정기업무 아래 '프로젝트' 박스 추가: 프로젝트명·마감일(D-day)·할 일 체크(취소선)·프로젝트 마감(비우고 새로 시작, 되돌리기) -->
 <!-- v1.06 | 2026-09-28 | 다크모드 고대비: 배경·박스 대비와 테두리 강화, 글자·배지·캘린더 색 선명하게 (WCAG AA 이상) -->
 <!-- v1.05 | 2026-09-28 | 오늘 방문·미제출 목록에서 '보고서 필요 없음'으로 지우기(되돌리기·숨긴 항목 복원 가능), 일정 상세에서도 지정 -->
@@ -442,6 +443,33 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 .prj-edit{display:flex;gap:6px;flex:1;flex-wrap:wrap}
 .prj-edit .input{flex:1;min-width:140px}
 
+/* project sub-checks (yellow) */
+:root{--hl-bg:#fff6cc;--hl-bd:#e8b800;--hl-tx:#6b4e00;--hl-on:#ffd23f;--hl-on-tx:#2e2300}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hl-bg:#382d00;--hl-bd:#f0c419;--hl-tx:#ffe27a;--hl-on:#ffd23f;--hl-on-tx:#1c1500}}
+:root[data-theme="dark"]{--hl-bg:#382d00;--hl-bd:#f0c419;--hl-tx:#ffe27a;--hl-on:#ffd23f;--hl-on-tx:#1c1500}
+.subs{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px}
+.sub-chip{display:inline-flex;align-items:center;border:1.5px solid var(--hl-bd);background:var(--hl-bg);border-radius:999px;overflow:hidden}
+.sub-btn{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;color:var(--hl-tx);font-size:11.5px;font-weight:700;height:24px;padding:0 9px 0 5px;line-height:1}
+.sub-box{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--hl-bd);background:var(--surface);display:grid;place-items:center;flex:none}
+.sub-box svg{width:10px;height:10px;stroke:var(--hl-on-tx);stroke-width:3.5;opacity:0}
+.sub-chip.on{background:var(--hl-on);border-color:var(--hl-on)}
+.sub-chip.on .sub-btn{color:var(--hl-on-tx)}
+.sub-chip.on .sub-box{background:#fff8d6;border-color:var(--hl-on-tx)}
+.sub-chip.on .sub-box svg{opacity:1}
+.sub-chip.on .sub-t{text-decoration:line-through;text-decoration-thickness:1.5px}
+.sub-btn:not(:has(.sub-t)){padding:0 5px}
+.sub-x{border:0;background:transparent;color:var(--hl-tx);font-weight:800;font-size:14px;width:22px;height:24px;padding:0;border-left:1px solid var(--hl-bd)}
+.sub-chip.on .sub-x{color:var(--hl-on-tx)}
+.sub-plus{border:1.5px dashed var(--hl-bd);background:transparent;color:var(--hl-tx);border-radius:999px;height:24px;padding:0 9px;font-size:11.5px;font-weight:700}
+.sub-plus:hover{background:var(--hl-bg)}
+.sub-add-f{display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--hl-bd);background:var(--hl-bg);border-radius:999px;padding:2px 3px 2px 8px}
+.sub-in{border:0;background:transparent;outline:none;font-size:12px;width:130px;color:var(--text)}
+.sub-ok{border:0;background:var(--hl-on);color:var(--hl-on-tx);border-radius:999px;height:20px;padding:0 9px;font-size:11px;font-weight:800}
+.sub-cnt{font-size:11px;font-weight:800;color:var(--hl-tx);margin-left:2px}
+.sub-hint{font-size:11px;color:var(--muted);margin-top:4px}
+.prj-item.done .sub-chip{opacity:.75}
+@media (max-width:899px){.sub-btn,.sub-plus{height:28px}.sub-x{height:28px}.sub-in{font-size:16px;width:140px}}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -785,7 +813,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.07';
+const APP_VERSION = 'v1.08';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -1957,7 +1985,17 @@ $('#rt-body').addEventListener('submit', async e => {
 });
 
 /* ===================== 프로젝트 ===================== */
-const PRJ = { edit: null, draft: '' };
+const PRJ = { edit: null, draft: '', subAdd: null, subDraft: '' };
+function subList(x) { return Object.entries(x.subs || {}).map(([id, v]) => ({ id, ...v })).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); }
+async function prjSubAdd(id) {
+  const x = S.project.items?.[id]; if (!x) return;
+  const txt = (PRJ.subDraft || '').trim(), sid = newId(), rec = clean({ text: txt || undefined, done: false, createdAt: Date.now() });
+  x.subs = { ...(x.subs || {}), [sid]: rec };
+  const upd = { ['subs/' + sid]: rec };
+  if (x.done) { x.done = false; x.doneAt = undefined; upd.done = false; upd.doneAt = null; }   // 새 확인이 생기면 완료 해제
+  PRJ.subDraft = ''; renderProject(); renderTabs();
+  try { await db.update('project/items/' + id, upd); } catch (e) { dbErr(e); }
+}
 function prjItems() { return Object.entries(S.project.items || {}).map(([id, v]) => ({ id, ...v })).sort((a, b) => (!!a.done - !!b.done) || (a.done ? (b.doneAt || 0) - (a.doneAt || 0) : (a.createdAt || 0) - (b.createdAt || 0))); }
 function ddayTag(due) {
   if (!due) return '<span class="dday none">마감일 미정</span>';
@@ -1977,18 +2015,27 @@ function renderProject() {
     <div class="prog"><i style="width:${items.length ? (done / items.length) * 100 : 0}%"></i></div>
     <form class="prj-add" id="prj-add" autocomplete="off"><input class="input" id="prj-new" placeholder="프로젝트 마감까지 해야 할 일" maxlength="200"><button class="btn btn-primary" type="submit">추가</button></form>
     <div class="prj-list">`;
-  h += items.length ? items.map(x => PRJ.edit === x.id
-    ? `<div class="prj-item" data-id="${esc(x.id)}"><div class="prj-edit"><input class="input" data-pe value="${esc(PRJ.draft)}" maxlength="200"><button class="btn btn-sm" data-pa="cancel">취소</button><button class="btn btn-primary btn-sm" data-pa="save">저장</button></div></div>`
-    : `<div class="prj-item ${x.done ? 'done' : ''}" data-id="${esc(x.id)}">
+  h += items.length ? items.map(x => {
+    const subs = subList(x), sd = subs.filter(v => v.done).length, editing = PRJ.edit === x.id;
+    const chips = subs.map(v => `<span class="sub-chip ${v.done ? 'on' : ''}" data-sid="${esc(v.id)}">
+        <button class="sub-btn" data-pa="sub" role="checkbox" aria-checked="${!!v.done}" aria-label="${esc(v.text || '확인')} ${v.done ? '체크됨' : ''}"><span class="sub-box">${ICO.check}</span>${v.text ? `<span class="sub-t">${esc(v.text)}</span>` : ''}</button>${editing ? `<button class="sub-x" data-pa="subdel" aria-label="확인 항목 삭제">×</button>` : ''}</span>`).join('');
+    const adding = PRJ.subAdd === x.id;
+    const subsRow = x.done && !subs.length && !editing && !adding ? '' : `<div class="subs">${chips}${adding
+      ? `<span class="sub-add-f"><input class="sub-in" data-sa placeholder="확인 이름 (비워도 돼요)" maxlength="30"><button class="sub-ok" data-pa="subok">추가</button></span>`
+      : (x.done && !subs.length && !editing ? '' : `<button class="sub-plus" data-pa="subadd" aria-label="확인 체크 추가">+ 확인</button>`)}${subs.length ? `<span class="sub-cnt">${sd}/${subs.length}</span>` : ''}</div>`;
+    if (editing) return `<div class="prj-item" data-id="${esc(x.id)}"><div style="flex:1;min-width:0"><div class="prj-edit"><input class="input" data-pe value="${esc(PRJ.draft)}" maxlength="200"><button class="btn btn-sm" data-pa="cancel">취소</button><button class="btn btn-primary btn-sm" data-pa="save">저장</button></div>${subsRow}${subs.length ? '<div class="sub-hint">× 를 눌러 확인 체크를 지울 수 있어요</div>' : ''}</div></div>`;
+    return `<div class="prj-item ${x.done ? 'done' : ''}" data-id="${esc(x.id)}">
         <button class="chk ${x.done ? 'on' : ''}" data-pa="toggle" role="checkbox" aria-checked="${!!x.done}" aria-label="완료">${ICO.check}</button>
-        <div class="txt" data-pa="edit">${esc(x.text)}</div>
+        <div style="flex:1;min-width:0"><div class="txt" data-pa="edit">${esc(x.text)}</div>${subsRow}</div>
         <div class="acts"><button class="btn btn-ghost btn-icon" data-pa="edit" aria-label="수정">${ICO.edit}</button><button class="btn btn-ghost btn-icon" data-pa="del" aria-label="삭제">${ICO.trash}</button></div>
-      </div>`).join('')
+      </div>`;
+  }).join('')
     : `<div class="prj-empty">${P.name ? '할 일을 추가해 보세요' : '프로젝트명과 마감일을 정하고 할 일을 추가해 보세요'}</div>`;
   h += `</div>${items.length ? `<div class="prj-foot"><span>${done}/${items.length} 완료${P.due && done < items.length ? ` · 남은 일 ${items.length - done}개` : ''}</span>${done === items.length ? '<span style="color:var(--ok);font-weight:700">모두 완료!</span>' : ''}</div>` : ''}`;
   box.innerHTML = h;
   if (keepName !== null) { const n = $('#prj-name'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
-  if (PRJ.edit) { const i = box.querySelector('[data-pe]'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
+  if (PRJ.subAdd) { const i = box.querySelector('[data-sa]'); if (i) { i.value = PRJ.subDraft || ''; i.focus(); } }
+  else if (PRJ.edit) { const i = box.querySelector('[data-pe]'); if (i && document.activeElement?.closest?.('.prj-edit') == null) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
 }
 async function prjSaveMeta(k, v) {
   const val = v || null;
@@ -2018,7 +2065,17 @@ PB.addEventListener('keydown', e => {
     else if (e.key === 'Escape') { e.stopPropagation(); PRJ.edit = null; renderProject(); }
   }
 });
-PB.addEventListener('input', e => { if (e.target.hasAttribute('data-pe')) PRJ.draft = e.target.value; });
+PB.addEventListener('input', e => { if (e.target.hasAttribute('data-pe')) PRJ.draft = e.target.value; if (e.target.hasAttribute('data-sa')) PRJ.subDraft = e.target.value; });
+PB.addEventListener('keydown', e => {
+  if (!e.target.hasAttribute('data-sa')) return;
+  const id = e.target.closest('.prj-item')?.dataset.id;
+  if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); prjSubAdd(id); }
+  else if (e.key === 'Escape') { e.stopPropagation(); PRJ.subAdd = null; renderProject(); }
+});
+PB.addEventListener('focusout', e => {
+  if (!e.target.hasAttribute('data-sa')) return;
+  setTimeout(() => { if (PRJ.subAdd && !PB.querySelector('[data-sa]')?.matches(':focus') && !(PRJ.subDraft || '').trim()) { PRJ.subAdd = null; renderProject(); } }, 150);
+});
 PB.addEventListener('submit', async e => {
   if (e.target.id !== 'prj-add') return; e.preventDefault();
   const inp = $('#prj-new'), t = inp.value.trim(); if (!t) return;
@@ -2032,8 +2089,30 @@ PB.addEventListener('click', e => {
   const b = e.target.closest('[data-pa]'); if (!b) return;
   const id = b.closest('.prj-item')?.dataset.id, x = S.project.items?.[id]; if (!x && b.dataset.pa !== 'cancel') return;
   const a = b.dataset.pa;
-  if (a === 'toggle') { const done = !x.done; x.done = done; x.doneAt = done ? Date.now() : undefined; renderProject(); renderTabs(); db.update('project/items/' + id, { done, doneAt: done ? Date.now() : null }).catch(dbErr); }
-  else if (a === 'edit') { PRJ.edit = id; PRJ.draft = x.text; renderProject(); }
+  if (a === 'toggle') {
+    const done = !x.done, upd = { done, doneAt: done ? Date.now() : null };
+    x.done = done; x.doneAt = done ? Date.now() : undefined;
+    for (const sid of Object.keys(x.subs || {})) { x.subs[sid].done = done; upd['subs/' + sid + '/done'] = done; }   // 할 일 체크 = 확인 전부 체크
+    renderProject(); renderTabs(); db.update('project/items/' + id, upd).catch(dbErr);
+  }
+  else if (a === 'sub') {
+    const sid = b.closest('[data-sid]').dataset.sid, v = x.subs?.[sid]; if (!v) return;
+    v.done = !v.done;
+    const all = Object.values(x.subs).every(z => z.done);
+    const upd = { ['subs/' + sid + '/done']: v.done };
+    if (all !== !!x.done) { x.done = all; x.doneAt = all ? Date.now() : undefined; upd.done = all; upd.doneAt = all ? Date.now() : null; if (all) toast(`'${x.text}' 확인을 모두 체크해서 완료했어요`); }
+    renderProject(); renderTabs(); db.update('project/items/' + id, upd).catch(dbErr);
+  }
+  else if (a === 'subadd') { PRJ.subAdd = id; PRJ.subDraft = ''; renderProject(); }
+  else if (a === 'subok') prjSubAdd(id);
+  else if (a === 'subdel') {
+    const sid = b.closest('[data-sid]').dataset.sid; if (!x.subs?.[sid]) return;
+    delete x.subs[sid];
+    const rest = Object.values(x.subs), upd = { ['subs/' + sid]: null };
+    if (rest.length && rest.every(z => z.done) && !x.done) { x.done = true; x.doneAt = Date.now(); upd.done = true; upd.doneAt = Date.now(); }
+    renderProject(); db.update('project/items/' + id, upd).catch(dbErr);
+  }
+  else if (a === 'edit') { PRJ.edit = id; PRJ.draft = x.text; PRJ.subAdd = null; renderProject(); }
   else if (a === 'cancel') { PRJ.edit = null; renderProject(); }
   else if (a === 'save') prjCommitEdit();
   else if (a === 'del') {
@@ -2200,8 +2279,8 @@ function startDemo() {
       name: '10월 수면 캠페인 준비', due: addDays(t, 18), createdAt: now - 5 * 864e5,
       items: {
         p1: { text: '캠페인 안내문 초안 작성', done: true, createdAt: now - 5 * 864e5, doneAt: now - 2 * 864e5 },
-        p2: { text: '참여 고객 명단 정리', done: false, createdAt: now - 4 * 864e5 },
-        p3: { text: '교수님 자문 일정 잡기', done: false, createdAt: now - 3 * 864e5 },
+        p2: { text: '참여 고객 명단 정리', done: false, createdAt: now - 4 * 864e5, subs: { s1: { text: '1차 명단', done: true, createdAt: 1 }, s2: { text: '연락처 확인', done: false, createdAt: 2 }, s3: { text: '팀장 검토', done: false, createdAt: 3 } } },
+        p3: { text: '교수님 자문 일정 잡기', done: false, createdAt: now - 3 * 864e5, subs: { s1: { done: true, createdAt: 1 }, s2: { done: false, createdAt: 2 } } },
         p4: { text: '결과 보고서 양식 만들기', done: false, createdAt: now - 2 * 864e5 },
       },
     },
