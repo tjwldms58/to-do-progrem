@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.02 | 2026-09-28 | 방문보고서 '저장' 버튼(창 유지·Ctrl+S·하단 고정), 캘린더 › 크게 보기(구글 캘린더처럼 시간·제목 표시) -->
 <!-- v1.01 | 2026-09-28 | 박스 크기 확대, 방문보고서 아래 미니 캘린더(구글 캘린더 일정 표시), 오늘 방문·제출할 보고서 표시, 폰에서 바꾼 일정 자동 반영 -->
 <!-- v1.00 | 2026-09-28 | 최초 작성: 방문보고서 작성·제출, To-Do, 금요일 정기업무 알림, Firebase RTDB 저장, 구글 캘린더 자동 동기화 -->
 <html lang="ko">
@@ -258,6 +259,51 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 .set-cals{display:flex;flex-direction:column;gap:6px}
 .set-cals .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
 
+/* big calendar */
+.h2btn{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;padding:4px 8px 4px 4px;margin:-4px 0 -4px -4px;border-radius:8px;font:inherit;font-weight:700;color:inherit}
+.h2btn:hover{background:var(--surface-2)}
+.h2btn .chev{color:var(--muted);width:18px;height:18px}
+.h2btn:hover .chev{color:var(--primary)}
+.bigcal-bg{position:fixed;inset:0;z-index:45;background:rgba(12,14,30,.45);display:flex;padding:24px}
+.bigcal{flex:1;max-width:1600px;margin:0 auto;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.bc-h{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.bc-h h3{margin:0;font-size:20px;min-width:120px}
+.bc-stat{font-size:12px;color:var(--muted)}
+#bc-connect .mc-connect{margin:12px 18px 0}
+.bc-grid{flex:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:auto;grid-auto-rows:minmax(0,1fr);min-height:0;overflow:auto}
+.bc-wd{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding:8px 0;border-bottom:1px solid var(--border)}
+.bc-wd.sun{color:var(--danger)} .bc-wd.sat{color:var(--primary)}
+.bc-d{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:4px 4px 6px;min-height:104px;display:flex;flex-direction:column;gap:2px;min-width:0;overflow:hidden}
+.bc-d:nth-child(7n){border-right:0}
+.bc-d.out{background:var(--surface-2)}
+.bc-d.out .bc-n{color:var(--muted)}
+.bc-n{align-self:center;border:0;background:transparent;font-size:12px;font-weight:600;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;padding:0;color:var(--text);flex:none}
+.bc-n:hover{background:var(--surface-3)}
+.bc-d.sun .bc-n{color:var(--danger)} .bc-d.sat .bc-n{color:var(--primary)}
+.bc-d.today .bc-n{background:var(--primary);color:var(--on-primary)}
+.bc-ev{display:flex;align-items:center;gap:5px;width:100%;border:0;background:transparent;border-radius:5px;padding:1px 5px;font-size:12px;line-height:1.45;text-align:left;color:var(--text);white-space:nowrap;overflow:hidden;min-width:0;flex:none}
+.bc-ev:hover{background:var(--surface-3)}
+.bc-ev .dt{width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
+.bc-ev .tm{color:var(--text-2);flex:none}
+.bc-ev .nm{overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.bc-ev.allday{background:var(--c);color:#fff;font-weight:600}
+.bc-ev.allday:hover{filter:brightness(1.08);background:var(--c)}
+.bc-more{border:0;background:transparent;font-size:11px;font-weight:700;color:var(--text-2);text-align:left;padding:1px 5px;border-radius:5px;flex:none}
+.bc-more:hover{background:var(--surface-3)}
+@media (max-width:899px){
+  .bigcal-bg{padding:0}
+  .bigcal{border-radius:0;border:0}
+  .bc-h{padding:10px 12px;gap:6px}
+  .bc-h h3{font-size:17px;min-width:0}
+  .bc-stat{display:none}
+  .bc-d{min-height:88px;padding:3px 2px}
+  .bc-ev{font-size:10px;padding:1px 2px;gap:0;flex-direction:column;align-items:flex-start;line-height:1.3;width:100%}
+  .bc-ev .dt{display:none}
+  .bc-ev .tm{font-size:9px}
+  .bc-ev .nm{max-width:100%}
+  .bc-ev:not(.allday){border-left:2px solid var(--c);border-radius:2px}
+}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -265,7 +311,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 .modal-h{display:flex;align-items:center;gap:10px;padding:18px 22px;border-bottom:1px solid var(--border)}
 .modal-h h3{margin:0;font-size:16px;flex:1}
 .modal-b{padding:18px 22px;display:flex;flex-direction:column;gap:14px}
-.modal-f{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:14px 22px;border-top:1px solid var(--border)}
+.modal-f{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:14px 22px;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--surface);border-radius:0 0 18px 18px;z-index:2}
 .modal-f .sp{flex:1}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .frow3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px}
@@ -410,7 +456,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
       <!-- 미니 캘린더 -->
       <section class="panel p-cal">
         <div class="panel-h">
-          <h2><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>캘린더</h2>
+          <h2><button class="h2btn" id="mc-big" title="크게 보기"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>캘린더<svg class="ic chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></h2>
           <span class="sp"></span>
           <div class="mc-nav">
             <button class="btn btn-ghost btn-icon" id="mc-prev" aria-label="이전 달"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -495,10 +541,39 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
       <button id="rep-del" class="btn btn-danger">삭제</button>
       <button id="rep-copy" class="btn btn-ghost">내용 복사</button>
       <span class="sp"></span>
+      <span id="rep-saved" style="font-size:12px;color:var(--muted)"></span>
       <button id="rep-unsubmit" class="btn">제출 취소 후 수정</button>
-      <button id="rep-draft" class="btn">임시저장</button>
+      <button id="rep-draft" class="btn" title="저장 (Ctrl+S)"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>저장</button>
       <button id="rep-submit" class="btn btn-primary">제출</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== 큰 캘린더 ===== -->
+<div id="big-cal" class="bigcal-bg hidden" role="dialog" aria-modal="true" aria-labelledby="bc-title">
+  <div class="bigcal">
+    <div class="bc-h">
+      <h3 id="bc-title"></h3>
+      <div class="mc-nav">
+        <button class="btn btn-ghost btn-icon" id="bc-prev" aria-label="이전 달"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="btn btn-ghost btn-icon" id="bc-next" aria-label="다음 달"><svg class="ic" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+        <button class="btn btn-sm" id="bc-today">오늘</button>
+        <button class="btn btn-ghost btn-icon" id="bc-refresh" aria-label="새로고침" title="새로고침"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+      </div>
+      <span class="sp"></span>
+      <span class="bc-stat" id="bc-stat"></span>
+      <button class="btn btn-ghost btn-icon" id="bc-close" aria-label="닫기"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div id="bc-connect"></div>
+    <div class="bc-grid" id="bc-grid"></div>
+  </div>
+</div>
+
+<!-- ===== 하루 일정 모달 ===== -->
+<div id="day-modal" class="modal-bg hidden">
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-h"><h3 id="day-title"></h3><button class="btn btn-ghost btn-icon" data-close aria-label="닫기"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-b" id="day-list" style="gap:2px"></div>
   </div>
 </div>
 
@@ -549,7 +624,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.01';
+const APP_VERSION = 'v1.02';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -1013,6 +1088,7 @@ function renderCal() {
   }).join('');
   $('#mc-grid').innerHTML = h;
   const evs = cal.ok() ? dayEvents(CV.sel) : [];
+  renderBig();
   $('#mc-day').innerHTML = `<div class="mc-day-h">${esc(fmtK(CV.sel))}${CV.sel === t ? ' 오늘' : ''} <span>일정 ${evs.length}건</span></div>` +
     (evs.length ? evs.map(evRow).join('') : `<div class="empty" style="padding:12px 0">${cal.ok() ? '일정이 없어요' : '캘린더 연결 전이에요'}</div>`);
 }
@@ -1084,7 +1160,7 @@ function openEvent(k) {
   $('#ev-rep').classList.toggle('hidden', isRoutineEv(e));
   $('#ev-modal').classList.remove('hidden');
 }
-$('#ev-rep').onclick = () => { closeModal($('#ev-modal')); if (evOpen) openFromEvent(evOpen); };
+$('#ev-rep').onclick = () => { closeModal($('#ev-modal')); closeModal($('#day-modal')); if (evOpen) openFromEvent(evOpen); };
 $('#mc-grid').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; CV.sel = b.dataset.d; if (CV.sel.slice(0, 7) !== CV.month) { CV.month = CV.sel.slice(0, 7); loadEvents(); } renderCal(); };
 $('#mc-day').onclick = e => { const b = e.target.closest('[data-k]'); if (b) openEvent(b.dataset.k); };
 $('#mc-connect').onclick = e => { if (e.target.closest('[data-connect]')) connectCalendar(); };
@@ -1097,6 +1173,63 @@ setInterval(() => { if (document.visibilityState === 'visible' && cal.ok() && LO
 const maybeRefresh = () => { if (document.visibilityState === 'visible' && cal.ok() && LOADED && Date.now() - CV.fetchedAt > 30e3) loadEvents(); };
 document.addEventListener('visibilitychange', maybeRefresh);
 window.addEventListener('focus', maybeRefresh);
+
+/* ----- 큰 캘린더 (구글 캘린더처럼 시간·제목 표시) ----- */
+const BIG = $('#big-cal'), DAYM = $('#day-modal');
+const bigOpen = () => !BIG.classList.contains('hidden');
+function openBig() { BIG.classList.remove('hidden'); document.body.style.overflow = 'hidden'; renderBig(); if (cal.ok() && Date.now() - CV.fetchedAt > 30e3) loadEvents(); }
+function closeBig() { BIG.classList.add('hidden'); document.body.style.overflow = ''; }
+function renderBig() {
+  if (!bigOpen()) return;
+  const t = todayStr(), [y, m] = CV.month.split('-').map(Number), g = monthGrid(CV.month), rows = g.length / 7;
+  $('#bc-title').textContent = `${y}년 ${m}월`;
+  $('#bc-stat').textContent = cal.ok() ? (CV.loading ? '불러오는 중…' : CV.fetchedAt ? `${new Date(CV.fetchedAt).toLocaleTimeString('ko-KR', { timeZone: TZ, hour: '2-digit', minute: '2-digit' })} 업데이트` : '') : '';
+  $('#bc-connect').innerHTML = cal.ok() ? '' : `<div class="mc-connect">${ICO.cal}<span>구글 캘린더를 연결하면 일정이 보여요</span><span class="sp"></span><button class="btn btn-primary btn-sm" data-connect>연결</button></div>`;
+  const grid = $('#bc-grid'), mobile = matchMedia('(max-width:899px)').matches;
+  const avail = Math.max(0, grid.clientHeight - 34);
+  const rowH = Math.max(mobile ? 88 : 104, avail / rows);
+  const per = Math.max(2, Math.floor((rowH - 34) / (mobile ? 27 : 20)));
+  let h = WD.map((w, i) => `<div class="bc-wd ${i === 0 ? 'sun' : i === 6 ? 'sat' : ''}">${w}</div>`).join('');
+  h += g.map(d => {
+    const evs = cal.ok() ? dayEvents(d) : [], w = dow(d);
+    const shown = evs.length > per ? evs.slice(0, per - 1) : evs;
+    const chips = shown.map(e => {
+      const i = evInfo(e), c = esc(calColor(e));
+      const tm = i.allDay ? '' : (i.date === d ? i.start : '');
+      return i.allDay
+        ? `<button class="bc-ev allday" style="--c:${c}" data-k="${esc(evKey(e))}" title="${esc(e.summary || '')}"><span class="nm">${esc(e.summary || '(제목 없음)')}</span></button>`
+        : `<button class="bc-ev" style="--c:${c}" data-k="${esc(evKey(e))}" title="${esc(`${i.start} ${e.summary || ''}`)}"><span class="dt"></span>${tm ? `<span class="tm">${esc(tm)}</span>` : ''}<span class="nm">${esc(e.summary || '(제목 없음)')}</span></button>`;
+    }).join('');
+    const more = evs.length > shown.length ? `<button class="bc-more" data-day="${d}">+${evs.length - shown.length}개 더</button>` : '';
+    return `<div class="bc-d ${d.slice(0, 7) !== CV.month ? 'out' : ''} ${d === t ? 'today' : ''} ${w === 0 ? 'sun' : w === 6 ? 'sat' : ''}" style="min-height:${Math.floor(rowH)}px">
+      <button class="bc-n" data-day="${d}" aria-label="${esc(fmtK(d))} 일정 ${evs.length}건">${Number(d.slice(8))}</button>${chips}${more}</div>`;
+  }).join('');
+  grid.innerHTML = h;
+}
+function openDay(d) {
+  const evs = dayEvents(d);
+  $('#day-title').textContent = `${fmtK(d)}${d === todayStr() ? ' 오늘' : ''} · 일정 ${evs.length}건`;
+  $('#day-list').innerHTML = evs.length ? evs.map(evRow).join('') : '<div class="empty">일정이 없어요</div>';
+  DAYM.classList.remove('hidden');
+}
+$('#mc-big').onclick = openBig;
+$('#bc-close').onclick = closeBig;
+BIG.addEventListener('mousedown', e => { if (e.target === BIG) BIG.dataset.down = '1'; });
+BIG.addEventListener('mouseup', e => { if (e.target === BIG && BIG.dataset.down) closeBig(); delete BIG.dataset.down; });
+$('#bc-prev').onclick = () => shiftMonth(-1);
+$('#bc-next').onclick = () => shiftMonth(1);
+$('#bc-today').onclick = () => $('#mc-today').click();
+$('#bc-refresh').onclick = () => $('#mc-refresh').click();
+$('#bc-connect').onclick = e => { if (e.target.closest('[data-connect]')) connectCalendar(); };
+$('#bc-grid').onclick = e => {
+  const k = e.target.closest('[data-k]'); if (k) return openEvent(k.dataset.k);
+  const d = e.target.closest('[data-day]'); if (d) openDay(d.dataset.day);
+};
+$('#day-list').onclick = e => { const b = e.target.closest('[data-k]'); if (b) openEvent(b.dataset.k); };
+DAYM.addEventListener('click', e => { if (e.target.closest('[data-close]')) closeModal(DAYM); });
+DAYM.addEventListener('mousedown', e => { if (e.target === DAYM) DAYM.dataset.down = '1'; });
+DAYM.addEventListener('mouseup', e => { if (e.target === DAYM && DAYM.dataset.down) closeModal(DAYM); delete DAYM.dataset.down; });
+let bigRT = null; window.addEventListener('resize', () => { clearTimeout(bigRT); bigRT = setTimeout(renderBig, 120); });
 
 /* ===================== RENDER ===================== */
 const UI = { repF: 'all', repQ: '', todoF: 'open', tab: lsGet('hwm_tab') || 'rep', editTodo: null, editDraft: null, rtEdit: false };
@@ -1256,6 +1389,7 @@ function fillReportForm(r, pre) {
   else ln.classList.add('hidden');
 }
 function openReport(id, pre) {
+  $('#rep-saved').textContent = '';
   editRep = id; const r = id ? S.reports[id] : null; addedTodos = [...(r?.addedTodos || [])];
   editSrc = !r && pre?.srcEventId ? { srcEventId: pre.srcEventId, srcCalId: pre.srcCalId, calSyncedAt: pre.calSyncedAt } : null;
   fillReportForm(r, pre);
@@ -1301,6 +1435,9 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   const cf = $('#cf-modal'); if (!cf.classList.contains('hidden')) { $('#cf-no').click(); return; }
   if (!evM.classList.contains('hidden')) { closeModal(evM); return; }
+  if (!DAYM.classList.contains('hidden')) { closeModal(DAYM); return; }
+  if (!$('#rep-modal').classList.contains('hidden')) { requestCloseRep(); return; }
+  if (bigOpen()) { closeBig(); return; }
   if (!setM.classList.contains('hidden')) { closeModal(setM); return; }
   if (!$('#rep-modal').classList.contains('hidden')) requestCloseRep();
 });
@@ -1311,7 +1448,7 @@ function readForm() {
     calOn: F('cal').checked,
   };
 }
-async function saveReport(submit) {
+async function saveReport(submit, keepOpen = false) {
   const f = readForm();
   if (!f.customer) { toast('고객명을 입력해 주세요', 'warn'); F('customer').focus(); return; }
   if (!f.date) { toast('방문일을 입력해 주세요', 'warn'); F('date').focus(); return; }
@@ -1331,14 +1468,25 @@ async function saveReport(submit) {
   try {
     await db.set('reports/' + id, rec);
     S.reports[id] = { ...rec, id }; editSrc = null;
-    closeModal($('#rep-modal'));
+    if (keepOpen) {
+      editRep = id; repSnap = JSON.stringify(readForm());
+      $('#rep-del').classList.remove('hidden'); $('#rep-mt').textContent = '방문보고서';
+      setRepLock(false, S.reports[id]);
+      const tm = new Date().toLocaleTimeString('ko-KR', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
+      $('#rep-saved').textContent = `${tm} 저장됨`;
+    } else closeModal($('#rep-modal'));
     const needCal = rec.calState === 'pending' && !cal.ok();
     if (needCal) toast(submit ? '제출했어요. 캘린더는 연결 후 반영돼요' : '저장했어요. 캘린더는 연결 후 반영돼요', 'warn', { label: '캘린더 연결', fn: connectCalendar });
-    else toast(submit ? '방문보고서를 제출했어요' : '임시저장했어요');
+    else toast(submit ? '방문보고서를 제출했어요' : '저장했어요');
     processPending();
   } catch (e) { dbErr(e); }
 }
-$('#rep-draft').onclick = () => saveReport(false);
+$('#rep-draft').onclick = () => saveReport(false, true);
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && !$('#rep-modal').classList.contains('hidden')) {
+    e.preventDefault(); if (!$('#rep-draft').classList.contains('hidden')) saveReport(false, true);
+  }
+});
 $('#rep-submit').onclick = async () => { if (await askConfirm('방문보고서를 제출할까요?\n제출 후에는 [제출 취소 후 수정]으로만 고칠 수 있어요.', '제출')) saveReport(true); };
 $('#rep-unsubmit').onclick = async () => {
   if (!editRep) return;
