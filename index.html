@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.07 | 2026-09-28 | 금요일 정기업무 아래 '프로젝트' 박스 추가: 프로젝트명·마감일(D-day)·할 일 체크(취소선)·프로젝트 마감(비우고 새로 시작, 되돌리기) -->
 <!-- v1.06 | 2026-09-28 | 다크모드 고대비: 배경·박스 대비와 테두리 강화, 글자·배지·캘린더 색 선명하게 (WCAG AA 이상) -->
 <!-- v1.05 | 2026-09-28 | 오늘 방문·미제출 목록에서 '보고서 필요 없음'으로 지우기(되돌리기·숨긴 항목 복원 가능), 일정 상세에서도 지정 -->
 <!-- v1.04 | 2026-09-28 | Firebase 설정값을 파일에 넣음(폰·다른 PC에서도 바로 로그인), 폰 반응형 다듬기(작은 화면 줄바꿈·입력 확대 방지·안전영역·탭 고정·태블릿 2단) -->
@@ -128,7 +129,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 .grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,.95fr);gap:22px;align-items:start}
 .col{display:flex;flex-direction:column;gap:22px;min-width:0}
-.p-rep,.p-todo,.p-rt{min-height:560px}
+.p-rep,.p-todo{min-height:560px}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
 .panel-h{display:flex;align-items:center;gap:8px;padding:20px 22px 14px}
 .panel-h h2{margin:0;white-space:nowrap;font-size:17px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
@@ -413,6 +414,34 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 :root[data-theme="dark"] .bc-ev.allday{color:#0b0d24;font-weight:700}
 :root[data-theme="dark"] .modal-bg,:root[data-theme="dark"] .bigcal-bg{background:rgba(0,0,0,.7)}
 
+/* project */
+.prj-close-btn{color:var(--danger);border-color:var(--danger);background:transparent}
+.prj-close-btn:hover{background:var(--danger-soft)}
+.prj-close-btn:disabled{color:var(--muted);border-color:var(--border-strong)}
+.prj-name{width:100%;border:1px solid transparent;background:transparent;border-radius:9px;padding:6px 8px;margin:-6px -8px 4px;font-size:18px;font-weight:800;letter-spacing:-.01em;outline:none;min-width:0}
+.prj-name:hover{border-color:var(--border)}
+.prj-name:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);background:var(--surface)}
+.prj-due{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.prj-due label{font-size:12px;font-weight:700;color:var(--text-2)}
+.prj-due .input{width:auto;height:34px;font-size:13px}
+.dday{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:7px;font-size:12px;font-weight:800;background:var(--primary-soft);color:var(--primary)}
+.dday.soon{background:var(--warn-soft);color:var(--warn)}
+.dday.over{background:var(--danger-soft);color:var(--danger)}
+.dday.none{background:var(--surface-3);color:var(--text-2);font-weight:600}
+.prj-add{display:flex;gap:6px;margin:12px 0 8px}
+.prj-list{display:flex;flex-direction:column}
+.prj-item{display:flex;align-items:flex-start;gap:10px;padding:10px 2px;border-bottom:1px solid var(--border)}
+.prj-item:last-child{border-bottom:0}
+.prj-item .txt{flex:1;min-width:0;word-break:break-word;cursor:text}
+.prj-item.done .txt{text-decoration:line-through;color:var(--muted)}
+.prj-item .acts{display:flex;gap:2px;opacity:0;transition:opacity .15s}
+.prj-item:hover .acts,.prj-item:focus-within .acts{opacity:1}
+@media (hover:none){.prj-item .acts{opacity:1}}
+.prj-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:var(--muted)}
+.prj-empty{text-align:center;color:var(--muted);font-size:13px;padding:18px 0 6px}
+.prj-edit{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+.prj-edit .input{flex:1;min-width:140px}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -439,13 +468,14 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 .spin{width:18px;height:18px;border:2px solid var(--border-strong);border-top-color:var(--primary);border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-@media (max-width:1180px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.grid .p-rt{grid-column:1 / -1;min-height:0}}
+@media (max-width:1180px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.grid .col-rt{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}.grid .p-rt{min-height:0}}
 @media (max-width:899px){
   .grid{grid-template-columns:minmax(0,1fr)}
   .mtabs{display:flex}
   [data-panel]{display:none!important}
   [data-panel].active{display:flex!important}
   .p-rep,.p-todo,.p-rt{min-height:0}
+  .col-rt[data-panel].active{display:flex!important;align-items:stretch}
   .hdr-in{padding:10px 16px;gap:8px}
   .hdr-date,.pill .lbl-long{display:none}
   .main{padding:14px 16px 40px}
@@ -536,7 +566,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
     <nav class="mtabs" id="mtabs">
       <button data-tab="rep"><span class="lbl-l">방문보고서</span><span class="lbl-s">보고서</span> <span class="cnt" id="cnt-rep">0</span></button>
       <button data-tab="todo">To-Do <span class="cnt" id="cnt-todo">0</span></button>
-      <button data-tab="rt">금요일 <span class="cnt" id="cnt-rt">0</span></button>
+      <button data-tab="rt"><span class="lbl-l">금요일·프로젝트</span><span class="lbl-s">금요일</span> <span class="cnt" id="cnt-rt">0</span></button>
     </nav>
     <div id="loading" class="loading"><span class="spin"></span>불러오는 중…</div>
     <div class="grid hidden" id="grid">
@@ -606,8 +636,9 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
         </div>
       </section>
 
-      <!-- 금요일 루틴 -->
-      <section class="panel p-rt" data-panel="rt">
+      <!-- 금요일 루틴 + 프로젝트 -->
+      <div class="col col-rt" data-panel="rt">
+      <section class="panel p-rt">
         <div class="panel-h">
           <h2><svg class="ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>매주 금요일 정기업무</h2>
           <span class="sp"></span>
@@ -615,6 +646,17 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
         </div>
         <div class="panel-b" id="rt-body"></div>
       </section>
+
+      <!-- 프로젝트 -->
+      <section class="panel p-prj">
+        <div class="panel-h">
+          <h2><svg class="ic" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>프로젝트</h2>
+          <span class="sp"></span>
+          <button id="prj-close" class="btn btn-sm prj-close-btn">프로젝트 마감</button>
+        </div>
+        <div class="panel-b" id="prj-body"></div>
+      </section>
+      </div>
     </div>
     <p class="ver" data-ver></p>
   </main>
@@ -743,7 +785,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.06';
+const APP_VERSION = 'v1.07';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -823,10 +865,10 @@ let LOADED = false;
 let unsub = null;
 let DEMO = null;
 
-function emptyState() { return { reports: {}, todos: {}, routine: { items: null, weeks: {}, cal: {} }, calTrash: {}, settings: {}, dismissed: {} }; }
+function emptyState() { return { reports: {}, todos: {}, routine: { items: null, weeks: {}, cal: {} }, calTrash: {}, settings: {}, dismissed: {}, project: {} }; }
 function normalize(v) {
   const s = emptyState(); v = v || {};
-  s.reports = v.reports || {}; s.todos = v.todos || {}; s.calTrash = v.calTrash || {}; s.settings = v.settings || {}; s.dismissed = v.dismissed || {};
+  s.reports = v.reports || {}; s.todos = v.todos || {}; s.calTrash = v.calTrash || {}; s.settings = v.settings || {}; s.dismissed = v.dismissed || {}; s.project = v.project || {};
   s.routine.items = v.routine?.items || null; s.routine.weeks = v.routine?.weeks || {}; s.routine.cal = v.routine?.cal || {};
   for (const [id, r] of Object.entries(s.reports)) r.id = id;
   for (const [id, t] of Object.entries(s.todos)) t.id = id;
@@ -1515,7 +1557,7 @@ function render() {
   const t = todayStr();
   const [yy, mm, dd] = t.split('-').map(Number);
   $('#hdr-date').textContent = `${yy}년 ${mm}월 ${dd}일 (${WD[dow(t)]})`;
-  renderReports(); renderDue(); renderCal(); renderTodos(); renderRoutine(); renderBanner(); renderTabs(); updateCalUI();
+  renderReports(); renderDue(); renderCal(); renderTodos(); renderRoutine(); renderProject(); renderBanner(); renderTabs(); updateCalUI();
 }
 function calMark(r) {
   if (r.srcEventId) return `<span class="calmark cm-ok">${ICO.cal}캘린더 일정</span>`;
@@ -1914,6 +1956,104 @@ $('#rt-body').addEventListener('submit', async e => {
   setTimeout(() => $('#rt-new')?.focus(), 30);
 });
 
+/* ===================== 프로젝트 ===================== */
+const PRJ = { edit: null, draft: '' };
+function prjItems() { return Object.entries(S.project.items || {}).map(([id, v]) => ({ id, ...v })).sort((a, b) => (!!a.done - !!b.done) || (a.done ? (b.doneAt || 0) - (a.doneAt || 0) : (a.createdAt || 0) - (b.createdAt || 0))); }
+function ddayTag(due) {
+  if (!due) return '<span class="dday none">마감일 미정</span>';
+  const d = diffDays(todayStr(), due);
+  if (d < 0) return `<span class="dday over">D+${-d} · 마감 지남</span>`;
+  if (d === 0) return '<span class="dday soon">D-day</span>';
+  return `<span class="dday ${d <= 3 ? 'soon' : ''}">D-${d}</span>`;
+}
+function renderProject() {
+  const box = $('#prj-body'); if (!box) return;
+  const P = S.project, items = prjItems(), done = items.filter(x => x.done).length;
+  const active = document.activeElement;
+  const keepName = active?.id === 'prj-name' ? active.value : null;
+  $('#prj-close').disabled = !P.name && !items.length && !P.due;
+  let h = `<input id="prj-name" class="prj-name" placeholder="프로젝트명 입력" maxlength="80" value="${esc(keepName ?? P.name ?? '')}" aria-label="프로젝트명">
+    <div class="prj-due"><label for="prj-due">마감일</label><input id="prj-due" class="input" type="date" value="${esc(P.due || '')}">${ddayTag(P.due)}${P.due ? `<span style="font-size:12px;color:var(--text-2)">${esc(fmtK(P.due))}까지</span>` : ''}</div>
+    <div class="prog"><i style="width:${items.length ? (done / items.length) * 100 : 0}%"></i></div>
+    <form class="prj-add" id="prj-add" autocomplete="off"><input class="input" id="prj-new" placeholder="프로젝트 마감까지 해야 할 일" maxlength="200"><button class="btn btn-primary" type="submit">추가</button></form>
+    <div class="prj-list">`;
+  h += items.length ? items.map(x => PRJ.edit === x.id
+    ? `<div class="prj-item" data-id="${esc(x.id)}"><div class="prj-edit"><input class="input" data-pe value="${esc(PRJ.draft)}" maxlength="200"><button class="btn btn-sm" data-pa="cancel">취소</button><button class="btn btn-primary btn-sm" data-pa="save">저장</button></div></div>`
+    : `<div class="prj-item ${x.done ? 'done' : ''}" data-id="${esc(x.id)}">
+        <button class="chk ${x.done ? 'on' : ''}" data-pa="toggle" role="checkbox" aria-checked="${!!x.done}" aria-label="완료">${ICO.check}</button>
+        <div class="txt" data-pa="edit">${esc(x.text)}</div>
+        <div class="acts"><button class="btn btn-ghost btn-icon" data-pa="edit" aria-label="수정">${ICO.edit}</button><button class="btn btn-ghost btn-icon" data-pa="del" aria-label="삭제">${ICO.trash}</button></div>
+      </div>`).join('')
+    : `<div class="prj-empty">${P.name ? '할 일을 추가해 보세요' : '프로젝트명과 마감일을 정하고 할 일을 추가해 보세요'}</div>`;
+  h += `</div>${items.length ? `<div class="prj-foot"><span>${done}/${items.length} 완료${P.due && done < items.length ? ` · 남은 일 ${items.length - done}개` : ''}</span>${done === items.length ? '<span style="color:var(--ok);font-weight:700">모두 완료!</span>' : ''}</div>` : ''}`;
+  box.innerHTML = h;
+  if (keepName !== null) { const n = $('#prj-name'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+  if (PRJ.edit) { const i = box.querySelector('[data-pe]'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
+}
+async function prjSaveMeta(k, v) {
+  const val = v || null;
+  if ((S.project[k] || null) === val) return;
+  S.project[k] = val || undefined;
+  const upd = { [k]: val }; if (!S.project.createdAt) { upd.createdAt = Date.now(); S.project.createdAt = upd.createdAt; }
+  try { await db.update('project', upd); } catch (e) { dbErr(e); }
+  renderProject();
+}
+async function prjCommitEdit() {
+  const id = PRJ.edit, t = PRJ.draft.trim(); if (!id) return;
+  if (!t) { toast('내용을 입력해 주세요', 'warn'); return; }
+  PRJ.edit = null;
+  if (S.project.items?.[id]) S.project.items[id].text = t;
+  try { await db.update('project/items/' + id, { text: t }); } catch (e) { dbErr(e); }
+  renderProject();
+}
+const PB = $('#prj-body');
+PB.addEventListener('change', e => {
+  if (e.target.id === 'prj-name') prjSaveMeta('name', e.target.value.trim());
+  else if (e.target.id === 'prj-due') prjSaveMeta('due', e.target.value);
+});
+PB.addEventListener('keydown', e => {
+  if (e.target.id === 'prj-name' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); e.target.blur(); }
+  if (e.target.hasAttribute('data-pe')) {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); prjCommitEdit(); }
+    else if (e.key === 'Escape') { e.stopPropagation(); PRJ.edit = null; renderProject(); }
+  }
+});
+PB.addEventListener('input', e => { if (e.target.hasAttribute('data-pe')) PRJ.draft = e.target.value; });
+PB.addEventListener('submit', async e => {
+  if (e.target.id !== 'prj-add') return; e.preventDefault();
+  const inp = $('#prj-new'), t = inp.value.trim(); if (!t) return;
+  const id = newId(), rec = { text: t, done: false, createdAt: Date.now() };
+  S.project.items = { ...(S.project.items || {}), [id]: rec };
+  const upd = { ['items/' + id]: rec }; if (!S.project.createdAt) upd.createdAt = Date.now();
+  renderProject(); setTimeout(() => $('#prj-new')?.focus(), 0);
+  try { await db.update('project', upd); } catch (er) { dbErr(er); }
+});
+PB.addEventListener('click', e => {
+  const b = e.target.closest('[data-pa]'); if (!b) return;
+  const id = b.closest('.prj-item')?.dataset.id, x = S.project.items?.[id]; if (!x && b.dataset.pa !== 'cancel') return;
+  const a = b.dataset.pa;
+  if (a === 'toggle') { const done = !x.done; x.done = done; x.doneAt = done ? Date.now() : undefined; renderProject(); renderTabs(); db.update('project/items/' + id, { done, doneAt: done ? Date.now() : null }).catch(dbErr); }
+  else if (a === 'edit') { PRJ.edit = id; PRJ.draft = x.text; renderProject(); }
+  else if (a === 'cancel') { PRJ.edit = null; renderProject(); }
+  else if (a === 'save') prjCommitEdit();
+  else if (a === 'del') {
+    const copy = { ...x }; delete S.project.items[id]; renderProject(); renderTabs();
+    db.remove('project/items/' + id).catch(dbErr);
+    toast('삭제했어요', '', { label: '되돌리기', fn: () => db.set('project/items/' + id, clean(copy)).catch(dbErr) });
+  }
+});
+$('#prj-close').onclick = async () => {
+  const P = S.project, items = prjItems(), done = items.filter(x => x.done).length;
+  const nm = $('#prj-name')?.value.trim() || P.name || '이 프로젝트';
+  const msg = `'${nm}' 프로젝트를 마감할까요?\n할 일 ${items.length}개${items.length ? `(완료 ${done}개)` : ''}와 마감일이 모두 지워지고, 새 프로젝트를 입력할 수 있게 비워져요.`;
+  if (!(await askConfirm(msg, '프로젝트 마감'))) return;
+  const snap = JSON.parse(JSON.stringify(P));
+  S.project = {}; PRJ.edit = null; renderProject(); renderTabs();
+  try { await db.set('project', null); } catch (e) { dbErr(e); return; }
+  toast(`'${nm}' 프로젝트를 마감했어요`, '', { label: '되돌리기', fn: () => db.set('project', snap).catch(dbErr) });
+  setTimeout(() => $('#prj-name')?.focus(), 50);
+};
+
 /* ===================== 설정 ===================== */
 $('#settings-btn').onclick = () => {
   $('#set-user').textContent = `${USER.displayName || ''} ${USER.email ? '(' + USER.email + ')' : ''}`.trim();
@@ -2056,6 +2196,15 @@ function startDemo() {
       cal: { time: '09:00', remind: '0' },
     },
     settings: { calDefault: true, cals: ['primary', 'visits'] },
+    project: {
+      name: '10월 수면 캠페인 준비', due: addDays(t, 18), createdAt: now - 5 * 864e5,
+      items: {
+        p1: { text: '캠페인 안내문 초안 작성', done: true, createdAt: now - 5 * 864e5, doneAt: now - 2 * 864e5 },
+        p2: { text: '참여 고객 명단 정리', done: false, createdAt: now - 4 * 864e5 },
+        p3: { text: '교수님 자문 일정 잡기', done: false, createdAt: now - 3 * 864e5 },
+        p4: { text: '결과 보고서 양식 만들기', done: false, createdAt: now - 2 * 864e5 },
+      },
+    },
   };
   const T = (d, hm) => ({ dateTime: `${d}T${hm}:00+09:00` }), old = new Date(now - 3 * 864e5).toISOString();
   DEMO_CAL = {
