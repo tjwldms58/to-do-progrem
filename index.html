@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.04 | 2026-09-28 | Firebase 설정값을 파일에 넣음(폰·다른 PC에서도 바로 로그인), 폰 반응형 다듬기(작은 화면 줄바꿈·입력 확대 방지·안전영역·탭 고정·태블릿 2단) -->
 <!-- v1.03 | 2026-09-28 | 캘린더 연결 진단 화면 추가, 일정 불러오기 오류를 화면에 표시, 캘린더 목록 권한이 없을 때 연결이 끊기던 문제 수정, 연결된 구글 계정·숨겨진 캘린더 안내 -->
 <!-- v1.02 | 2026-09-28 | 방문보고서 '저장' 버튼(창 유지·Ctrl+S·하단 고정), 캘린더 › 크게 보기(구글 캘린더처럼 시간·제목 표시) -->
 <!-- v1.01 | 2026-09-28 | 박스 크기 확대, 방문보고서 아래 미니 캘린더(구글 캘린더 일정 표시), 오늘 방문·제출할 보고서 표시, 폰에서 바꾼 일정 자동 반영 -->
@@ -320,6 +321,62 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 .dg-cal .cnt{margin-left:auto;font-weight:700;color:var(--text)}
 .dg-sum{font-size:13px;font-weight:600;background:var(--primary-soft);color:var(--primary-strong);border-radius:10px;padding:10px 12px;white-space:pre-line}
 
+/* ===== 폰·태블릿 반응형 보강 (v1.04) ===== */
+.lbl-s{display:none}
+.hdr-in{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+.mtabs button,.chips button,.badge,.due-go,.btn{white-space:nowrap}
+@media (min-width:700px) and (max-width:899px){
+  .col[data-panel].active{display:grid!important;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px;align-items:start}
+}
+@media (max-width:899px){
+  html{-webkit-text-size-adjust:100%}
+  .hdr{padding-top:env(safe-area-inset-top)}
+  .hdr-in{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+  .main{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+  .mtabs{position:sticky;top:calc(56px + env(safe-area-inset-top));z-index:15;box-shadow:0 4px 12px rgba(22,26,64,.06)}
+  .input,.textarea,.select{font-size:16px}           /* iOS에서 입력칸 누를 때 화면 확대 방지 */
+  .panel-h{flex-wrap:wrap;row-gap:8px;padding:16px 16px 12px}
+  .panel-b{padding:0 16px 16px}
+  .panel-h h2{font-size:16px}
+  .p-todo .panel-h .chips{margin-left:auto}
+  .modal-f{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+  .modal-h{padding-top:calc(16px + env(safe-area-inset-top))}
+  .bc-h{padding-top:calc(10px + env(safe-area-inset-top))}
+  .toasts{bottom:calc(20px + env(safe-area-inset-bottom))}
+  .chk{width:22px;height:22px}
+  .btn-icon{width:36px;height:36px}
+  .due-h{flex-wrap:wrap;row-gap:2px}
+  .due-row{min-height:44px}
+}
+@media (max-width:480px){
+  .hdr .brand{font-size:15px}
+  .pill{padding:0 10px}
+  .due{padding:10px}
+  .due-row{padding:8px 10px}
+  .due-time{min-width:0;font-size:11px}
+  .due-go{font-size:0}
+  .due-go::after{content:'›';font-size:18px;line-height:1;color:var(--primary)}
+  .due-row .badge{height:20px;padding:0 6px;font-size:10.5px}
+  .toolbar .chips{flex:1}
+  .toolbar .chips button{flex:1}
+  .search{flex-basis:100%}
+  .rt-week{flex-wrap:wrap}
+  .calbox .row label.field{min-width:0}
+  #diag-modal .modal-f .btn{flex:1}
+  #diag-modal .modal-f .sp{display:none}
+  .rep-meta{font-size:12px}
+}
+@media (max-width:374px){
+  .lbl-l{display:none}.lbl-s{display:inline}
+  .mtabs button{font-size:12px;gap:4px}
+  .hdr-in{gap:6px}
+  .pill{font-size:11px}
+  .todo-acts .btn-icon{width:30px;height:30px}
+  .mc-d{height:46px}
+  .modal-f{gap:6px}
+  .modal-f .btn{padding:0 10px}
+}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -441,7 +498,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
   <main class="main">
     <div id="banner"></div>
     <nav class="mtabs" id="mtabs">
-      <button data-tab="rep">방문보고서 <span class="cnt" id="cnt-rep">0</span></button>
+      <button data-tab="rep"><span class="lbl-l">방문보고서</span><span class="lbl-s">보고서</span> <span class="cnt" id="cnt-rep">0</span></button>
       <button data-tab="todo">To-Do <span class="cnt" id="cnt-todo">0</span></button>
       <button data-tab="rt">금요일 <span class="cnt" id="cnt-rt">0</span></button>
     </nav>
@@ -650,7 +707,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.03';
+const APP_VERSION = 'v1.04';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -663,13 +720,13 @@ const DEFAULT_ROUTINE = ['영양, 교수님 피드백 요청', '출장복명서 
    Firebase 콘솔 → 프로젝트 설정 → 내 앱(웹)에서 복사해 붙여넣으세요.
    databaseURL(asia-southeast1 주소)이 꼭 들어 있어야 합니다. */
 const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyBUxQqT1vi-eQy_hRpJ_lf0sfVCEs05LXk",
+  authDomain: "my-to-do-progrem-work-84408.firebaseapp.com",
+  databaseURL: "https://my-to-do-progrem-work-84408-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "my-to-do-progrem-work-84408",
+  storageBucket: "my-to-do-progrem-work-84408.firebasestorage.app",
+  messagingSenderId: "509716510385",
+  appId: "1:509716510385:web:3fa04baf340990f8281490"
 };
 
 /* ===================== UTILS ===================== */
