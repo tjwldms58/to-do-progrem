@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.05 | 2026-09-28 | 오늘 방문·미제출 목록에서 '보고서 필요 없음'으로 지우기(되돌리기·숨긴 항목 복원 가능), 일정 상세에서도 지정 -->
 <!-- v1.04 | 2026-09-28 | Firebase 설정값을 파일에 넣음(폰·다른 PC에서도 바로 로그인), 폰 반응형 다듬기(작은 화면 줄바꿈·입력 확대 방지·안전영역·탭 고정·태블릿 2단) -->
 <!-- v1.03 | 2026-09-28 | 캘린더 연결 진단 화면 추가, 일정 불러오기 오류를 화면에 표시, 캘린더 목록 권한이 없을 때 연결이 끊기던 문제 수정, 연결된 구글 계정·숨겨진 캘린더 안내 -->
 <!-- v1.02 | 2026-09-28 | 방문보고서 '저장' 버튼(창 유지·Ctrl+S·하단 고정), 캘린더 › 크게 보기(구글 캘린더처럼 시간·제목 표시) -->
@@ -377,6 +378,14 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
   .modal-f .btn{padding:0 10px}
 }
 
+.due-item{display:flex;align-items:center;gap:6px}
+.due-item .due-row{flex:1;min-width:0}
+.due-x{flex:none;width:34px;height:34px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--muted);display:grid;place-items:center;padding:0}
+.due-x:hover{background:var(--danger-soft);color:var(--danger)}
+.due-item.hid .due-row{opacity:.6;background:var(--surface-2)}
+.due-foot{margin-top:10px;text-align:right}
+@media (max-width:480px){.due-x{width:30px;height:30px}.due-item{gap:4px}}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -659,7 +668,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
       <div id="ev-meta" style="font-size:13px;color:var(--text-2);display:flex;flex-direction:column;gap:4px"></div>
       <div id="ev-desc" class="ev-desc hidden"></div>
     </div>
-    <div class="modal-f"><a id="ev-link" class="btn btn-ghost" target="_blank" rel="noopener">Google 캘린더에서 보기</a><span class="sp"></span><button id="ev-rep" class="btn btn-primary">방문보고서 작성</button></div>
+    <div class="modal-f"><a id="ev-link" class="btn btn-ghost" target="_blank" rel="noopener">Google 캘린더에서 보기</a><span class="sp"></span><button id="ev-dismiss" class="btn">보고서 필요 없음</button><button id="ev-rep" class="btn btn-primary">방문보고서 작성</button></div>
   </div>
 </div>
 
@@ -707,7 +716,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.04';
+const APP_VERSION = 'v1.05';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -787,10 +796,10 @@ let LOADED = false;
 let unsub = null;
 let DEMO = null;
 
-function emptyState() { return { reports: {}, todos: {}, routine: { items: null, weeks: {}, cal: {} }, calTrash: {}, settings: {} }; }
+function emptyState() { return { reports: {}, todos: {}, routine: { items: null, weeks: {}, cal: {} }, calTrash: {}, settings: {}, dismissed: {} }; }
 function normalize(v) {
   const s = emptyState(); v = v || {};
-  s.reports = v.reports || {}; s.todos = v.todos || {}; s.calTrash = v.calTrash || {}; s.settings = v.settings || {};
+  s.reports = v.reports || {}; s.todos = v.todos || {}; s.calTrash = v.calTrash || {}; s.settings = v.settings || {}; s.dismissed = v.dismissed || {};
   s.routine.items = v.routine?.items || null; s.routine.weeks = v.routine?.weeks || {}; s.routine.cal = v.routine?.cal || {};
   for (const [id, r] of Object.entries(s.reports)) r.id = id;
   for (const [id, t] of Object.entries(s.todos)) t.id = id;
@@ -1193,7 +1202,8 @@ function renderCal() {
   $('#mc-day').innerHTML = `<div class="mc-day-h">${esc(fmtK(CV.sel))}${CV.sel === t ? ' 오늘' : ''} <span>일정 ${evs.length}건</span></div>` +
     (evs.length ? evs.map(evRow).join('') : `<div class="empty" style="padding:12px 0">${cal.ok() ? '일정이 없어요' : '캘린더 연결 전이에요'}</div>`);
 }
-function dueItems() {
+const dkey = x => (x.ev ? 'e_' + x.ev.id : 'r_' + x.r.id).replace(/[.#$\[\]\/]/g, '_');
+function dueItems(includeHidden = false) {
   const t = todayStr(), from = addDays(t, -7), out = [], used = new Set();
   if (cal.ok() && CV.range) {
     for (const e of CV.events) {
@@ -1208,9 +1218,10 @@ function dueItems() {
     if (used.has(r.id) || r.status === 'submitted' || r.date < from || r.date > t) continue;
     out.push({ date: r.date, time: r.start || '', name: r.customer, r });
   }
-  return out.sort((a, b) => b.date.localeCompare(a.date) || (a.time || '').localeCompare(b.time || ''));
+  out.forEach(x => { x.key = dkey(x); x.hidden = !!S.dismissed[x.key]; });
+  return out.filter(x => includeHidden || !x.hidden).sort((a, b) => b.date.localeCompare(a.date) || (a.time || '').localeCompare(b.time || ''));
 }
-let DUE = [];
+let DUE = [], showHidden = false;
 function dueRow(x, idx) {
   const t = todayStr(), late = diffDays(x.date, t);
   let st;
@@ -1218,19 +1229,44 @@ function dueRow(x, idx) {
   else if (late > 0) st = `<span class="badge b-late">${late}일 지남</span>`;
   else st = '<span class="badge b-due">오늘 제출</span>';
   const go = x.r?.status === 'submitted' ? '보기' : x.r ? '이어쓰기' : '작성';
-  return `<button class="due-row" data-due="${idx}"><span class="due-time">${late > 0 ? esc(fmtK(x.date)) : esc(x.time || '종일')}</span><span class="due-name">${esc(x.name)}</span>${x.r && x.r.status !== 'submitted' ? '<span class="badge b-draft">작성중</span>' : ''}${st}<span class="due-go">${go} ›</span></button>`;
+  if (x.hidden) return `<div class="due-item hid"><div class="due-row" style="cursor:default"><span class="due-time">${esc(fmtK(x.date))}</span><span class="due-name">${esc(x.name)}</span><span class="badge b-draft">보고서 불필요</span></div><button class="btn btn-sm" data-undismiss="${idx}">되돌리기</button></div>`;
+  const canX = x.r?.status !== 'submitted';
+  return `<div class="due-item"><button class="due-row" data-due="${idx}"><span class="due-time">${late > 0 ? esc(fmtK(x.date)) : esc(x.time || '종일')}</span><span class="due-name">${esc(x.name)}</span>${x.r && x.r.status !== 'submitted' ? '<span class="badge b-draft">작성중</span>' : ''}${st}<span class="due-go">${go} ›</span></button>${canX ? `<button class="due-x" data-dismiss="${idx}" aria-label="${esc(x.name)} 목록에서 지우기" title="보고서 필요 없음 (목록에서 지우기)"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>` : ''}</div>`;
+}
+async function setDismissed(x, on) {
+  const path = 'dismissed/' + x.key;
+  if (on) S.dismissed[x.key] = { name: x.name, date: x.date, at: Date.now() }; else delete S.dismissed[x.key];
+  renderDue(); renderTabs();
+  try { await db.set(path, on ? { name: x.name, date: x.date, at: Date.now() } : null); } catch (e) { dbErr(e); }
+}
+function dismissItem(x) {
+  setDismissed(x, true);
+  toast(`'${x.name}'을(를) 목록에서 지웠어요`, '', { label: '되돌리기', fn: () => setDismissed(x, false) });
+}
+let dismissPruned = false;
+function pruneDismissed() {   // 30일 지난 숨김 기록 정리
+  if (dismissPruned || !LOADED) return; dismissPruned = true;
+  const lim = addDays(todayStr(), -30), ups = {};
+  for (const [k, v] of Object.entries(S.dismissed)) if (!v?.date || v.date < lim) ups[k] = null;
+  if (Object.keys(ups).length) db.update('dismissed', ups).catch(() => {});
 }
 function renderDue() {
   if (!USER || !$('#due')) return;
-  const t = todayStr(); DUE = dueItems();
-  const today = DUE.filter(x => x.date === t), past = DUE.filter(x => x.date < t);
+  const t = todayStr(); pruneDismissed();
+  const all = dueItems(true), hiddenN = all.filter(x => x.hidden).length;
+  DUE = showHidden ? all : all.filter(x => !x.hidden);
+  const today = DUE.filter(x => x.date === t && !x.hidden), past = DUE.filter(x => x.date < t && !x.hidden), hid = DUE.filter(x => x.hidden);
   const left = today.filter(x => x.r?.status !== 'submitted').length;
+  if (!hiddenN) showHidden = false;
   let h = `<div class="due-h">${ICO.cal}오늘 방문 <span class="sub">${esc(fmtK(t))}${today.length ? ` · ${today.length}건${left ? `, 보고서 ${left}건 제출 필요` : ', 모두 제출 완료'}` : ''}</span></div>`;
   if (today.length) h += `<div class="due-list">${today.map(x => dueRow(x, DUE.indexOf(x))).join('')}</div>`;
-  else h += `<div class="due-empty">${cal.ok() ? (CV.range ? '오늘 예정된 방문이 없어요' : '캘린더 확인 중…') : '캘린더를 연결하면 오늘 방문 고객이 여기에 떠요'}</div>`;
+  else { const th = all.filter(x => x.date === t && x.hidden).length;
+    h += `<div class="due-empty">${th ? `오늘 방문은 모두 정리했어요 (보고서 불필요 ${th}건)` : cal.ok() ? (CV.range ? '오늘 예정된 방문이 없어요' : '캘린더 확인 중…') : '캘린더를 연결하면 오늘 방문 고객이 여기에 떠요'}</div>`; }
   if (past.length) h += `<div class="due-sep">미제출 방문보고서 (지난 7일) · ${past.length}건</div><div class="due-list">${past.map(x => dueRow(x, DUE.indexOf(x))).join('')}</div>`;
+  if (showHidden && hid.length) h += `<div class="due-sep" style="color:var(--muted)">보고서 불필요로 지운 항목</div><div class="due-list">${hid.map(x => dueRow(x, DUE.indexOf(x))).join('')}</div>`;
+  if (hiddenN) h += `<div class="due-foot"><button class="linkbtn" data-togglehidden>${showHidden ? '지운 항목 숨기기' : `지운 항목 ${hiddenN}개 보기`}</button></div>`;
   $('#due').innerHTML = h;
-  $('#cnt-rep').textContent = DUE.filter(x => x.r?.status !== 'submitted').length;
+  $('#cnt-rep').textContent = DUE.filter(x => !x.hidden && x.r?.status !== 'submitted').length;
 }
 function prefillFromEvent(e) {
   const i = evInfo(e);
@@ -1242,6 +1278,9 @@ function openFromEvent(e) {
   openReport(null, prefillFromEvent(e));
 }
 $('#due').onclick = e => {
+  const dx = e.target.closest('[data-dismiss]'); if (dx) { const x = DUE[+dx.dataset.dismiss]; if (x) dismissItem(x); return; }
+  const ux = e.target.closest('[data-undismiss]'); if (ux) { const x = DUE[+ux.dataset.undismiss]; if (x) setDismissed(x, false); return; }
+  if (e.target.closest('[data-togglehidden]')) { showHidden = !showHidden; renderDue(); return; }
   const b = e.target.closest('[data-due]'); if (!b) return;
   const x = DUE[+b.dataset.due]; if (!x) return;
   if (x.r) openReport(x.r.id); else openFromEvent(x.ev);
@@ -1259,8 +1298,19 @@ function openEvent(k) {
   $('#ev-link').classList.toggle('hidden', !link); if (link) $('#ev-link').href = link;
   $('#ev-rep').textContent = r ? (r.status === 'submitted' ? '방문보고서 보기' : '방문보고서 이어쓰기') : '방문보고서 작성';
   $('#ev-rep').classList.toggle('hidden', isRoutineEv(e));
+  const dk = dkey({ ev: e }), dis = !!S.dismissed[dk];
+  $('#ev-dismiss').textContent = dis ? '보고서 필요 목록에 다시 표시' : '보고서 필요 없음';
+  $('#ev-dismiss').classList.toggle('hidden', isRoutineEv(e) || r?.status === 'submitted' || (!dis && !isVisit(e)));
   $('#ev-modal').classList.remove('hidden');
 }
+$('#ev-dismiss').onclick = () => {
+  if (!evOpen) return;
+  const e = evOpen, i = evInfo(e), r = linkedReport(e);
+  const x = { ev: e, r, date: i.date, name: r?.customer || customerFromSummary(e.summary) || '(제목 없음)' }; x.key = dkey(x);
+  const on = !S.dismissed[x.key];
+  closeModal($('#ev-modal'));
+  if (on) dismissItem(x); else { setDismissed(x, false); toast('보고서 필요 목록에 다시 표시했어요'); }
+};
 $('#ev-rep').onclick = () => { closeModal($('#ev-modal')); closeModal($('#day-modal')); if (evOpen) openFromEvent(evOpen); };
 $('#mc-grid').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; CV.sel = b.dataset.d; if (CV.sel.slice(0, 7) !== CV.month) { CV.month = CV.sel.slice(0, 7); loadEvents(); } renderCal(); };
 $('#mc-day').onclick = e => { const b = e.target.closest('[data-k]'); if (b) openEvent(b.dataset.k); };
@@ -1558,7 +1608,7 @@ function renderBanner() {
 function renderTabs() {
   $$('#mtabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === UI.tab));
   $$('[data-panel]').forEach(p => p.classList.toggle('active', p.dataset.panel === UI.tab));
-  $('#cnt-rep').textContent = DUE.filter(x => x.r?.status !== 'submitted').length;
+  $('#cnt-rep').textContent = DUE.filter(x => !x.hidden && x.r?.status !== 'submitted').length;
   $('#cnt-todo').textContent = Object.values(S.todos).filter(x => !x.done).length;
   $('#cnt-rt').textContent = routineItems().length - routineDone(routineWeek());
 }
