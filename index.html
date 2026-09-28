@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.11 | 2026-09-28 | 구글 로그인: 새 방식이 준비되지 않았을 때 예전 방식으로 조용히 넘어가지 않고 안내, 스크립트 차단 시 재시도·해결 안내 -->
 <!-- v1.10 | 2026-09-28 | 구글 로그인 방식 변경(Google Identity Services): 'missing initial state' 오류 해결, 캘린더 재연결도 같은 방식, 예전 방식 로그인 버튼 유지 -->
 <!-- v1.09 | 2026-09-28 | 배경화면 전용 보기 모드(?wall=비밀키): 로그인 없이 오늘 방문·이번 주 일정·To-Do·금요일·프로젝트 요약을 실시간 표시, 설정에서 켜기/끄기/주소 재발급 -->
 <!-- v1.08 | 2026-09-28 | 프로젝트 할 일마다 노란색 확인 체크(여러 개) 추가: 누르면 체크 표시, 모두 체크하면 할 일 완료(취소선) -->
@@ -904,7 +905,7 @@ body.wall{overflow:hidden}
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.10';
+const APP_VERSION = 'v1.11';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -2446,20 +2447,22 @@ $('#cfg-save').onclick = () => {
 };
 $('#demo-start').onclick = () => startDemo();
 /* ----- Google Identity Services: 로그인·캘린더 권한을 구글 창에서 직접 받아요 (Firebase 중간 페이지를 거치지 않음) ----- */
-let GIS = null, gisCb = null;
+let GIS = null, gisCb = null, gisFailed = false, gisLoading = false;
 function initGis() {
-  if (!GOOGLE_CLIENT_ID || GIS) return;
+  if (!GOOGLE_CLIENT_ID || GIS || gisLoading) return;
+  gisLoading = true;
   const go = () => {
     try {
       GIS = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID, scope: ['openid', 'email', 'profile', ...CAL_SCOPES].join(' '),
         callback: r => gisCb?.ok(r), error_callback: e => gisCb?.fail(e),
       });
-    } catch (e) { console.warn('GIS init', e); }
+    } catch (e) { console.warn('GIS init', e); gisFailed = true; }
+    gisLoading = false;
   };
   if (window.google?.accounts?.oauth2) return go();
   const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = go;
-  sc.onerror = () => console.warn('GIS script load failed'); document.head.appendChild(sc);
+  sc.onerror = () => { console.warn('GIS script load failed'); gisFailed = true; gisLoading = false; sc.remove(); }; document.head.appendChild(sc);
 }
 function gisRequest(opts) {   // 반드시 클릭 처리 안에서 바로 불러야 팝업이 막히지 않아요
   return new Promise((ok, fail) => {
@@ -2490,7 +2493,11 @@ async function loginLegacy() {
   } catch (e) { authErr(e); }
 }
 $('#login-btn').onclick = async () => {
-  if (!GIS) return loginLegacy();
+  if (!GIS) {
+    if (gisFailed) { gisFailed = false; initGis(); toast('구글 로그인 도구를 불러오지 못했어요. Edge 설정 → 개인 정보 → 추적 방지를 "균형"으로 바꾸거나, 광고 차단 확장을 이 사이트에서 꺼 주세요. 다시 불러오는 중이에요', 'danger'); }
+    else { initGis(); toast('구글 로그인 준비 중이에요. 2~3초 뒤 다시 눌러 주세요', 'warn'); }
+    return;
+  }
   try {
     const r = await gisRequest({ prompt: 'select_account' });
     const res = await FB.signInWithCredential(FB.auth, FB.GoogleAuthProvider.credential(null, r.access_token));
