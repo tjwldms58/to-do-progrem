@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.13 | 2026-09-28 | 배경화면 크기·위치 조절: 설정에서 위치(전체/오른쪽/왼쪽/가운데)·너비·높이·글자 크기·배경을 고르면 주소 그대로 배경화면에 바로 반영 -->
 <!-- v1.12 | 2026-09-28 | 구글 로그인을 '페이지 이동 방식'(리디렉션)으로 변경: 팝업·타사 쿠키 차단 환경(Edge)에서도 로그인·캘린더 연결 가능 -->
 <!-- v1.11 | 2026-09-28 | 구글 로그인: 새 방식이 준비되지 않았을 때 예전 방식으로 조용히 넘어가지 않고 안내, 스크립트 차단 시 재시도·해결 안내 -->
 <!-- v1.10 | 2026-09-28 | 구글 로그인 방식 변경(Google Identity Services): 'missing initial state' 오류 해결, 캘린더 재연결도 같은 방식, 예전 방식 로그인 버튼 유지 -->
@@ -477,14 +478,29 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 /* ===== 배경화면 보기 모드 ===== */
 .wall-rules summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--primary)}
 body.wall{overflow:hidden}
-#wall-screen{height:100vh}
-.wl-wrap{height:100vh;display:flex;flex-direction:column;padding:clamp(16px,2.2vw,40px);gap:clamp(10px,1.2vw,20px);font-size:clamp(13px,.95vw,19px)}
+#wall-screen{position:fixed;inset:0;overflow:hidden;background:var(--bg)}
+#wall-screen.wl-bg-gradient{background:linear-gradient(135deg,#dfe3ff 0%,#eef0ff 45%,#f3e8ff 100%)}
+:root[data-theme="dark"] #wall-screen.wl-bg-gradient{background:linear-gradient(135deg,#0d1030 0%,#1d2150 50%,#2d1f4d 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #wall-screen.wl-bg-gradient{background:linear-gradient(135deg,#0d1030 0%,#1d2150 50%,#2d1f4d 100%)}}
+#wall-screen.wl-bg-black{background:#000}
+.wl-wrap{position:absolute;inset:0;display:flex;flex-direction:column;padding:2.2em;gap:1.1em;font-size:16px;box-sizing:border-box}
+.wl-pos-right .wl-wrap,.wl-pos-left .wl-wrap,.wl-pos-center .wl-wrap{inset:auto;width:var(--wl-w);height:var(--wl-h);top:calc((100vh - var(--wl-h)) / 2);background:var(--bg);background:color-mix(in srgb,var(--bg) 90%,transparent);border:1px solid var(--panel-border);border-radius:24px;box-shadow:var(--shadow-lg);padding:1.4em}
+.wl-pos-right .wl-wrap{right:var(--wl-m)}
+.wl-pos-left .wl-wrap{left:var(--wl-m)}
+.wl-pos-center .wl-wrap{left:calc((100vw - var(--wl-w)) / 2)}
 .wl-h{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
 .wl-date{font-size:2.2em;font-weight:800;letter-spacing:-.02em;line-height:1.1}
 .wl-sub{color:var(--text-2);margin-top:4px;font-size:.95em}
 .wl-clock{font-size:3.2em;font-weight:800;letter-spacing:-.03em;color:var(--primary);line-height:1;font-variant-numeric:tabular-nums}
 .wl-note{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:.6em 1em;font-weight:700}
-.wl-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(10px,1.2vw,20px)}
+.wl-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1.2fr) minmax(0,1fr);gap:1em}
+.wl-grid[data-cols="2"]{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(13em,auto);overflow:auto;scrollbar-width:thin}
+.wl-grid[data-cols="1"]{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-auto-rows:minmax(11em,auto);overflow:auto;scrollbar-width:thin}
+.wl-span{grid-column:span 2;display:flex;min-height:0}
+.wl-grid[data-cols="1"] .wl-span{grid-column:auto}
+.wl-grid[data-cols="1"],.wl-grid[data-cols="2"]{grid-auto-rows:auto;align-content:start}
+.wl-grid[data-cols="1"] .wl-body,.wl-grid[data-cols="2"] .wl-body{flex:none;overflow:visible;-webkit-mask-image:none;mask-image:none;padding-bottom:0}
+.wl-grid[data-cols="1"] .wl-card,.wl-grid[data-cols="2"] .wl-card,.wl-grid[data-cols="1"] .wl-span,.wl-grid[data-cols="2"] .wl-span{overflow:visible;min-height:auto}
 .wl-card{background:var(--surface);border:1px solid var(--panel-border);border-radius:18px;padding:1.1em 1.2em;display:flex;flex-direction:column;min-height:0;overflow:hidden;box-shadow:var(--shadow)}
 .wl-card h3{margin:0 0 .6em;font-size:1.15em;display:flex;align-items:center;gap:.5em}
 .wl-card h3 .n{margin-left:auto;font-size:.8em;font-weight:800;color:var(--text-2)}
@@ -517,8 +533,11 @@ body.wall{overflow:hidden}
 .wl-prog i{display:block;height:100%;background:var(--primary)}
 .wl-more{font-size:.85em;color:var(--muted);font-weight:700}
 .wl-foot{font-size:.8em;color:var(--muted);margin-top:auto;padding-top:.4em}
-@media (max-width:1100px){.wl-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;overflow:auto}.wl-wrap{height:auto;min-height:100vh}body.wall{overflow:auto}#wall-screen{height:auto}}
-@media (max-width:640px){.wl-grid{grid-template-columns:1fr}.wl-clock{font-size:2.4em}}
+@media (max-width:640px){.wl-clock{font-size:2.4em}}
+.wall-lay{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;font-size:12px;font-weight:700;color:var(--text-2)}
+.wall-lay .select{height:32px;font-size:13px}
+.wall-lay input[type=range]{width:100%;accent-color:var(--primary)}
+.wall-lay .rv{display:flex;align-items:center;gap:8px}.wall-lay .rv span{min-width:3em;text-align:right;color:var(--text)}
 
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
@@ -865,6 +884,18 @@ body.wall{overflow:hidden}
           <div style="display:flex;gap:6px"><input id="set-wall-url" class="input mono" readonly style="font-size:12px"><button id="set-wall-copy" class="btn btn-sm">복사</button></div>
           <div class="dg-d">이 주소를 Lively Wallpaper에 넣으세요. 고객명·일정 요약이 보이니 다른 사람에게 공유하지 마세요. (보고서 상세 내용은 들어가지 않아요)</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap"><button id="set-wall-open" class="btn btn-sm">미리보기</button><button id="set-wall-new" class="btn btn-ghost btn-sm">주소 새로 만들기</button></div>
+          <div class="set-t" style="margin-top:4px">배경화면 크기·위치</div>
+          <div class="wall-lay" id="wall-lay">
+            <label for="wl-pos">위치</label>
+            <select id="wl-pos" class="select"><option value="full">전체 화면</option><option value="right">오른쪽</option><option value="left">왼쪽</option><option value="center">가운데</option></select>
+            <label for="wl-w">너비</label><div class="rv"><input type="range" id="wl-w" min="25" max="95" step="5"><span id="wl-w-v"></span></div>
+            <label for="wl-h">높이</label><div class="rv"><input type="range" id="wl-h" min="40" max="100" step="5"><span id="wl-h-v"></span></div>
+            <label for="wl-scale">글자 크기</label>
+            <select id="wl-scale" class="select"><option value="80">아주 작게</option><option value="90">작게</option><option value="100">보통</option><option value="115">크게</option><option value="130">아주 크게</option></select>
+            <label for="wl-bg">배경</label>
+            <select id="wl-bg" class="select"><option value="plain">기본</option><option value="gradient">그라데이션</option><option value="black">검정</option></select>
+          </div>
+          <div class="dg-d">바꾸면 배경화면에 몇 초 안에 바로 반영돼요 (주소는 그대로).</div>
           <div id="set-wall-stat" class="dg-d"></div>
         </div>
         <details class="wall-rules"><summary>처음 한 번: Firebase 규칙 바꾸기</summary>
@@ -906,7 +937,7 @@ body.wall{overflow:hidden}
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.12';
+const APP_VERSION = 'v1.13';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -2287,6 +2318,7 @@ function newWallKey() { const b = new Uint8Array(24); crypto.getRandomValues(b);
 function buildWall() {
   const t = todayStr(), calOk = cal.ok() && !!CV.range;
   const snap = { owner: USER.uid, v: 1, updatedAt: Date.now(), today: t, calOk };
+  if (S.settings.wallLayout) snap.layout = S.settings.wallLayout;
   if (calOk) {
     snap.dueAt = Date.now();
     snap.due = dueItems().slice(0, 30).map(x => clean({ d: x.date, tm: x.time || '', n: x.name, st: x.r?.status === 'submitted' ? 'sub' : x.r ? 'draft' : 'todo' }));
@@ -2330,7 +2362,7 @@ function renderWallSettings() {
   const key = S.settings.wallKey;
   $('#set-wall').checked = !!key;
   $('#set-wall-box').classList.toggle('hidden', !key);
-  if (key) $('#set-wall-url').value = MODE === 'demo' ? wallUrl('demo') : wallUrl(key);
+  if (key) { $('#set-wall-url').value = MODE === 'demo' ? wallUrl('demo') : wallUrl(key); renderWallLayoutUI(); }
 }
 $('#set-wall').onchange = async e => {
   if (e.target.checked) {
@@ -2363,6 +2395,42 @@ $('#set-wall-new').onclick = async () => {
   toast('새 주소를 만들었어요. 복사해서 Lively에 넣어 주세요');
 };
 $('#wall-rules-copy').onclick = async () => toast(await copyText($('#wall-rules-txt').textContent) ? '규칙을 복사했어요. Firebase 콘솔 규칙 탭에 붙여넣으세요' : '복사에 실패했어요');
+
+/* ----- 배경화면 크기·위치 ----- */
+const WL_DEF = { pos: 'full', w: 40, h: 100, scale: 100, bg: 'plain' };
+function wallLayout(src) {
+  const q = new URLSearchParams(location.search), L = { ...WL_DEF, ...(src || {}) };
+  for (const k of ['pos', 'bg']) if (q.get(k)) L[k] = q.get(k);
+  for (const k of ['w', 'h', 'scale']) if (q.get(k) && !isNaN(+q.get(k))) L[k] = +q.get(k);
+  if (!['full', 'right', 'left', 'center'].includes(L.pos)) L.pos = 'full';
+  if (!['plain', 'gradient', 'black'].includes(L.bg)) L.bg = 'plain';
+  L.w = Math.min(95, Math.max(20, +L.w || 40)); L.h = Math.min(100, Math.max(30, +L.h || 100)); L.scale = Math.min(150, Math.max(60, +L.scale || 100));
+  return L;
+}
+function applyWallLayout() {
+  const sc = $('#wall-screen'); if (!sc || sc.classList.contains('hidden')) return;
+  const L = wallLayout(WALL?.layout || (MODE === 'demo' ? S.settings.wallLayout : null));
+  sc.className = `screen wl-pos-${L.pos} wl-bg-${L.bg}`;
+  sc.style.setProperty('--wl-w', L.w + 'vw'); sc.style.setProperty('--wl-h', L.h + 'vh'); sc.style.setProperty('--wl-m', L.pos === 'full' ? '0' : Math.min(2, (100 - L.w) / 2) + 'vw');
+  const wrap = $('.wl-wrap'), pw = wrap.getBoundingClientRect().width || innerWidth;
+  const cols = pw >= 1100 ? 3 : pw >= 680 ? 2 : 1;
+  wrap.style.fontSize = (Math.max(13, Math.min(20, pw / ({ 3: 85, 2: 58, 1: 38 })[cols])) * L.scale / 100).toFixed(2) + 'px';
+  $('#wl-grid').dataset.cols = cols;
+}
+window.addEventListener('resize', () => { if (document.body.classList.contains('wall')) applyWallLayout(); });
+function renderWallLayoutUI() {
+  const L = wallLayout(S.settings.wallLayout);
+  $('#wl-pos').value = L.pos; $('#wl-w').value = L.w; $('#wl-h').value = L.h; $('#wl-scale').value = String(L.scale); $('#wl-bg').value = L.bg;
+  $('#wl-w-v').textContent = L.w + '%'; $('#wl-h-v').textContent = L.h + '%';
+  const side = L.pos !== 'full'; $('#wl-w').disabled = !side; $('#wl-h').disabled = !side;
+}
+let wlSaveT = null;
+$('#wall-lay').addEventListener('input', e => {
+  const L = { pos: $('#wl-pos').value, w: +$('#wl-w').value, h: +$('#wl-h').value, scale: +$('#wl-scale').value, bg: $('#wl-bg').value };
+  if (e.target.id === 'wl-pos' && L.pos !== 'full' && (S.settings.wallLayout?.pos || 'full') === 'full' && L.w === WL_DEF.w) L.w = 40;
+  S.settings.wallLayout = L; renderWallLayoutUI();
+  clearTimeout(wlSaveT); wlSaveT = setTimeout(() => { db.update('settings', { wallLayout: L }).catch(dbErr); scheduleWall(); }, 400);
+});
 
 /* ----- 배경화면 화면 (?wall=키) ----- */
 let WALL = null;
@@ -2404,10 +2472,12 @@ function renderWall() {
     + (pj.items || []).map(x => `<div class="wl-chk ${x.on ? 'on' : ''}"><span class="bx"></span><span class="t">${esc(x.t)}${x.st ? `<span class="sub">${x.sd}/${x.st}</span>` : ''}</span></div>`).join('') + ((pj.total || 0) > (pj.items || []).length ? `<div class="wl-more">외 ${pj.total - pj.items.length}개</div>` : '')
     : '<div class="wl-empty">진행 중인 프로젝트가 없어요</div>';
   $('#wl-grid').innerHTML = wlCard('오늘 방문 · 보고서', I.doc, b1, left ? `제출 필요 ${left}` : '') + wlCard('앞으로 7일 일정', I.cal, b2) + wlCard('To-Do', I.todo, b3, td.open ? `${td.open}개` : '')
-    + wlCard('금요일 정기업무', I.rt, b4, `${rd}/${rt.items.length}`) + `<div style="grid-column:span 2;display:flex;min-height:0">${wlCard('프로젝트', I.flag, b5).replace('class="wl-card"', 'class="wl-card" style="flex:1"')}</div>`;
+    + wlCard('금요일 정기업무', I.rt, b4, `${rd}/${rt.items.length}`) + `<div class="wl-span">${wlCard('프로젝트', I.flag, b5).replace('class="wl-card"', 'class="wl-card" style="flex:1"')}</div>`;
+  applyWallLayout();
 }
 function wallMessage(title, msg) {
   $('#wl-grid').innerHTML = `<section class="wl-card" style="grid-column:1/-1;justify-content:center;align-items:center;text-align:center"><h3 style="font-size:1.5em">${esc(title)}</h3><div class="wl-empty" style="font-size:1.1em">${esc(msg)}</div></section>`;
+  applyWallLayout();
 }
 async function startWall(key) {
   document.body.classList.add('wall'); show('wall-screen');
