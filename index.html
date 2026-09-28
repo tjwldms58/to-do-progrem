@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.06 | 2026-09-28 | 다크모드 고대비: 배경·박스 대비와 테두리 강화, 글자·배지·캘린더 색 선명하게 (WCAG AA 이상) -->
 <!-- v1.05 | 2026-09-28 | 오늘 방문·미제출 목록에서 '보고서 필요 없음'으로 지우기(되돌리기·숨긴 항목 복원 가능), 일정 상세에서도 지정 -->
 <!-- v1.04 | 2026-09-28 | Firebase 설정값을 파일에 넣음(폰·다른 PC에서도 바로 로그인), 폰 반응형 다듬기(작은 화면 줄바꿈·입력 확대 방지·안전영역·탭 고정·태블릿 2단) -->
 <!-- v1.03 | 2026-09-28 | 캘린더 연결 진단 화면 추가, 일정 불러오기 오류를 화면에 표시, 캘린더 목록 권한이 없을 때 연결이 끊기던 문제 수정, 연결된 구글 계정·숨겨진 캘린더 안내 -->
@@ -21,30 +22,32 @@
   --ok:#17875c; --ok-soft:#e3f5ec; --warn:#b86e00; --warn-soft:#fff3dc; --danger:#cf3f3f; --danger-soft:#fdeaea;
   --shadow:0 1px 2px rgba(22,26,64,.05),0 6px 20px rgba(22,26,64,.06);
   --shadow-lg:0 20px 60px rgba(22,26,64,.22);
-  --radius:14px; --radius-sm:9px;
+  --radius:14px; --radius-sm:9px; --panel-border:var(--border); --placeholder:#9aa0b8;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#10121a; --surface:#191c27; --surface-2:#1f2330; --surface-3:#262a39;
-    --border:#2b2f40; --border-strong:#3a3f55;
-    --text:#e8eaf4; --text-2:#aab0c8; --muted:#767d98;
-    --primary:#8d92ff; --primary-strong:#a9adff; --primary-soft:#262a4d; --on-primary:#12142a;
-    --hdr:#1d2040; --hdr-text:#eef0ff; --hdr-soft:rgba(255,255,255,.08);
-    --ok:#4cc995; --ok-soft:#173327; --warn:#f0a93a; --warn-soft:#3a2c12; --danger:#f07272; --danger-soft:#3d1c1f;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+    --bg:#07080d; --surface:#141724; --surface-2:#1b1f2f; --surface-3:#262b40;
+    --border:#3d4460; --border-strong:#5a6386; --panel-border:#4a5274;
+    --text:#f7f8ff; --text-2:#d6daf0; --muted:#adb3cf;
+    --primary:#aeb2ff; --primary-strong:#d0d2ff; --primary-soft:#2c3168; --on-primary:#0b0d24;
+    --hdr:#1b1f45; --hdr-text:#ffffff; --hdr-soft:rgba(255,255,255,.14);
+    --ok:#6ae9b3; --ok-soft:#10372a; --warn:#ffc56e; --warn-soft:#3f2e0c; --danger:#ff9696; --danger-soft:#4a1a20;
+    --placeholder:#8990ad;
+    --shadow:0 0 0 1px rgba(255,255,255,.02),0 6px 20px rgba(0,0,0,.45);
     --shadow-lg:0 20px 60px rgba(0,0,0,.55);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#10121a; --surface:#191c27; --surface-2:#1f2330; --surface-3:#262a39;
-  --border:#2b2f40; --border-strong:#3a3f55;
-  --text:#e8eaf4; --text-2:#aab0c8; --muted:#767d98;
-  --primary:#8d92ff; --primary-strong:#a9adff; --primary-soft:#262a4d; --on-primary:#12142a;
-  --hdr:#1d2040; --hdr-text:#eef0ff; --hdr-soft:rgba(255,255,255,.08);
-  --ok:#4cc995; --ok-soft:#173327; --warn:#f0a93a; --warn-soft:#3a2c12; --danger:#f07272; --danger-soft:#3d1c1f;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  --bg:#07080d; --surface:#141724; --surface-2:#1b1f2f; --surface-3:#262b40;
+  --border:#3d4460; --border-strong:#5a6386; --panel-border:#4a5274;
+  --text:#f7f8ff; --text-2:#d6daf0; --muted:#adb3cf;
+  --primary:#aeb2ff; --primary-strong:#d0d2ff; --primary-soft:#2c3168; --on-primary:#0b0d24;
+  --hdr:#1b1f45; --hdr-text:#ffffff; --hdr-soft:rgba(255,255,255,.14);
+  --ok:#6ae9b3; --ok-soft:#10372a; --warn:#ffc56e; --warn-soft:#3f2e0c; --danger:#ff9696; --danger-soft:#4a1a20;
+  --placeholder:#8990ad;
+  --shadow:0 0 0 1px rgba(255,255,255,.02),0 6px 20px rgba(0,0,0,.45);
   --shadow-lg:0 20px 60px rgba(0,0,0,.55);
   color-scheme:dark;
 }
@@ -386,6 +389,30 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 .due-foot{margin-top:10px;text-align:right}
 @media (max-width:480px){.due-x{width:30px;height:30px}.due-item{gap:4px}}
 
+/* ===== 다크모드 고대비 (v1.06) ===== */
+::placeholder{color:var(--placeholder);opacity:1}
+.panel{border-color:var(--panel-border)}
+.mc-d.out{opacity:1;color:var(--muted)}
+.mc-d.out .n{opacity:.7}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .rep,:root:not([data-theme="light"]) .due-row,:root:not([data-theme="light"]) .rt-item,:root:not([data-theme="light"]) .hist div,:root:not([data-theme="light"]) .due{border-color:var(--border-strong)}
+  :root:not([data-theme="light"]) .toast{border:1px solid rgba(255,255,255,.18);background:#23284a}
+  :root:not([data-theme="light"]) .due-item.hid .due-row{opacity:.8}
+  :root:not([data-theme="light"]) .mc-dots i.nv{opacity:.55}
+  :root:not([data-theme="light"]) .b-draft{background:#343a55;color:#e3e6f7}
+  :root:not([data-theme="light"]) .tag:not(.due-over):not(.due-today):not(.src){background:#343a55;color:#e3e6f7}
+  :root:not([data-theme="light"]) .bc-ev.allday{color:#0b0d24;font-weight:700}
+  :root:not([data-theme="light"]) .modal-bg,:root:not([data-theme="light"]) .bigcal-bg{background:rgba(0,0,0,.7)}
+}
+:root[data-theme="dark"] .rep,:root[data-theme="dark"] .due-row,:root[data-theme="dark"] .rt-item,:root[data-theme="dark"] .hist div,:root[data-theme="dark"] .due{border-color:var(--border-strong)}
+:root[data-theme="dark"] .toast{border:1px solid rgba(255,255,255,.18);background:#23284a}
+:root[data-theme="dark"] .due-item.hid .due-row{opacity:.8}
+:root[data-theme="dark"] .mc-dots i.nv{opacity:.55}
+:root[data-theme="dark"] .b-draft{background:#343a55;color:#e3e6f7}
+:root[data-theme="dark"] .tag:not(.due-over):not(.due-today):not(.src){background:#343a55;color:#e3e6f7}
+:root[data-theme="dark"] .bc-ev.allday{color:#0b0d24;font-weight:700}
+:root[data-theme="dark"] .modal-bg,:root[data-theme="dark"] .bigcal-bg{background:rgba(0,0,0,.7)}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -716,7 +743,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.05';
+const APP_VERSION = 'v1.06';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
