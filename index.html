@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.09 | 2026-09-28 | 배경화면 전용 보기 모드(?wall=비밀키): 로그인 없이 오늘 방문·이번 주 일정·To-Do·금요일·프로젝트 요약을 실시간 표시, 설정에서 켜기/끄기/주소 재발급 -->
 <!-- v1.08 | 2026-09-28 | 프로젝트 할 일마다 노란색 확인 체크(여러 개) 추가: 누르면 체크 표시, 모두 체크하면 할 일 완료(취소선) -->
 <!-- v1.07 | 2026-09-28 | 금요일 정기업무 아래 '프로젝트' 박스 추가: 프로젝트명·마감일(D-day)·할 일 체크(취소선)·프로젝트 마감(비우고 새로 시작, 되돌리기) -->
 <!-- v1.06 | 2026-09-28 | 다크모드 고대비: 배경·박스 대비와 테두리 강화, 글자·배지·캘린더 색 선명하게 (WCAG AA 이상) -->
@@ -470,6 +471,52 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 .prj-item.done .sub-chip{opacity:.75}
 @media (max-width:899px){.sub-btn,.sub-plus{height:28px}.sub-x{height:28px}.sub-in{font-size:16px;width:140px}}
 
+/* ===== 배경화면 보기 모드 ===== */
+.wall-rules summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--primary)}
+body.wall{overflow:hidden}
+#wall-screen{height:100vh}
+.wl-wrap{height:100vh;display:flex;flex-direction:column;padding:clamp(16px,2.2vw,40px);gap:clamp(10px,1.2vw,20px);font-size:clamp(13px,.95vw,19px)}
+.wl-h{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.wl-date{font-size:2.2em;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.wl-sub{color:var(--text-2);margin-top:4px;font-size:.95em}
+.wl-clock{font-size:3.2em;font-weight:800;letter-spacing:-.03em;color:var(--primary);line-height:1;font-variant-numeric:tabular-nums}
+.wl-note{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:.6em 1em;font-weight:700}
+.wl-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(10px,1.2vw,20px)}
+.wl-card{background:var(--surface);border:1px solid var(--panel-border);border-radius:18px;padding:1.1em 1.2em;display:flex;flex-direction:column;min-height:0;overflow:hidden;box-shadow:var(--shadow)}
+.wl-card h3{margin:0 0 .6em;font-size:1.15em;display:flex;align-items:center;gap:.5em}
+.wl-card h3 .n{margin-left:auto;font-size:.8em;font-weight:800;color:var(--text-2)}
+.wl-card h3 .ic{width:1.1em;height:1.1em;color:var(--primary)}
+.wl-body{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:.45em;scrollbar-width:thin;-webkit-mask-image:linear-gradient(#000 calc(100% - 1.6em),transparent);mask-image:linear-gradient(#000 calc(100% - 1.6em),transparent);padding-bottom:1.2em}
+.wl-row{display:flex;align-items:center;gap:.7em;padding:.5em .7em;border-radius:10px;background:var(--surface-2);border:1px solid var(--border)}
+.wl-row .tm{font-weight:800;color:var(--primary);min-width:3.4em;font-variant-numeric:tabular-nums}
+.wl-row .nm{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wl-row .badge{font-size:.78em;height:auto;padding:.2em .6em}
+.wl-sep{font-size:.85em;font-weight:800;color:var(--danger);margin:.5em 0 .1em}
+.wl-empty{color:var(--muted);padding:.4em 0}
+.wl-day{font-size:.85em;font-weight:800;color:var(--text-2);margin:.4em 0 .1em}
+.wl-day.today{color:var(--primary)}
+.wl-ev{display:flex;gap:.7em;padding:.15em 0 .15em .6em;border-left:3px solid var(--primary)}
+.wl-ev.nv{border-left-color:var(--border-strong)}
+.wl-ev .tm{font-weight:700;color:var(--text-2);min-width:3.2em;font-variant-numeric:tabular-nums}
+.wl-ev .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.wl-chk{display:flex;align-items:flex-start;gap:.6em;padding:.25em 0}
+.wl-chk .bx{flex:none;width:1.05em;height:1.05em;margin-top:.2em;border-radius:.25em;border:2px solid var(--border-strong);display:grid;place-items:center}
+.wl-chk.on .bx{background:var(--primary);border-color:var(--primary)}
+.wl-chk.on .bx::after{content:'';width:.3em;height:.55em;border:solid var(--on-primary);border-width:0 .14em .14em 0;transform:rotate(45deg) translate(-.02em,-.08em)}
+.wl-chk .t{flex:1;min-width:0;word-break:break-word}
+.wl-chk.on .t{text-decoration:line-through;color:var(--muted)}
+.wl-chk .meta{font-size:.8em;font-weight:700;color:var(--text-2);white-space:nowrap}
+.wl-chk .meta.over{color:var(--danger)} .wl-chk .meta.today{color:var(--warn)}
+.wl-chk .sub{display:inline-block;font-size:.72em;font-weight:800;padding:.05em .5em;border-radius:99px;background:var(--hl-bg);color:var(--hl-tx);border:1px solid var(--hl-bd);margin-left:.4em;vertical-align:.1em}
+.wl-prj-h{display:flex;align-items:center;gap:.6em;margin-bottom:.4em;flex-wrap:wrap}
+.wl-prj-h b{font-size:1.1em}
+.wl-prog{height:.4em;background:var(--surface-3);border-radius:99px;overflow:hidden;margin:.2em 0 .5em}
+.wl-prog i{display:block;height:100%;background:var(--primary)}
+.wl-more{font-size:.85em;color:var(--muted);font-weight:700}
+.wl-foot{font-size:.8em;color:var(--muted);margin-top:auto;padding-top:.4em}
+@media (max-width:1100px){.wl-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;overflow:auto}.wl-wrap{height:auto;min-height:100vh}body.wall{overflow:auto}#wall-screen{height:auto}}
+@media (max-width:640px){.wl-grid{grid-template-columns:1fr}.wl-clock{font-size:2.4em}}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -524,6 +571,18 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 <body>
 
 <!-- ===== 설정 안내 (firebaseConfig 미입력 시) ===== -->
+<!-- ===== 배경화면 보기 모드 ===== -->
+<section id="wall-screen" class="screen hidden" aria-label="업무관리 배경화면">
+  <div class="wl-wrap">
+    <header class="wl-h">
+      <div><div class="wl-date" id="wl-date"></div><div class="wl-sub" id="wl-sub"></div></div>
+      <div class="wl-clock" id="wl-clock"></div>
+    </header>
+    <div class="wl-note hidden" id="wl-note"></div>
+    <div class="wl-grid" id="wl-grid"></div>
+  </div>
+</section>
+
 <section id="setup-screen" class="screen hidden">
   <div class="center-wrap">
     <div class="card-lg setup-card">
@@ -795,6 +854,36 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
           <input id="set-kw" class="input" placeholder="예: 방문, 상담, 님" maxlength="100"></label>
       </div>
       <button id="set-diag" class="btn btn-sm" style="align-self:flex-start">캘린더 연결 진단</button>
+      <div class="set-sec">
+        <div class="set-t">배경화면 보기 모드</div>
+        <label class="checkline"><input type="checkbox" id="set-wall"> 로그인 없이 보는 배경화면용 주소 사용</label>
+        <div id="set-wall-box" class="hidden" style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:6px"><input id="set-wall-url" class="input mono" readonly style="font-size:12px"><button id="set-wall-copy" class="btn btn-sm">복사</button></div>
+          <div class="dg-d">이 주소를 Lively Wallpaper에 넣으세요. 고객명·일정 요약이 보이니 다른 사람에게 공유하지 마세요. (보고서 상세 내용은 들어가지 않아요)</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><button id="set-wall-open" class="btn btn-sm">미리보기</button><button id="set-wall-new" class="btn btn-ghost btn-sm">주소 새로 만들기</button></div>
+          <div id="set-wall-stat" class="dg-d"></div>
+        </div>
+        <details class="wall-rules"><summary>처음 한 번: Firebase 규칙 바꾸기</summary>
+          <div class="dg-d" style="margin:6px 0">Firebase 콘솔 → Realtime Database → 규칙 탭에 아래 내용을 통째로 붙여넣고 [게시]를 누르세요.</div>
+<pre class="code" id="wall-rules-txt">{
+  "rules": {
+    "workmgr": {
+      "$uid": {
+        ".read":  "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "wall": {
+      "$key": {
+        ".read": "$key.length >= 24",
+        ".write": "auth != null && (!data.exists() || data.child('owner').val() === auth.uid) && (!newData.exists() || newData.child('owner').val() === auth.uid)"
+      }
+    }
+  }
+}</pre>
+          <button id="wall-rules-copy" class="btn btn-sm" style="margin-top:6px">규칙 복사</button>
+        </details>
+      </div>
       <button id="set-cfgreset" class="btn btn-ghost btn-sm hidden" style="align-self:flex-start">이 브라우저에 저장된 Firebase 설정 지우기</button>
     </div>
     <div class="modal-f"><span class="ver" data-ver style="margin:0"></span><span class="sp"></span><button id="logout-btn" class="btn">로그아웃</button></div>
@@ -813,7 +902,7 @@ pre.code{background:var(--surface-3);border-radius:var(--radius-sm);padding:10px
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.08';
+const APP_VERSION = 'v1.09';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -879,7 +968,7 @@ function askConfirm(msg, yes = '확인') {
     $('#cf-yes').onclick = () => done(true); $('#cf-no').onclick = () => done(false);
   });
 }
-function show(id) { for (const s of ['setup-screen', 'login-screen', 'app-screen']) $('#' + s).classList.toggle('hidden', s !== id); }
+function show(id) { for (const s of ['setup-screen', 'login-screen', 'app-screen', 'wall-screen']) $('#' + s).classList.toggle('hidden', s !== id); }
 function applyTheme(t) { t ? document.documentElement.setAttribute('data-theme', t) : document.documentElement.removeAttribute('data-theme'); }
 applyTheme(lsGet('hwm_theme') || '');
 $$('[data-ver]').forEach(e => e.textContent = APP_VERSION);
@@ -1364,6 +1453,7 @@ function renderDue() {
   if (hiddenN) h += `<div class="due-foot"><button class="linkbtn" data-togglehidden>${showHidden ? '지운 항목 숨기기' : `지운 항목 ${hiddenN}개 보기`}</button></div>`;
   $('#due').innerHTML = h;
   $('#cnt-rep').textContent = DUE.filter(x => !x.hidden && x.r?.status !== 'submitted').length;
+  scheduleWall();
 }
 function prefillFromEvent(e) {
   const i = evInfo(e);
@@ -1585,7 +1675,7 @@ function render() {
   const t = todayStr();
   const [yy, mm, dd] = t.split('-').map(Number);
   $('#hdr-date').textContent = `${yy}년 ${mm}월 ${dd}일 (${WD[dow(t)]})`;
-  renderReports(); renderDue(); renderCal(); renderTodos(); renderRoutine(); renderProject(); renderBanner(); renderTabs(); updateCalUI();
+  renderReports(); renderDue(); renderCal(); renderTodos(); renderRoutine(); renderProject(); renderBanner(); renderTabs(); updateCalUI(); scheduleWall();
 }
 function calMark(r) {
   if (r.srcEventId) return `<span class="calmark cm-ok">${ICO.cal}캘린더 일정</span>`;
@@ -2140,6 +2230,7 @@ $('#settings-btn').onclick = () => {
   $('#set-theme').value = lsGet('hwm_theme') || '';
   $('#set-cfgreset').classList.toggle('hidden', !lsGet('hwm_fbconfig') || MODE !== 'fb');
   $('#set-kw').value = S.settings.visitKw || '';
+  renderWallSettings(); $('#set-wall-stat').textContent = '';
   renderSetCals();
   if (cal.ok() && !CV.cals) loadCalList().then(renderSetCals);
   $('#set-modal').classList.remove('hidden');
@@ -2166,6 +2257,160 @@ $('#logout-btn').onclick = async () => {
   if (MODE === 'demo') { location.href = location.pathname; return; }
   await FB.signOut(FB.auth).catch(() => {});
 };
+
+/* ===================== 배경화면 보기 모드 ===================== */
+function wallUrl(key) { return location.origin + location.pathname + '?wall=' + key; }
+function newWallKey() { const b = new Uint8Array(24); crypto.getRandomValues(b); return Array.from(b, x => 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[x % 57]).join(''); }
+function buildWall() {
+  const t = todayStr(), calOk = cal.ok() && !!CV.range;
+  const snap = { owner: USER.uid, v: 1, updatedAt: Date.now(), today: t, calOk };
+  if (calOk) {
+    snap.dueAt = Date.now();
+    snap.due = dueItems().slice(0, 30).map(x => clean({ d: x.date, tm: x.time || '', n: x.name, st: x.r?.status === 'submitted' ? 'sub' : x.r ? 'draft' : 'todo' }));
+    const end = addDays(t, 7), evs = [];
+    for (const e of CV.events) {
+      if (isRoutineEv(e)) continue;
+      const i = evInfo(e); if (i.endDate < t || i.date >= end) continue;
+      const d = i.date < t ? t : i.date;
+      evs.push({ d, tm: i.allDay ? '' : (i.date === d ? i.start : ''), s: e.summary || '(제목 없음)', v: isVisit(e) ? 1 : 0 });
+    }
+    snap.week = evs.sort((a, b) => a.d.localeCompare(b.d) || (a.tm || '').localeCompare(b.tm || '')).slice(0, 60);
+  }
+  const todos = sortedTodos(), open = todos.filter(x => !x.done);
+  snap.todo = { open: open.length, done: todos.length - open.length, items: open.slice(0, 20).map(x => clean({ t: x.text, due: x.due || undefined })) };
+  const fri = routineWeek(), wk = S.routine.weeks[fri] || {};
+  snap.rt = { fri, items: routineItems().map(it => ({ t: it.text, on: !!wk[it.id] })) };
+  const P = S.project || {}, pit = prjItems();
+  snap.prj = clean({ name: P.name || undefined, due: P.due || undefined, done: pit.filter(x => x.done).length, total: pit.length,
+    items: pit.slice(0, 20).map(x => { const sb = subList(x); return clean({ t: x.text, on: !!x.done, sd: sb.length ? sb.filter(v => v.done).length : undefined, st: sb.length || undefined }); }) });
+  return snap;
+}
+let wallTimer = null, wallSig = '', wallWarned = false;
+function scheduleWall() { if (MODE !== 'fb' || !S.settings.wallKey || !LOADED || !USER) return; clearTimeout(wallTimer); wallTimer = setTimeout(publishWall, 1500); }
+async function publishWall(force) {
+  const key = S.settings.wallKey; if (!key || MODE !== 'fb') return;
+  const snap = buildWall();
+  const sig = JSON.stringify({ ...snap, updatedAt: 0, dueAt: 0 });
+  if (!force && sig === wallSig) return true;
+  try {
+    const r = FB.ref(FB.db, 'wall/' + key);
+    if (snap.calOk) await FB.set(r, snap); else await FB.update(r, snap);
+    wallSig = sig; wallWarned = false; return true;
+  } catch (e) {
+    console.warn('wall publish', e); wallSig = '';
+    if (!wallWarned) { wallWarned = true; toast(/permission/i.test(e.message || e.code || '') ? '배경화면 보기 모드: Firebase 규칙을 먼저 바꿔 주세요 (설정 → 배경화면 보기 모드)' : '배경화면 요약 저장 실패: ' + e.message, 'danger'); }
+    return false;
+  }
+}
+setInterval(() => { if (MODE === 'fb' && S.settings.wallKey && document.visibilityState === 'visible') publishWall(true); }, 10 * 60e3);   // 날짜 바뀜·시간 경과 반영
+function renderWallSettings() {
+  const key = S.settings.wallKey;
+  $('#set-wall').checked = !!key;
+  $('#set-wall-box').classList.toggle('hidden', !key);
+  if (key) $('#set-wall-url').value = MODE === 'demo' ? wallUrl('demo') : wallUrl(key);
+}
+$('#set-wall').onchange = async e => {
+  if (e.target.checked) {
+    const key = MODE === 'demo' ? 'demo' : newWallKey();
+    S.settings.wallKey = key; renderWallSettings();
+    try { await db.update('settings', { wallKey: key }); } catch (er) { dbErr(er); }
+    if (MODE === 'fb') {
+      const ok = await publishWall(true);
+      $('#set-wall-stat').textContent = ok ? '켜졌어요. 이제 이 창에서 바꾸는 내용이 배경화면에 자동으로 반영돼요.' : '저장에 실패했어요. 아래 "처음 한 번: Firebase 규칙 바꾸기"를 먼저 해 주세요.';
+      if (!ok) $('.wall-rules').open = true;
+    } else $('#set-wall-stat').textContent = '데모에서는 예시 화면으로 미리보기만 돼요.';
+  } else {
+    const key = S.settings.wallKey;
+    if (!(await askConfirm('배경화면 보기 모드를 끌까요?\n지금 주소는 더 이상 열리지 않아요.', '끄기'))) { e.target.checked = true; return; }
+    if (MODE === 'fb' && key) { try { await FB.remove(FB.ref(FB.db, 'wall/' + key)); } catch (er) { console.warn(er); } }
+    S.settings.wallKey = null; wallSig = ''; renderWallSettings(); $('#set-wall-stat').textContent = '';
+    db.update('settings', { wallKey: null }).catch(dbErr);
+    toast('배경화면 보기 모드를 껐어요');
+  }
+};
+$('#set-wall-copy').onclick = async () => toast(await copyText($('#set-wall-url').value) ? '배경화면 주소를 복사했어요' : '복사에 실패했어요');
+$('#set-wall-open').onclick = () => window.open($('#set-wall-url').value, '_blank', 'noopener');
+$('#set-wall-new').onclick = async () => {
+  if (!(await askConfirm('배경화면 주소를 새로 만들까요?\n지금 주소는 더 이상 열리지 않으니 Lively에도 새 주소를 넣어 주세요.', '새로 만들기'))) return;
+  const old = S.settings.wallKey, key = MODE === 'demo' ? 'demo' : newWallKey();
+  if (MODE === 'fb' && old) { try { await FB.remove(FB.ref(FB.db, 'wall/' + old)); } catch (er) { console.warn(er); } }
+  S.settings.wallKey = key; wallSig = ''; renderWallSettings();
+  await db.update('settings', { wallKey: key }).catch(dbErr);
+  if (MODE === 'fb') await publishWall(true);
+  toast('새 주소를 만들었어요. 복사해서 Lively에 넣어 주세요');
+};
+$('#wall-rules-copy').onclick = async () => toast(await copyText($('#wall-rules-txt').textContent) ? '규칙을 복사했어요. Firebase 콘솔 규칙 탭에 붙여넣으세요' : '복사에 실패했어요');
+
+/* ----- 배경화면 화면 (?wall=키) ----- */
+let WALL = null;
+function wlAgo(ms) { const m = Math.round((Date.now() - ms) / 60000); return m < 1 ? '방금' : m < 60 ? `${m}분 전` : `${Math.floor(m / 60)}시간 ${m % 60}분 전`; }
+function wlCard(title, ico, body, n) { return `<section class="wl-card"><h3>${ico}${esc(title)}${n != null ? `<span class="n">${n}</span>` : ''}</h3><div class="wl-body">${body}</div></section>`; }
+function renderWall() {
+  const t = todayStr(), now = new Date();
+  const [yy, mm, dd] = t.split('-').map(Number);
+  $('#wl-date').textContent = `${mm}월 ${dd}일 ${WD[dow(t)]}요일`;
+  $('#wl-clock').textContent = now.toLocaleTimeString('ko-KR', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false });
+  const W = WALL;
+  if (!W) return;
+  $('#wl-sub').textContent = `${yy}년 · 힐마루케어 업무관리 · ${wlAgo(W.updatedAt)} 업데이트`;
+  const notes = [];
+  if (W.today !== t) notes.push('업무관리 창을 한 번 열면 오늘 기준으로 새로 고쳐져요 (지금은 ' + fmtK(W.today) + ' 기준)');
+  else if (!W.calOk && W.dueAt) notes.push(`캘린더 연결이 끊겨 일정은 ${wlAgo(W.dueAt)} 기준이에요 — 업무관리 창에서 [캘린더 연결]을 눌러 주세요`);
+  else if (!W.dueAt) notes.push('업무관리 창에서 캘린더를 연결하면 방문 일정도 여기에 떠요');
+  $('#wl-note').textContent = notes.join(' · '); $('#wl-note').classList.toggle('hidden', !notes.length);
+  const I = { cal: ICO.cal, doc: '<svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>', todo: '<svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 10l2 2 4-4"/></svg>', rt: '<svg class="ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/></svg>', flag: '<svg class="ic" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>' };
+  // 1. 오늘 방문 + 미제출
+  const due = W.due || [], today = due.filter(x => x.d === W.today), past = due.filter(x => x.d < W.today);
+  const stB = x => x.st === 'sub' ? '<span class="badge b-sub">제출완료</span>' : x.d < W.today ? `<span class="badge b-late">${diffDays(x.d, W.today)}일 지남</span>` : x.st === 'draft' ? '<span class="badge b-draft">작성중</span>' : '<span class="badge b-due">오늘 제출</span>';
+  let b1 = today.length ? today.map(x => `<div class="wl-row"><span class="tm">${esc(x.tm || '종일')}</span><span class="nm">${esc(x.n)}</span>${stB(x)}</div>`).join('') : `<div class="wl-empty">${W.dueAt ? '오늘 예정된 방문이 없어요' : '—'}</div>`;
+  if (past.length) b1 += `<div class="wl-sep">미제출 보고서 ${past.length}건</div>` + past.map(x => `<div class="wl-row"><span class="tm">${esc(fmtK(x.d))}</span><span class="nm">${esc(x.n)}</span>${stB(x)}</div>`).join('');
+  const left = today.filter(x => x.st !== 'sub').length + past.length;
+  // 2. 이번 주 일정
+  const wk = W.week || [], days = [...new Set(wk.map(x => x.d))];
+  const b2 = wk.length ? days.map(d => `<div class="wl-day ${d === W.today ? 'today' : ''}">${esc(fmtK(d))}${d === W.today ? ' 오늘' : ''}</div>` + wk.filter(x => x.d === d).map(x => `<div class="wl-ev ${x.v ? '' : 'nv'}"><span class="tm">${esc(x.tm || '종일')}</span><span class="nm">${esc(x.s)}</span></div>`).join('')).join('') : `<div class="wl-empty">${W.dueAt ? '앞으로 7일 일정이 없어요' : '—'}</div>`;
+  // 3. To-Do
+  const td = W.todo || { items: [] };
+  const dueMeta = d => { if (!d) return ''; const n = diffDays(W.today, d); return `<span class="meta ${n < 0 ? 'over' : n === 0 ? 'today' : ''}">${n < 0 ? `${-n}일 지남` : n === 0 ? '오늘까지' : fmtK(d)}</span>`; };
+  const b3 = (td.items || []).length ? td.items.map(x => `<div class="wl-chk"><span class="bx"></span><span class="t">${esc(x.t)}</span>${dueMeta(x.due)}</div>`).join('') + (td.open > td.items.length ? `<div class="wl-more">외 ${td.open - td.items.length}개</div>` : '') : '<div class="wl-empty">진행 중인 할 일이 없어요</div>';
+  // 4. 금요일
+  const rt = W.rt || { items: [] }, rd = rt.items.filter(x => x.on).length, dfri = diffDays(W.today, rt.fri || W.today);
+  const b4 = `<div class="wl-prj-h"><b>${esc(fmtK(rt.fri || ''))}</b><span class="dday ${dfri === 0 ? 'soon' : ''}">${dfri === 0 ? '오늘' : dfri > 0 ? `D-${dfri}` : '지난 금요일'}</span></div><div class="wl-prog"><i style="width:${rt.items.length ? rd / rt.items.length * 100 : 0}%"></i></div>` + rt.items.map(x => `<div class="wl-chk ${x.on ? 'on' : ''}"><span class="bx"></span><span class="t">${esc(x.t)}</span></div>`).join('');
+  // 5. 프로젝트
+  const pj = W.prj || {};
+  const b5 = (pj.name || pj.total) ? `<div class="wl-prj-h"><b>${esc(pj.name || '이름 없는 프로젝트')}</b>${ddayTag(pj.due)}<span class="wl-more">${pj.done || 0}/${pj.total || 0} 완료</span></div><div class="wl-prog"><i style="width:${pj.total ? (pj.done || 0) / pj.total * 100 : 0}%"></i></div>`
+    + (pj.items || []).map(x => `<div class="wl-chk ${x.on ? 'on' : ''}"><span class="bx"></span><span class="t">${esc(x.t)}${x.st ? `<span class="sub">${x.sd}/${x.st}</span>` : ''}</span></div>`).join('') + ((pj.total || 0) > (pj.items || []).length ? `<div class="wl-more">외 ${pj.total - pj.items.length}개</div>` : '')
+    : '<div class="wl-empty">진행 중인 프로젝트가 없어요</div>';
+  $('#wl-grid').innerHTML = wlCard('오늘 방문 · 보고서', I.doc, b1, left ? `제출 필요 ${left}` : '') + wlCard('앞으로 7일 일정', I.cal, b2) + wlCard('To-Do', I.todo, b3, td.open ? `${td.open}개` : '')
+    + wlCard('금요일 정기업무', I.rt, b4, `${rd}/${rt.items.length}`) + `<div style="grid-column:span 2;display:flex;min-height:0">${wlCard('프로젝트', I.flag, b5).replace('class="wl-card"', 'class="wl-card" style="flex:1"')}</div>`;
+}
+function wallMessage(title, msg) {
+  $('#wl-grid').innerHTML = `<section class="wl-card" style="grid-column:1/-1;justify-content:center;align-items:center;text-align:center"><h3 style="font-size:1.5em">${esc(title)}</h3><div class="wl-empty" style="font-size:1.1em">${esc(msg)}</div></section>`;
+}
+async function startWall(key) {
+  document.body.classList.add('wall'); show('wall-screen');
+  const th = new URLSearchParams(location.search).get('theme'); if (th === 'dark' || th === 'light') applyTheme(th);
+  setInterval(renderWall, 20e3); renderWall();
+  if (key === 'demo') {   // 데모 미리보기
+    startDemo(true); LOADED = true; S = normalize(JSON.parse(JSON.stringify(DEMO)));
+    const t = todayStr(), r = demoCalReq('GET', evPath('visits') + '?' + new URLSearchParams({ timeMin: `${addDays(t, -8)}T00:00:00+09:00`, timeMax: `${addDays(t, 10)}T00:00:00+09:00` }));
+    const r2 = demoCalReq('GET', evPath('primary') + '?' + new URLSearchParams({ timeMin: `${addDays(t, -8)}T00:00:00+09:00`, timeMax: `${addDays(t, 10)}T00:00:00+09:00` }));
+    CV.events = [...r.items.map(e => ({ ...e, _cal: 'visits' })), ...r2.items.map(e => ({ ...e, _cal: 'primary' }))]; CV.range = [addDays(t, -8), addDays(t, 10)];
+    WALL = buildWall(); renderWall(); return;
+  }
+  if (!/^[A-Za-z0-9]{24,}$/.test(key)) return wallMessage('주소가 올바르지 않아요', '업무관리 설정 → 배경화면 보기 모드에서 주소를 다시 복사해 주세요.');
+  const cfg = resolveConfig(); if (!cfg) return wallMessage('설정이 없어요', 'Firebase 설정이 들어 있는 업무관리 주소인지 확인해 주세요.');
+  try {
+    const B = `https://www.gstatic.com/firebasejs/${FB_VER}/`;
+    const [appM, dbM] = await Promise.all([import(B + 'firebase-app.js'), import(B + 'firebase-database.js')]);
+    const app = appM.initializeApp(cfg); const d = dbM.getDatabase(app);
+    wallMessage('불러오는 중…', '');
+    dbM.onValue(dbM.ref(d, 'wall/' + key), snap => {
+      WALL = snap.val();
+      if (!WALL) return wallMessage('보기 모드가 꺼져 있어요', '업무관리 설정에서 배경화면 보기 모드를 켜거나, 새 주소를 복사해 주세요.');
+      renderWall();
+    }, err => wallMessage('불러오지 못했어요', /permission/i.test(err.message) ? 'Firebase 규칙을 먼저 바꿔 주세요 (업무관리 설정 → 배경화면 보기 모드).' : err.message));
+  } catch (e) { wallMessage('불러오지 못했어요', e.message); }
+}
 
 /* ===================== BOOT ===================== */
 function parseConfig(txt) {
@@ -2251,7 +2496,7 @@ function demoCalReq(method, path, body) {
   if (method === 'PUT') { if (i < 0) throw gone(); list[i] = { ...J(body), id: evId, updated: now, htmlLink: '#' }; return J(list[i]); }
   if (method === 'DELETE') { if (i >= 0) list.splice(i, 1); return null; }
 }
-function startDemo() {
+function startDemo(forWall = false) {
   MODE = 'demo'; cal.demoOn = true;
   USER = { uid: 'demo', email: 'demo@example.com', displayName: '데모 사용자', photoURL: '' };
   const t = todayStr(), fri = weekFriday(t), rid = i => 'rt' + i;
@@ -2303,14 +2548,17 @@ function startDemo() {
       ],
     },
   };
-  window.__hwmDemo = { cal: DEMO_CAL, S: () => S, loadEvents };
+  window.__hwmDemo = { cal: DEMO_CAL, S: () => S, loadEvents, buildWall: () => buildWall() };
+  if (forWall) return;
   $('#demo-bar').classList.remove('hidden');
   enterApp();
   onData(JSON.parse(JSON.stringify(DEMO)));
 }
 
 (async function boot() {
-  if (new URLSearchParams(location.search).has('demo')) return startDemo();
+  const qp = new URLSearchParams(location.search);
+  if (qp.has('wall')) return startWall(qp.get('wall') || '');
+  if (qp.has('demo')) return startDemo();
   const cfg = resolveConfig();
   if (!cfg) { show('setup-screen'); return; }
   try { await bootFirebase(cfg); }
