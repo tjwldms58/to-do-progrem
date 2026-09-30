@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko" style="--hdrH: 102px;"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>힐마루케어 회복관리 입력 v34.24</title>
+<title>힐마루케어 회복관리 입력 v34.25</title>
 <!-- 완전 오프라인: 외부 CDN 없음. 자체 수식엔진 + 자체 ZIP 내장 -->
 <script>
 
@@ -786,13 +786,15 @@ tr.schedCancelledRow td:not(.schedMgmtCol){background:#f8fafc}
 <!-- [v34.20] Firebase 제거 — 단일 기기 사용으로 localStorage만 사용 -->
 <!-- [v34.21] 등록(대상자 등록) 기능만 분리한 단독 파일 — 방문일정 업무관리(일정 앱)·일정 데이터 제거, 로그인 후 바로 등록 화면 -->
 <!-- [v34.22] 로그인·회원가입·회원관리 화면 제거 — 파일을 열면 바로 등록 화면 -->
+<!-- [v34.25] 헤더에 💾 저장 버튼 추가(누르면 바로 Firebase 저장 + 서버에서 다시 읽어 확인, Ctrl+S) -->
 <!-- [v34.24] 헤더 높이 변화 시 탭 줄 위치 자동 맞춤(헤더·탭 사이 빈틈 수정) -->
 <!-- [v34.23] 저장소를 Firebase로 변경(업무관리·출장서류와 같은 프로젝트·같은 구글 계정, workmgr/{uid}/regApp) · 브라우저 저장은 보조로 유지 · 사이트 공개용으로 파일에 내장된 대상자 데이터 제거 -->
 <div id="appRoot" style="display: block;">
 <header>
   <h1>힐마루케어 회복관리 입력</h1>
-  <span class="badge">v34.24 · 2026-09-30</span>
+  <span class="badge">v34.25 · 2026-09-30</span>
   <span class="badge g">대시보드·자동 F/U 일정·취소이력 내장 · Firebase 저장(업무관리 구글 계정)</span>
+  <button id="regSaveBtn" class="no-print" title="입력한 내용을 지금 바로 Firebase에 저장 (Ctrl+S)" style="background:#16a34a;color:#fff;border-radius:8px;padding:5px 13px;font-size:14px;font-weight:700;">💾 저장</button>
   <button id="hdrExportBtn" class="no-print" style="background:#0284c7;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;">📤 JSON 내보내기</button>
   <button id="hdrImportBtn" class="no-print" style="background:#7c3aed;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;">📥 JSON 불러오기</button>
   <input type="file" id="hdrImportInput" accept=".json" style="display:none">
@@ -2785,23 +2787,25 @@ function cloudParts(v) {
 const S = { uid: null, email: '', loaded: false, synced: null, last: null, timer: null, saving: false, again: false, deferred: false, dbM: null, ref: null, unsub: null, online: true };
 
 async function saveNow() {
-  if (!S.uid || !S.loaded) return;
+  if (!S.uid || !S.loaded) return 'notready';
   clearTimeout(S.timer); S.timer = null;
-  if (S.saving) { S.again = true; return; }
+  if (S.saving) { S.again = true; return 'queued'; }
   const cur = window.RegApp.parts(), old = S.synced || EMPTY;
   const upd = {};
   cur.pats.forEach((s, i) => { if (s !== old.pats[i]) upd['patients/' + i] = s; });
   for (let i = cur.pats.length; i < old.pats.length; i++) upd['patients/' + i] = null;
   if (cur.meta !== old.meta) upd.meta = cur.meta;
-  if (!Object.keys(upd).length) { setPending(false); return; }
+  if (!Object.keys(upd).length) { setPending(false); return 'same'; }
   upd.count = cur.pats.length; upd.updatedAt = Date.now();
   S.saving = true; setPending(true);
+  let result = 'fail';
   stat(S.online ? 'Firebase 저장 중…' : '오프라인 — 연결되면 Firebase에 올라가요', !S.online);
   try {
     await S.dbM.update(S.ref, upd);
     S.synced = cur;
     stat('✔ Firebase 저장됨 · ' + tm());
     if (!S.again) setPending(false);
+    result = 'saved';
   } catch (e) {
     console.error(e);
     stat('⚠ Firebase 저장 실패 — 인터넷·로그인 확인', true);
@@ -2811,7 +2815,52 @@ async function saveNow() {
     if (S.again) { S.again = false; saveNow(); }
     else considerRemote();   // 저장하는 동안 다른 기기에서 바뀐 게 있으면 반영
   }
+  return result;
 }
+// [v34.25] 💾 저장 버튼 — 누르면 바로 Firebase에 저장하고, 서버에 실제로 들어갔는지 다시 읽어서 확인
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let manualBusy = false, btnResetT = null;
+function btnState(t, bg) { const b = $('regSaveBtn'); if (!b) return; b.textContent = t; b.style.background = bg || '#16a34a'; clearTimeout(btnResetT); }
+async function manualSave() {
+  if (manualBusy) return;
+  if (!S.uid || !S.loaded) { alert(S.uid ? '아직 Firebase에서 불러오는 중이에요. 잠시 후 다시 눌러 주세요.' : '업무관리 로그인 후 저장할 수 있어요.'); return; }
+  manualBusy = true;
+  const a = document.activeElement; if (a && a.blur) a.blur();   // 입력 중이던 칸의 값을 먼저 반영
+  await sleep(80);
+  btnState('저장 중…', '#64748b');
+  try {
+    while (S.saving) await sleep(100);
+    if (!S.online) {
+      saveNow();
+      btnState('⚠ 오프라인', '#b45309');
+      stat('오프라인 — 연결되면 Firebase에 올라가요', true);
+      alert('인터넷에 연결돼 있지 않아요.\n입력한 내용은 이 브라우저에 저장돼 있고, 인터넷이 다시 연결되면 Firebase에 자동으로 올라가요.');
+      return;
+    }
+    const r = await saveNow();
+    if (r === 'fail') { btnState('⚠ 저장 실패', '#dc2626'); return; }
+    while (S.saving) await sleep(100);
+    // 서버에서 다시 읽어 확인
+    const n = state.patients.length;
+    let ok = false;
+    try {
+      const snap = await Promise.race([S.dbM.get(S.dbM.child(S.ref, 'count')), sleep(8000).then(() => null)]);
+      ok = !!snap && snap.val() === n;
+    } catch (e) { console.error(e); }
+    if (ok) {
+      btnState('✔ 저장됨', '#16a34a');
+      stat('✔ Firebase 저장 확인됨 · ' + tm() + ' (대상자 ' + n + '명)');
+    } else {
+      btnState('⚠ 확인 안 됨', '#b45309');
+      stat('⚠ Firebase 저장 확인이 안 됐어요 — 새로고침 후 다시 확인해 주세요', true);
+    }
+  } finally {
+    manualBusy = false;
+    btnResetT = setTimeout(() => { const b = $('regSaveBtn'); if (b) { b.textContent = '💾 저장'; b.style.background = '#16a34a'; } }, 3000);
+  }
+}
+if ($('regSaveBtn')) $('regSaveBtn').onclick = e => { e.preventDefault(); manualSave(); };
+document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); manualSave(); } });
 function schedule() { if (!S.loaded) return; clearTimeout(S.timer); S.timer = setTimeout(saveNow, 1200); }
 const prevHook = window.hilmaruFileSave;
 window.hilmaruFileSave = function () { if (typeof prevHook === 'function') { try { prevHook(); } catch (e) {} } schedule(); };  // 등록 앱 autosave()가 부를 때마다
