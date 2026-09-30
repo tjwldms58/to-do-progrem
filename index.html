@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.15 | 2026-09-30 | To-Do 아래 '휴가 현황' 박스 추가: 연도별 총 발생·사용·남은 휴가, 사용 내역(날짜·종류·일수·사유), 종류별 색 막대 -->
 <!-- v1.14 | 2026-09-28 | 금요일 정기업무 제목 옆 '출장서류' 버튼(trip.html 새 탭), 출장서류 화면에서 로그인 요청 시 로그인 후 자동 복귀 -->
 <!-- v1.13 | 2026-09-28 | 배경화면 크기·위치 조절: 설정에서 위치(전체/오른쪽/왼쪽/가운데)·너비·높이·글자 크기·배경을 고르면 주소 그대로 배경화면에 바로 반영 -->
 <!-- v1.12 | 2026-09-28 | 구글 로그인을 '페이지 이동 방식'(리디렉션)으로 변경: 팝업·타사 쿠키 차단 환경(Edge)에서도 로그인·캘린더 연결 가능 -->
@@ -543,6 +544,55 @@ body.wall{overflow:hidden}
 .trip-btn{text-decoration:none;color:var(--primary);border-color:var(--primary);gap:5px}
 .trip-btn:hover{background:var(--primary-soft)}
 
+/* ===== 휴가 현황 ===== */
+:root{--lv-a:#4a6cf7;--lv-h:#14a3a0;--lv-q:#9b5de5;--lv-o:#f08c2e;--lv-left:#22b573}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lv-a:#8ea4ff;--lv-h:#3fd0cc;--lv-q:#c29bff;--lv-o:#ffae5c;--lv-left:#4fdc9c}}
+:root[data-theme="dark"]{--lv-a:#8ea4ff;--lv-h:#3fd0cc;--lv-q:#c29bff;--lv-o:#ffae5c;--lv-left:#4fdc9c}
+.col-todo .p-todo{min-height:320px}
+.lv-sum{display:flex;align-items:center;gap:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.lv-ring{flex:none;width:92px;height:92px;position:relative}
+.lv-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.lv-ring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.lv-ring .c b{font-size:22px;font-weight:800;color:var(--lv-left)}
+.lv-ring .c b.low{color:var(--warn)} .lv-ring .c b.over{color:var(--danger)}
+.lv-ring .c span{font-size:11px;color:var(--text-2);font-weight:700}
+.lv-stats{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lv-stat{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 4px}
+.lv-stat .k{font-size:11px;font-weight:700;color:var(--text-2)}
+.lv-stat .v{font-size:19px;font-weight:800;margin-top:2px}
+.lv-stat .v small{font-size:11px;font-weight:700;color:var(--muted);margin-left:1px}
+.lv-stat.t .v{color:var(--text)} .lv-stat.u .v{color:var(--lv-a)} .lv-stat.l .v{color:var(--lv-left)}
+.lv-stat.l.low .v{color:var(--warn)} .lv-stat.l.over .v{color:var(--danger)}
+.lv-bar{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--surface-3);margin:12px 0 6px}
+.lv-bar i{display:block;height:100%}
+.lv-leg{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--text-2);font-weight:600}
+.lv-leg span{display:inline-flex;align-items:center;gap:5px}
+.lv-leg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.lv-set{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+.lv-set label.field .input{height:36px}
+.lv-add{display:grid;grid-template-columns:1.05fr 1.15fr .6fr;gap:6px;margin-top:12px}
+.lv-add .memo{grid-column:1 / -1;display:flex;gap:6px}
+.lv-add .input,.lv-add .select{height:36px;font-size:13.5px}
+.lv-list{display:flex;flex-direction:column;margin-top:10px}
+.lv-item{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border)}
+.lv-item:last-child{border-bottom:0}
+.lv-date{font-size:12.5px;font-weight:700;color:var(--text-2);min-width:62px}
+.lv-chip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;color:#fff;white-space:nowrap}
+.lv-days{font-size:12.5px;font-weight:800;min-width:34px;text-align:right}
+.lv-memo{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv-memo.none{color:var(--muted)}
+.lv-item .acts{display:flex;gap:2px;opacity:0;transition:opacity .15s}
+.lv-item:hover .acts,.lv-item:focus-within .acts{opacity:1}
+@media (hover:none){.lv-item .acts{opacity:1}}
+.lv-edit{display:grid;grid-template-columns:1fr 1fr .6fr;gap:6px;flex:1}
+.lv-edit .memo{grid-column:1 / -1;display:flex;gap:6px}
+.lv-edit .input,.lv-edit .select{height:34px;font-size:13px}
+.lv-empty{color:var(--muted);font-size:13px;text-align:center;padding:14px 0 4px}
+.lv-sec{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:800;color:var(--muted);margin:14px 0 2px}
+@media (max-width:480px){.lv-sum{flex-direction:column;align-items:stretch}.lv-ring{align-self:center}.lv-add{grid-template-columns:1fr 1fr}.lv-add .days{grid-column:span 2}.lv-item{flex-wrap:wrap;row-gap:4px}.lv-memo{order:9;flex-basis:100%;white-space:normal;padding-left:72px}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lv-chip{color:#0b0d24}}
+:root[data-theme="dark"] .lv-chip{color:#0b0d24}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -679,7 +729,7 @@ body.wall{overflow:hidden}
     <div id="banner"></div>
     <nav class="mtabs" id="mtabs">
       <button data-tab="rep"><span class="lbl-l">방문보고서</span><span class="lbl-s">보고서</span> <span class="cnt" id="cnt-rep">0</span></button>
-      <button data-tab="todo">To-Do <span class="cnt" id="cnt-todo">0</span></button>
+      <button data-tab="todo"><span class="lbl-l">To-Do·휴가</span><span class="lbl-s">To-Do</span> <span class="cnt" id="cnt-todo">0</span></button>
       <button data-tab="rt"><span class="lbl-l">금요일·프로젝트</span><span class="lbl-s">금요일</span> <span class="cnt" id="cnt-rt">0</span></button>
     </nav>
     <div id="loading" class="loading"><span class="spin"></span>불러오는 중…</div>
@@ -729,7 +779,8 @@ body.wall{overflow:hidden}
       </div>
 
       <!-- To-Do -->
-      <section class="panel p-todo" data-panel="todo">
+      <div class="col col-todo" data-panel="todo">
+      <section class="panel p-todo">
         <div class="panel-h">
           <h2><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 10l2 2 4-4M8 16h8"/></svg>To-Do</h2>
           <span class="sp"></span>
@@ -749,6 +800,21 @@ body.wall{overflow:hidden}
           <div class="todo-foot"><span id="todo-sum"></span><button id="todo-clear" class="btn btn-ghost btn-sm">완료 항목 지우기</button></div>
         </div>
       </section>
+
+      <!-- 휴가 현황 -->
+      <section class="panel p-leave">
+        <div class="panel-h">
+          <h2><svg class="ic" viewBox="0 0 24 24"><path d="M12 2v2M4.9 4.9l1.4 1.4M2 12h2M19.1 4.9l-1.4 1.4M22 12h-2"/><path d="M17 12a5 5 0 0 0-10 0"/><path d="M3 20h18M6 16h12"/></svg>휴가 현황</h2>
+          <span class="sp"></span>
+          <div class="mc-nav">
+            <button class="btn btn-ghost btn-icon" id="lv-prev" aria-label="이전 연도"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <span class="mc-title" id="lv-year" style="min-width:64px"></span>
+            <button class="btn btn-ghost btn-icon" id="lv-next" aria-label="다음 연도"><svg class="ic" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+          </div>
+        </div>
+        <div class="panel-b" id="lv-body"></div>
+      </section>
+      </div>
 
       <!-- 금요일 루틴 + 프로젝트 -->
       <div class="col col-rt" data-panel="rt">
@@ -942,7 +1008,7 @@ body.wall{overflow:hidden}
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.14';
+const APP_VERSION = 'v1.15';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -1024,10 +1090,10 @@ let LOADED = false;
 let unsub = null;
 let DEMO = null;
 
-function emptyState() { return { reports: {}, todos: {}, routine: { items: null, weeks: {}, cal: {} }, calTrash: {}, settings: {}, dismissed: {}, project: {} }; }
+function emptyState() { return { reports: {}, todos: {}, routine: { items: null, weeks: {}, cal: {} }, calTrash: {}, settings: {}, dismissed: {}, project: {}, leave: {} }; }
 function normalize(v) {
   const s = emptyState(); v = v || {};
-  s.reports = v.reports || {}; s.todos = v.todos || {}; s.calTrash = v.calTrash || {}; s.settings = v.settings || {}; s.dismissed = v.dismissed || {}; s.project = v.project || {};
+  s.reports = v.reports || {}; s.todos = v.todos || {}; s.calTrash = v.calTrash || {}; s.settings = v.settings || {}; s.dismissed = v.dismissed || {}; s.project = v.project || {}; s.leave = v.leave || {};
   s.routine.items = v.routine?.items || null; s.routine.weeks = v.routine?.weeks || {}; s.routine.cal = v.routine?.cal || {};
   for (const [id, r] of Object.entries(s.reports)) r.id = id;
   for (const [id, t] of Object.entries(s.todos)) t.id = id;
@@ -1734,7 +1800,7 @@ function render() {
   const t = todayStr();
   const [yy, mm, dd] = t.split('-').map(Number);
   $('#hdr-date').textContent = `${yy}년 ${mm}월 ${dd}일 (${WD[dow(t)]})`;
-  renderReports(); renderDue(); renderCal(); renderTodos(); renderRoutine(); renderProject(); renderBanner(); renderTabs(); updateCalUI(); scheduleWall();
+  renderReports(); renderDue(); renderCal(); renderTodos(); renderLeave(); renderRoutine(); renderProject(); renderBanner(); renderTabs(); updateCalUI(); scheduleWall();
 }
 function calMark(r) {
   if (r.srcEventId) return `<span class="calmark cm-ok">${ICO.cal}캘린더 일정</span>`;
@@ -2282,6 +2348,158 @@ $('#prj-close').onclick = async () => {
   setTimeout(() => $('#prj-name')?.focus(), 50);
 };
 
+/* ===================== 휴가 현황 ===================== */
+const LV_TYPES = {
+  annual: { label: '연차', days: 1, color: 'var(--lv-a)' },
+  am: { label: '오전반차', days: 0.5, color: 'var(--lv-h)' },
+  pm: { label: '오후반차', days: 0.5, color: 'var(--lv-h)' },
+  quarter: { label: '반반차', days: 0.25, color: 'var(--lv-q)' },
+  etc: { label: '기타', days: 1, color: 'var(--lv-o)' },
+};
+const LV = { year: +todayStr().slice(0, 4), edit: null };
+const lvNum = v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? Math.round(n * 100) / 100 : 0; };
+const lvFmt = n => (Math.round(n * 100) / 100).toString();
+const lvK = y => 'y' + y;
+function lvYear(y = LV.year) { return (S.leave && S.leave[lvK(y)]) || {}; }
+function lvItems(y = LV.year) { return Object.entries(lvYear(y).items || {}).map(([id, v]) => ({ id, ...v })).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0)); }
+function lvCalc(y = LV.year) {
+  const Y = lvYear(y), items = lvItems(y), byType = {};
+  for (const it of items) { const k = LV_TYPES[it.type] ? (it.type === 'pm' ? 'am' : it.type) : 'etc'; byType[k] = (byType[k] || 0) + lvNum(it.days); }
+  const prior = lvNum(Y.prior || 0), used = items.reduce((a, it) => a + lvNum(it.days), 0) + prior, total = lvNum(Y.total || 0);
+  return { total, used, prior, left: total - used, byType, items, hasTotal: Y.total != null && Y.total !== '' };
+}
+function renderLeave() {
+  const box = $('#lv-body'); if (!box) return;
+  $('#lv-year').textContent = LV.year + '년';
+  const C = lvCalc(), t = todayStr(), Y = lvYear();
+  const ratio = C.total > 0 ? Math.max(0, C.left) / C.total : 0;
+  const cls = C.left < 0 ? 'over' : (C.total > 0 && ratio <= 0.2) ? 'low' : '';
+  const R0 = 40, CIRC = 2 * Math.PI * R0;
+  const leftPct = C.total > 0 ? Math.max(0, Math.min(1, C.left / C.total)) : 0;
+  const act = document.activeElement, keep = act && act.closest && act.closest('#lv-body') && act.id && ['lv-total', 'lv-prior', 'lv-date', 'lv-type', 'lv-days', 'lv-memo'].includes(act.id) ? { id: act.id, v: act.value } : null;
+  const draft = LV.draft || { date: t, type: 'annual', days: '1', memo: '' };
+  let h = `<div class="lv-sum">
+    <div class="lv-ring" title="남은 휴가">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R0}" fill="none" stroke="var(--surface-3)" stroke-width="11"/>
+        ${leftPct > 0 ? `<circle cx="50" cy="50" r="${R0}" fill="none" stroke="${cls === 'low' ? 'var(--warn)' : 'var(--lv-left)'}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(leftPct * CIRC).toFixed(1)} ${CIRC.toFixed(1)}"/>` : ''}</svg>
+      <div class="c"><b class="${cls}">${C.hasTotal ? lvFmt(C.left) : '-'}</b><span>${C.left < 0 ? '초과' : '남음'}</span></div>
+    </div>
+    <div class="lv-stats">
+      <div class="lv-stat t"><div class="k">총 발생</div><div class="v">${C.hasTotal ? lvFmt(C.total) : '-'}<small>일</small></div></div>
+      <div class="lv-stat u"><div class="k">사용</div><div class="v">${lvFmt(C.used)}<small>일</small></div></div>
+      <div class="lv-stat l ${cls}"><div class="k">${C.left < 0 ? '초과 사용' : '남은 휴가'}</div><div class="v">${C.hasTotal ? lvFmt(Math.abs(C.left)) : '-'}<small>일</small></div></div>
+    </div>
+  </div>`;
+  const denom = Math.max(C.total, C.used, 0.0001);
+  const seg = (v, c) => v > 0 ? `<i style="width:${(v / denom * 100).toFixed(2)}%;background:${c}"></i>` : '';
+  h += `<div class="lv-bar" role="img" aria-label="사용 ${lvFmt(C.used)}일, 남은 ${lvFmt(Math.max(0, C.left))}일">${seg(C.byType.annual || 0, 'var(--lv-a)')}${seg(C.byType.am || 0, 'var(--lv-h)')}${seg(C.byType.quarter || 0, 'var(--lv-q)')}${seg(C.byType.etc || 0, 'var(--lv-o)')}${seg(C.prior, 'var(--muted)')}${seg(Math.max(0, C.left), 'var(--lv-left)')}</div>
+    <div class="lv-leg"><span><i style="background:var(--lv-a)"></i>연차 ${lvFmt(C.byType.annual || 0)}</span><span><i style="background:var(--lv-h)"></i>반차 ${lvFmt(C.byType.am || 0)}</span><span><i style="background:var(--lv-q)"></i>반반차 ${lvFmt(C.byType.quarter || 0)}</span>${C.byType.etc ? `<span><i style="background:var(--lv-o)"></i>기타 ${lvFmt(C.byType.etc)}</span>` : ''}${C.prior ? `<span><i style="background:var(--muted)"></i>기록 외 ${lvFmt(C.prior)}</span>` : ''}<span><i style="background:var(--lv-left)"></i>남음 ${lvFmt(Math.max(0, C.left))}</span></div>`;
+  h += `<div class="lv-set">
+    <label class="field">총 발생 휴가 (일)<input id="lv-total" class="input" type="number" min="0" step="0.5" inputmode="decimal" placeholder="예: 15" value="${esc(Y.total ?? '')}"></label>
+    <label class="field">기록 외 사용 (일) <input id="lv-prior" class="input" type="number" min="0" step="0.25" inputmode="decimal" placeholder="0" value="${esc(Y.prior ?? '')}" title="여기 기록하기 전에 이미 쓴 휴가"></label>
+  </div>`;
+  h += `<form class="lv-add" id="lv-add" autocomplete="off">
+    <input id="lv-date" class="input" type="date" value="${esc(draft.date)}" aria-label="날짜">
+    <select id="lv-type" class="select" aria-label="종류">${Object.entries(LV_TYPES).map(([k, v]) => `<option value="${k}" ${k === draft.type ? 'selected' : ''}>${v.label}${k === 'etc' ? '' : ` (${v.days}일)`}</option>`).join('')}</select>
+    <input id="lv-days" class="input days" type="number" min="0.25" step="0.25" inputmode="decimal" value="${esc(draft.days)}" aria-label="일수" title="일수">
+    <div class="memo"><input id="lv-memo" class="input" maxlength="80" placeholder="어떻게 사용했나요? (예: 가족여행, 병원)" value="${esc(draft.memo)}"><button class="btn btn-primary" type="submit">사용 추가</button></div>
+  </form>`;
+  const items = C.items;
+  h += `<div class="lv-sec"><span>사용 내역 ${items.length ? items.length + '건' : ''}</span></div><div class="lv-list">`;
+  h += items.length ? items.map(it => {
+    const T = LV_TYPES[it.type] || LV_TYPES.etc, fut = it.date > t;
+    if (LV.edit === it.id) {
+      const d = LV.editDraft;
+      return `<div class="lv-item" data-id="${esc(it.id)}"><div class="lv-edit">
+        <input class="input" type="date" data-le="date" value="${esc(d.date)}"><select class="select" data-le="type">${Object.entries(LV_TYPES).map(([k, v]) => `<option value="${k}" ${k === d.type ? 'selected' : ''}>${v.label}</option>`).join('')}</select>
+        <input class="input" type="number" min="0.25" step="0.25" data-le="days" value="${esc(d.days)}">
+        <div class="memo"><input class="input" data-le="memo" maxlength="80" value="${esc(d.memo)}" placeholder="사유"><button class="btn btn-sm" data-la="cancel" type="button">취소</button><button class="btn btn-primary btn-sm" data-la="save" type="button">저장</button></div>
+      </div></div>`;
+    }
+    return `<div class="lv-item" data-id="${esc(it.id)}">
+      <span class="lv-date">${esc(fmtK(it.date))}</span>
+      <span class="lv-chip" style="background:${T.color}">${esc(T.label)}</span>
+      <span class="lv-days">${lvFmt(lvNum(it.days))}일</span>
+      <span class="lv-memo ${it.memo ? '' : 'none'}" data-la="edit" title="${esc(it.memo || '')}">${esc(it.memo || '사유 없음')}</span>
+      ${fut ? '<span class="badge b-soon">예정</span>' : ''}
+      <span class="acts"><button class="btn btn-ghost btn-icon" data-la="edit" aria-label="수정">${ICO.edit}</button><button class="btn btn-ghost btn-icon" data-la="del" aria-label="삭제">${ICO.trash}</button></span>
+    </div>`;
+  }).join('') : `<div class="lv-empty">${C.hasTotal ? '아직 사용한 휴가가 없어요' : '먼저 올해 총 발생 휴가 수를 입력해 주세요'}</div>`;
+  h += '</div>';
+  box.innerHTML = h;
+  if (keep) { const el = $('#' + keep.id); if (el) { el.value = keep.v; el.focus(); } }
+}
+$('#lv-prev').onclick = () => { LV.year--; LV.edit = null; renderLeave(); };
+$('#lv-next').onclick = () => { LV.year++; LV.edit = null; renderLeave(); };
+const LB = $('#lv-body');
+LB.addEventListener('input', e => {
+  const id = e.target.id;
+  if (['lv-date', 'lv-type', 'lv-days', 'lv-memo'].includes(id)) {
+    LV.draft = { date: $('#lv-date').value, type: $('#lv-type').value, days: $('#lv-days').value, memo: $('#lv-memo').value };
+    if (id === 'lv-type' && e.target.value !== 'etc') { $('#lv-days').value = LV_TYPES[e.target.value].days; LV.draft.days = String(LV_TYPES[e.target.value].days); }
+  }
+  if (e.target.dataset.le && LV.editDraft) {
+    LV.editDraft[e.target.dataset.le] = e.target.value;
+    if (e.target.dataset.le === 'type' && e.target.value !== 'etc') { LV.editDraft.days = String(LV_TYPES[e.target.value].days); const d = LB.querySelector('[data-le="days"]'); if (d) d.value = LV.editDraft.days; }
+  }
+});
+LB.addEventListener('change', e => {
+  const id = e.target.id;
+  if (id === 'lv-total' || id === 'lv-prior') {
+    const k = id === 'lv-total' ? 'total' : 'prior', raw = e.target.value.trim();
+    const val = raw === '' ? null : Math.max(0, lvNum(raw));
+    S.leave[lvK(LV.year)] = { ...(S.leave[lvK(LV.year)] || {}), [k]: val ?? undefined }; if (val === null) delete S.leave[lvK(LV.year)][k];
+    renderLeave();
+    db.update('leave/' + lvK(LV.year), { [k]: val }).catch(dbErr);
+  }
+});
+LB.addEventListener('submit', async e => {
+  if (e.target.id !== 'lv-add') return; e.preventDefault();
+  const date = $('#lv-date').value, type = $('#lv-type').value, days = lvNum($('#lv-days').value), memo = $('#lv-memo').value.trim();
+  if (!date) return toast('날짜를 골라 주세요', 'warn');
+  if (!(days > 0)) return toast('일수를 입력해 주세요', 'warn');
+  const y = +date.slice(0, 4), id = newId(), rec = clean({ date, type, days, memo: memo || undefined, createdAt: Date.now() });
+  S.leave[lvK(y)] = { ...(S.leave[lvK(y)] || {}) }; S.leave[lvK(y)].items = { ...(S.leave[lvK(y)].items || {}), [id]: rec };
+  LV.draft = { date: todayStr(), type: 'annual', days: '1', memo: '' };
+  if (y !== LV.year) { LV.year = y; toast(`${y}년 휴가에 기록했어요`); }
+  renderLeave();
+  try { await db.set(`leave/${lvK(y)}/items/${id}`, rec); } catch (er) { dbErr(er); }
+  const C = lvCalc(y);
+  if (C.hasTotal && C.left < 0) toast(`총 발생보다 ${lvFmt(-C.left)}일 더 사용했어요`, 'warn');
+});
+LB.addEventListener('keydown', e => {
+  if (!e.target.dataset.le) return;
+  if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); lvSaveEdit(); }
+  else if (e.key === 'Escape') { e.stopPropagation(); LV.edit = null; renderLeave(); }
+});
+async function lvSaveEdit() {
+  const id = LV.edit, d = LV.editDraft; if (!id || !d) return;
+  const days = lvNum(d.days); if (!d.date) return toast('날짜를 골라 주세요', 'warn'); if (!(days > 0)) return toast('일수를 입력해 주세요', 'warn');
+  const oldY = LV.year, newY = +d.date.slice(0, 4), prev = S.leave[lvK(oldY)]?.items?.[id] || {};
+  const rec = clean({ ...prev, date: d.date, type: d.type, days, memo: d.memo.trim() || null });
+  if (rec.memo === null) delete rec.memo;
+  LV.edit = null;
+  try {
+    if (newY !== oldY) { delete S.leave[lvK(oldY)].items[id]; await db.remove(`leave/${lvK(oldY)}/items/${id}`); }
+    S.leave[lvK(newY)] = { ...(S.leave[lvK(newY)] || {}) }; S.leave[lvK(newY)].items = { ...(S.leave[lvK(newY)].items || {}), [id]: rec };
+    await db.set(`leave/${lvK(newY)}/items/${id}`, rec);
+  } catch (e) { dbErr(e); }
+  renderLeave();
+}
+LB.addEventListener('click', e => {
+  const b = e.target.closest('[data-la]'); if (!b) return;
+  const id = b.closest('.lv-item')?.dataset.id, it = S.leave[lvK(LV.year)]?.items?.[id];
+  const a = b.dataset.la;
+  if (a === 'edit' && it) { LV.edit = id; LV.editDraft = { date: it.date, type: it.type, days: String(it.days), memo: it.memo || '' }; renderLeave(); LB.querySelector('[data-le="memo"]')?.focus(); }
+  else if (a === 'cancel') { LV.edit = null; renderLeave(); }
+  else if (a === 'save') lvSaveEdit();
+  else if (a === 'del' && it) {
+    const y = LV.year, copy = { ...it }; delete S.leave[lvK(y)].items[id]; renderLeave();
+    db.remove(`leave/${lvK(y)}/items/${id}`).catch(dbErr);
+    toast('휴가 기록을 삭제했어요', '', { label: '되돌리기', fn: () => db.set(`leave/${lvK(y)}/items/${id}`, clean(copy)).catch(dbErr) });
+  }
+});
+
 /* ===================== 설정 ===================== */
 $('#settings-btn').onclick = () => {
   $('#set-user').textContent = `${USER.displayName || ''} ${USER.email ? '(' + USER.email + ')' : ''}`.trim();
@@ -2707,6 +2925,13 @@ function startDemo(forWall = false) {
       cal: { time: '09:00', remind: '0' },
     },
     settings: { calDefault: true, cals: ['primary', 'visits'] },
+    leave: { ['y' + t.slice(0, 4)]: { total: 15, prior: 1, items: {
+      l1: { date: t.slice(0, 4) + '-03-14', type: 'annual', days: 1, memo: '가족 행사', createdAt: 1 },
+      l2: { date: t.slice(0, 4) + '-05-02', type: 'annual', days: 2, memo: '여행', createdAt: 2 },
+      l3: { date: t.slice(0, 4) + '-07-21', type: 'pm', days: 0.5, memo: '병원 진료', createdAt: 3 },
+      l4: { date: t.slice(0, 4) + '-08-29', type: 'quarter', days: 0.25, memo: '은행 업무', createdAt: 4 },
+      l5: { date: addDays(t, 11), type: 'annual', days: 1, memo: '연휴 붙여서 쉬기', createdAt: 5 },
+    } } },
     project: {
       name: '10월 수면 캠페인 준비', due: addDays(t, 18), createdAt: now - 5 * 864e5,
       items: {
