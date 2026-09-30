@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v1.17 | 2026-09-30 | 캘린더 검색: 큰 캘린더·미니 캘린더 제목 옆 검색 버튼, 대상자 이름·장소·메모로 앞뒤 기간 일정을 찾아 목록으로 보기 -->
 <!-- v1.16 | 2026-09-30 | To-Do 제목 옆 '등록' 버튼 추가(reg.html 새 탭 · 힐마루케어 대상자 등록) -->
 <!-- v1.15 | 2026-09-30 | To-Do 아래 '휴가 현황' 박스 추가: 연도별 총 발생·사용·남은 휴가, 사용 내역(날짜·종류·일수·사유), 종류별 색 막대 -->
 <!-- v1.14 | 2026-09-28 | 금요일 정기업무 제목 옆 '출장서류' 버튼(trip.html 새 탭), 출장서류 화면에서 로그인 요청 시 로그인 후 자동 복귀 -->
@@ -594,6 +595,31 @@ body.wall{overflow:hidden}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lv-chip{color:#0b0d24}}
 :root[data-theme="dark"] .lv-chip{color:#0b0d24}
 
+/* ===== 캘린더 검색 ===== */
+.bc-search{display:flex;gap:8px;align-items:center;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap}
+.bc-sbox{flex:1;min-width:220px;position:relative}
+.bc-sbox .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.bc-sbox .input{padding-left:36px;height:40px;font-size:15px}
+.bc-search .select{width:auto;height:40px;font-size:13px}
+.bc-results{flex:1;min-height:0;overflow:auto;padding:6px 18px 24px}
+.bs-meta{font-size:12.5px;color:var(--text-2);font-weight:700;padding:10px 0 4px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bs-month{position:sticky;top:0;background:var(--surface);font-size:13px;font-weight:800;color:var(--primary);padding:12px 0 6px;border-bottom:1px solid var(--border);z-index:1}
+.bs-row{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--border);background:transparent;padding:10px 6px;border-radius:0}
+.bs-row:hover{background:var(--surface-2)}
+.bs-row.past{opacity:.72}
+.bs-date{flex:none;width:78px;font-weight:800;font-size:13px;color:var(--text)}
+.bs-date small{display:block;font-weight:600;color:var(--muted);font-size:11.5px}
+.bs-row.today .bs-date{color:var(--primary)}
+.bs-bar{flex:none;width:4px;align-self:stretch;border-radius:2px;background:var(--c,var(--primary))}
+.bs-main{flex:1;min-width:0}
+.bs-sum{font-weight:700;word-break:break-word}
+.bs-sub{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word}
+.bs-row mark{background:var(--hl-on,#ffd23f);color:#1c1500;border-radius:3px;padding:0 2px}
+.bs-now{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--danger);margin:4px 0}
+.bs-now::before,.bs-now::after{content:'';flex:1;height:1px;background:var(--danger);opacity:.5}
+.bs-empty{text-align:center;color:var(--muted);padding:40px 0;font-size:14px}
+@media (max-width:899px){.bc-search{padding:8px 12px}.bc-results{padding:4px 12px 20px}.bs-date{width:64px}}
+
 /* modal */
 .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(12,14,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal{width:100%;max-width:640px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
@@ -761,6 +787,7 @@ body.wall{overflow:hidden}
       <section class="panel p-cal">
         <div class="panel-h">
           <h2><button class="h2btn" id="mc-big" title="크게 보기"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>캘린더<svg class="ic chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></h2>
+          <button class="btn btn-ghost btn-icon" id="mc-search" aria-label="일정 검색" title="일정 검색"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
           <span class="sp"></span>
           <div class="mc-nav">
             <button class="btn btn-ghost btn-icon" id="mc-prev" aria-label="이전 달"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -888,6 +915,7 @@ body.wall{overflow:hidden}
   <div class="bigcal">
     <div class="bc-h">
       <h3 id="bc-title"></h3>
+      <button class="btn btn-ghost btn-icon" id="bc-search-btn" aria-label="일정 검색" title="일정 검색 (Ctrl+F)"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
       <div class="mc-nav">
         <button class="btn btn-ghost btn-icon" id="bc-prev" aria-label="이전 달"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
         <button class="btn btn-ghost btn-icon" id="bc-next" aria-label="다음 달"><svg class="ic" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
@@ -898,7 +926,13 @@ body.wall{overflow:hidden}
       <span class="bc-stat" id="bc-stat"></span>
       <button class="btn btn-ghost btn-icon" id="bc-close" aria-label="닫기"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
+    <div class="bc-search hidden" id="bc-search">
+      <div class="bc-sbox"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="bc-q" class="input" type="search" placeholder="대상자 이름이나 검색어 (예: 김영희, 요양원, 상담)" autocomplete="off" aria-label="일정 검색어"></div>
+      <select id="bc-range" class="select" aria-label="검색 기간"><option value="3m">앞뒤 3개월</option><option value="1y" selected>앞뒤 1년</option><option value="all">지난 3년 ~ 앞으로 1년</option></select>
+      <button class="btn btn-sm" id="bc-search-close">검색 닫기</button>
+    </div>
     <div id="bc-connect"></div>
+    <div class="bc-results hidden" id="bc-results"></div>
     <div class="bc-grid" id="bc-grid"></div>
   </div>
 </div>
@@ -1010,7 +1044,7 @@ body.wall{overflow:hidden}
 
 <script type="module">
 /* ===================== CONSTANTS ===================== */
-const APP_VERSION = 'v1.16';
+const APP_VERSION = 'v1.17';
 const ROOT = 'workmgr';              // RTDB 최상위 경로: workmgr/{uid}/...
 const TZ = 'Asia/Seoul';
 const CAL_SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly'];
@@ -1643,7 +1677,7 @@ window.addEventListener('focus', maybeRefresh);
 const BIG = $('#big-cal'), DAYM = $('#day-modal');
 const bigOpen = () => !BIG.classList.contains('hidden');
 function openBig() { BIG.classList.remove('hidden'); document.body.style.overflow = 'hidden'; renderBig(); if (cal.ok() && Date.now() - CV.fetchedAt > 30e3) loadEvents(); }
-function closeBig() { BIG.classList.add('hidden'); document.body.style.overflow = ''; }
+function closeBig() { BIG.classList.add('hidden'); document.body.style.overflow = ''; if (typeof BS !== 'undefined' && BS.open) bsClose(); }
 function renderBig() {
   if (!bigOpen()) return;
   const t = todayStr(), [y, m] = CV.month.split('-').map(Number), g = monthGrid(CV.month), rows = g.length / 7;
@@ -1670,6 +1704,7 @@ function renderBig() {
       <button class="bc-n" data-day="${d}" aria-label="${esc(fmtK(d))} 일정 ${evs.length}건">${Number(d.slice(8))}</button>${chips}${more}</div>`;
   }).join('');
   grid.innerHTML = h;
+  if (typeof BS !== 'undefined' && BS.open) bsRender();
 }
 function openDay(d) {
   const evs = dayEvents(d);
@@ -1793,6 +1828,100 @@ $('#dg-list').addEventListener('change', e => {
   S.settings.cals = cals; db.update('settings', { cals }).catch(dbErr); loadEvents(); toast('표시할 캘린더를 바꿨어요');
 });
 $('#set-diag').onclick = () => { closeModal($('#set-modal')); openDiag(); };
+
+/* ----- 캘린더 검색 (휴대폰 캘린더처럼: 검색어로 앞뒤 기간 일정을 목록으로) ----- */
+const BS = { open: false, q: '', range: '1y', pool: null, loading: false, err: null, seq: 0, timer: null };
+const BS_SPAN = { '3m': [-92, 92], '1y': [-366, 366], all: [-1096, 366] };
+function bsOpen() {
+  if (!bigOpen()) openBig();
+  BS.open = true; $('#bc-search').classList.remove('hidden');
+  const i = $('#bc-q'); i.value = BS.q; setTimeout(() => { i.focus(); i.select(); }, 30);
+  bsRender(); bsLoadPool();
+}
+function bsClose() {
+  BS.open = false; BS.q = ''; $('#bc-q').value = '';
+  $('#bc-search').classList.add('hidden'); $('#bc-results').classList.add('hidden'); $('#bc-grid').classList.remove('hidden');
+  renderBig();
+}
+async function bsLoadPool(force) {
+  if (!cal.ok()) { BS.pool = null; BS.err = 'need'; bsRender(); return; }
+  const key = BS.range + '|' + selectedCals().join(',');
+  if (!force && BS.pool && BS.pool.key === key && Date.now() - BS.pool.at < 5 * 60e3) return bsRender();
+  const seq = ++BS.seq, t = todayStr(), [a, b] = BS_SPAN[BS.range];
+  BS.loading = true; BS.err = null; bsRender();
+  const qs = new URLSearchParams({ timeMin: `${addDays(t, a)}T00:00:00+09:00`, timeMax: `${addDays(t, b)}T00:00:00+09:00`, singleEvents: 'true', orderBy: 'startTime', maxResults: '2500' }).toString();
+  try {
+    const lists = await Promise.all(selectedCals().map(id => cal.req('GET', evPath(id) + '?' + qs)
+      .then(r => (r.items || []).filter(e => e.status !== 'cancelled').map(e => ({ ...e, _cal: id })))
+      .catch(e => { if (e.code === 'auth') throw e; console.warn('search', id, e.message); return []; })));
+    if (seq !== BS.seq) return;
+    const seen = new Set();
+    const evs = lists.flat().filter(e => !isRoutineEv(e) && !seen.has(e.id) && seen.add(e.id)).sort((x, y) => parseEvTime(x.start) - parseEvTime(y.start));
+    BS.pool = { key, at: Date.now(), events: evs };
+  } catch (e) {
+    if (seq !== BS.seq) return;
+    BS.err = e.code === 'auth' ? 'auth' : e.message;
+  } finally { if (seq === BS.seq) { BS.loading = false; bsRender(); } }
+}
+const bsNorm = s => (s || '').toLowerCase().replace(/\s+/g, '');
+function bsMatch(e, terms) {
+  const hay = bsNorm(`${e.summary || ''} ${e.location || ''} ${(e.description || '').replace(/<[^>]+>/g, ' ')}`);
+  return terms.every(t => hay.includes(t));
+}
+function bsMark(text, terms) {
+  let h = esc(text || '');
+  for (const t of [...new Set(terms)].sort((a, b) => b.length - a.length)) {
+    if (!t) continue;
+    const re = new RegExp(t.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s*'), 'gi');
+    h = h.replace(/(<[^>]*>)|([^<]+)/g, (m, tag, txt) => tag ? tag : txt.replace(re, x => `<mark>${x}</mark>`));
+  }
+  return h;
+}
+function bsRender() {
+  if (!BS.open) return;
+  const box = $('#bc-results'), grid = $('#bc-grid'), q = BS.q.trim();
+  const showList = !!q || BS.err === 'need';
+  box.classList.toggle('hidden', !showList); grid.classList.toggle('hidden', showList);
+  if (!showList) return;
+  if (BS.err === 'need') { box.innerHTML = '<div class="bs-empty">구글 캘린더를 연결하면 일정을 검색할 수 있어요</div>'; return; }
+  if (BS.err === 'auth') { box.innerHTML = '<div class="bs-empty">캘린더 연결이 만료됐어요. 위쪽 [연결]을 눌러 다시 연결해 주세요</div>'; return; }
+  if (BS.err) { box.innerHTML = `<div class="bs-empty">검색 중 오류가 났어요: ${esc(BS.err)}</div>`; return; }
+  if (!BS.pool) { box.innerHTML = '<div class="bs-empty">일정을 불러오는 중…</div>'; return; }
+  const terms = q.toLowerCase().split(/\s+/).filter(Boolean).map(bsNorm);
+  const res = BS.pool.events.filter(e => bsMatch(e, terms));
+  const t = todayStr(), nowMs = Date.now();
+  const upcoming = res.filter(e => parseEvTime(e.end || e.start) >= nowMs).length;
+  const rangeLbl = { '3m': '앞뒤 3개월', '1y': '앞뒤 1년', all: '지난 3년 ~ 앞으로 1년' }[BS.range];
+  let h = `<div class="bs-meta"><span>‘${esc(q)}’ 검색 결과 ${res.length}건${res.length ? ` · 앞으로 ${upcoming}건` : ''}</span><span style="color:var(--muted);font-weight:600">${esc(rangeLbl)}${BS.loading ? ' · 새로 불러오는 중…' : ''}</span></div>`;
+  if (!res.length) { box.innerHTML = h + `<div class="bs-empty">‘${esc(q)}’와 맞는 일정이 없어요${BS.range !== 'all' ? '<br><small>위쪽에서 검색 기간을 늘려 보세요</small>' : ''}</div>`; return; }
+  let curM = '', nowPlaced = false;
+  for (const e of res) {
+    const i = evInfo(e), ym = i.date.slice(0, 7), past = parseEvTime(e.end || e.start) < nowMs, r = linkedReport(e);
+    if (ym !== curM) { curM = ym; const [yy, mm] = ym.split('-').map(Number); h += `<div class="bs-month">${yy}년 ${mm}월</div>`; }
+    if (!past && !nowPlaced) { nowPlaced = true; if (res.indexOf(e) > 0) h += '<div class="bs-now" id="bs-now">오늘 이후</div>'; }
+    const when = i.allDay ? (i.endDate !== i.date ? `종일 ~${fmtK(i.endDate)}` : '종일') : `${i.start}~${i.end}`;
+    const sub = [e.location && bsMark(e.location, terms), esc(calName(e))].filter(Boolean).join(' · ');
+    const badge = r ? `<span class="badge ${r.status === 'submitted' ? 'b-sub' : 'b-draft'}" style="margin-left:6px">${r.status === 'submitted' ? '보고서 제출' : '보고서 작성중'}</span>` : '';
+    h += `<button class="bs-row ${past ? 'past' : ''} ${i.date === t ? 'today' : ''}" data-k="${esc(evKey(e))}" style="--c:${esc(calColor(e))}">
+      <span class="bs-date">${esc(fmtK(i.date))}<small>${esc(when)}</small></span><span class="bs-bar"></span>
+      <span class="bs-main"><div class="bs-sum">${bsMark(e.summary || '(제목 없음)', terms)}${badge}</div>${sub ? `<div class="bs-sub">${sub}</div>` : ''}</span></button>`;
+  }
+  box.innerHTML = h;
+  const nowEl = $('#bs-now'); if (nowEl && !BS.scrolled) { BS.scrolled = true; nowEl.scrollIntoView({ block: 'start' }); }
+}
+$('#bc-search-btn').onclick = () => BS.open ? bsClose() : bsOpen();
+$('#mc-search').onclick = bsOpen;
+$('#bc-search-close').onclick = bsClose;
+$('#bc-q').addEventListener('input', e => { BS.q = e.target.value; BS.scrolled = false; clearTimeout(BS.timer); BS.timer = setTimeout(bsRender, 120); });
+$('#bc-q').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); if (BS.q) { BS.q = ''; e.target.value = ''; bsRender(); } else bsClose(); } });
+$('#bc-range').onchange = e => { BS.range = e.target.value; BS.scrolled = false; bsLoadPool(true); };
+$('#bc-results').onclick = e => {
+  const b = e.target.closest('[data-k]'); if (!b) return;
+  const k = b.dataset.k;
+  if (!CV.events.some(x => evKey(x) === k)) { const ev = BS.pool?.events.find(x => evKey(x) === k); if (ev) CV.events = [...CV.events, ev]; }
+  openEvent(k);
+};
+document.addEventListener('keydown', e => { if (bigOpen() && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f' && $('#rep-modal').classList.contains('hidden')) { e.preventDefault(); bsOpen(); } });
 
 /* ===================== RENDER ===================== */
 const UI = { repF: 'all', repQ: '', todoF: 'open', tab: lsGet('hwm_tab') || 'rep', editTodo: null, editDraft: null, rtEdit: false };
@@ -2001,6 +2130,7 @@ document.addEventListener('keydown', e => {
   if (!$('#diag-modal').classList.contains('hidden')) { closeModal($('#diag-modal')); return; }
   if (!DAYM.classList.contains('hidden')) { closeModal(DAYM); return; }
   if (!$('#rep-modal').classList.contains('hidden')) { requestCloseRep(); return; }
+  if (bigOpen() && BS.open) { if (BS.q) { BS.q = ''; $('#bc-q').value = ''; bsRender(); } else bsClose(); return; }
   if (bigOpen()) { closeBig(); return; }
   if (!setM.classList.contains('hidden')) { closeModal(setM); return; }
   if (!$('#rep-modal').classList.contains('hidden')) requestCloseRep();

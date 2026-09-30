@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko" style="--hdrH: 102px;"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>힐마루케어 회복관리 입력 v34.25</title>
+<title>힐마루케어 회복관리 입력 v34.28</title>
 <!-- 완전 오프라인: 외부 CDN 없음. 자체 수식엔진 + 자체 ZIP 내장 -->
 <script>
 
@@ -782,19 +782,57 @@ tr.schedCancelledRow td:not(.schedMgmtCol){background:#f8fafc}
 .folderContent{flex:1;min-width:0;overflow-x:auto;padding-left:14px}
 .addFolderBtn{width:100%;margin-top:10px;padding:7px 4px;border:1.5px dashed #cbd5e1;border-radius:8px;background:none;color:#64748b;font-size:12px;cursor:pointer}
 .addFolderBtn:hover{border-color:#0369a1;color:#0369a1;background:#eff6ff}
+
+/* [v34.28] 대시보드 = 대상자체크 화면 (일정메뉴 대상자체크 스타일 그대로, 왼쪽 관리열 없음 → 번호가 1번째 열) */
+#panel-dashboard table.regCheckTbl tbody tr:nth-child(even){background:#fff}
+#panel-dashboard table.regCheckTbl td:nth-child(1),#panel-dashboard table.regCheckTbl th:nth-child(1){width:44px;max-width:44px;text-align:center}
+#panel-dashboard table.regCheckTbl tbody tr:hover td{background:#e0f2fe}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.schedMgmtCol{background:#e0f2fe}
+#panel-dashboard table.regCheckTbl tbody tr:hover td input.schedCell,
+#panel-dashboard table.regCheckTbl tbody tr:hover td select.schedCell{background:#e0f2fe}
+#panel-dashboard table.regCheckTbl tbody tr:hover td select.schedCellDisabled{background:#e2e8f0}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagRed{background:rgba(239,68,68,.28)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagRed select.schedCell{background:rgba(239,68,68,.32)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagYellow{background:rgba(234,179,8,.30)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagYellow select.schedCell{background:rgba(234,179,8,.34)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagPink{background:rgba(236,72,153,.26)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagPink select.schedCell{background:rgba(236,72,153,.30)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagPurple{background:rgba(147,51,234,.24)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagPurple select.schedCell{background:rgba(147,51,234,.28)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagAmber{background:rgba(217,119,6,.24)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagAmber select.schedCell{background:rgba(217,119,6,.28)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagTeal{background:rgba(13,148,136,.24)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagTeal select.schedCell{background:rgba(13,148,136,.28)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagIndigo{background:rgba(79,70,229,.24)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagIndigo select.schedCell{background:rgba(79,70,229,.28)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagOrange{background:rgba(234,88,12,.24)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagOrange select.schedCell{background:rgba(234,88,12,.28)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagCyan{background:rgba(6,182,212,.24)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagCyan select.schedCell{background:rgba(6,182,212,.28)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagRose{background:rgba(225,29,72,.24)}
+#panel-dashboard table.regCheckTbl tbody tr:hover td.cellFlagRose select.schedCell{background:rgba(225,29,72,.28)}
+#panel-dashboard table.regCheckTbl td,#panel-dashboard table.regCheckTbl th{text-align:center}
+#panel-dashboard table.regCheckTbl input.schedCell,#panel-dashboard table.regCheckTbl select.schedCell{text-align:center}
+#panel-dashboard.dashboardPanel{max-width:2400px;width:99%}
+#panel-dashboard table.regCheckTbl td.dashPriority,#panel-dashboard table.regCheckTbl td.dashGift{text-align:center}
+#panel-dashboard table.regCheckTbl input.regNameInput{min-width:96px}
+#panel-dashboard table.regCheckTbl tbody td{vertical-align:middle}
+#panel-dashboard table.regCheckTbl td.dashPriority{min-width:150px}
 </style>
 <!-- [v34.20] Firebase 제거 — 단일 기기 사용으로 localStorage만 사용 -->
 <!-- [v34.21] 등록(대상자 등록) 기능만 분리한 단독 파일 — 방문일정 업무관리(일정 앱)·일정 데이터 제거, 로그인 후 바로 등록 화면 -->
 <!-- [v34.22] 로그인·회원가입·회원관리 화면 제거 — 파일을 열면 바로 등록 화면 -->
+<!-- [v34.28] 대시보드 탭을 대상자체크 화면으로 교체(폴더·우선순위 케어·선물제공·관리 열 유지, 일정 데이터는 보관), 일정메뉴 JSON으로 체크값 불러오기 -->
+<!-- [v34.27] 💾 저장 버튼을 헤더에서 각 탭 제목 옆으로 옮김(모든 탭) -->
+<!-- [v34.26] 저장 실패·응답 없음(15초)·인터넷 끊김을 빨간/주황 알림 띠로 표시(성공할 때까지 유지), 💾 저장 실패 시 알림창 -->
 <!-- [v34.25] 헤더에 💾 저장 버튼 추가(누르면 바로 Firebase 저장 + 서버에서 다시 읽어 확인, Ctrl+S) -->
 <!-- [v34.24] 헤더 높이 변화 시 탭 줄 위치 자동 맞춤(헤더·탭 사이 빈틈 수정) -->
 <!-- [v34.23] 저장소를 Firebase로 변경(업무관리·출장서류와 같은 프로젝트·같은 구글 계정, workmgr/{uid}/regApp) · 브라우저 저장은 보조로 유지 · 사이트 공개용으로 파일에 내장된 대상자 데이터 제거 -->
 <div id="appRoot" style="display: block;">
 <header>
   <h1>힐마루케어 회복관리 입력</h1>
-  <span class="badge">v34.25 · 2026-09-30</span>
+  <span class="badge">v34.28 · 2026-09-30</span>
   <span class="badge g">대시보드·자동 F/U 일정·취소이력 내장 · Firebase 저장(업무관리 구글 계정)</span>
-  <button id="regSaveBtn" class="no-print" title="입력한 내용을 지금 바로 Firebase에 저장 (Ctrl+S)" style="background:#16a34a;color:#fff;border-radius:8px;padding:5px 13px;font-size:14px;font-weight:700;">💾 저장</button>
   <button id="hdrExportBtn" class="no-print" style="background:#0284c7;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;">📤 JSON 내보내기</button>
   <button id="hdrImportBtn" class="no-print" style="background:#7c3aed;color:#fff;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;">📥 JSON 불러오기</button>
   <input type="file" id="hdrImportInput" accept=".json" style="display:none">
@@ -830,6 +868,7 @@ tr.schedCancelledRow td:not(.schedMgmtCol){background:#f8fafc}
     </div>
   </div>
 </div>
+<div id="regFail" role="alert" style="display:none;position:fixed;left:50%;top:calc(var(--hdrH,92px) + 56px);transform:translateX(-50%);z-index:1002;background:#dc2626;color:#fff;border-radius:12px;padding:12px 40px 12px 16px;font-size:15px;font-weight:700;line-height:1.5;box-shadow:0 10px 30px rgba(220,38,38,.35);max-width:calc(100% - 32px)"><span id="regFailMsg"></span><button type="button" id="regFailX" title="닫기" style="position:absolute;right:8px;top:8px;background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1">✕</button></div>
 <div id="regNotice" style="display:none;position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:1001;background:#1e293b;color:#fff;border-radius:12px;padding:10px 14px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:calc(100% - 32px)"></div>
 
 <script id="cfg" type="application/json">{"version":"v18.5","date":"2026-07-06","order":["01_고객기본정보","02_첫방문회복상태확인","04_증상활력복약평가","05_영양평가","06_기능평가","07_심리평가","08_암종별평가","09_핵심평가요약"],"tabmeta":{"01_고객기본정보":{"t":"01 기본정보","c":"#1f6fb2"},"02_첫방문회복상태확인":{"t":"02 첫방문 선별","c":"#0ea5a4"},"04_증상활력복약평가":{"t":"04 증상·활력·복약","c":"#d97706"},"05_영양평가":{"t":"05 영양","c":"#16a34a"},"06_기능평가":{"t":"06 기능","c":"#7c3aed"},"07_심리평가":{"t":"07 심리","c":"#db2777"},"08_암종별평가":{"t":"08 암종별","c":"#0891b2"},"09_핵심평가요약":{"t":"09 핵심요약","c":"#dc2626"}},"schema":{"01_고객기본정보":[{"coord":"B7","name":"고객명","type":"text","choices":[],"section":"1) 고객 기본정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"대상자명에서 변경"},{"coord":"B8","name":"성별","type":"select","choices":["남","여","기타"],"section":"1) 고객 기본정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":""},{"coord":"B9","name":"생년월일","type":"date","choices":[],"section":"1) 고객 기본정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"yyyy-mm-dd"},{"coord":"B11","name":"연락처","type":"text","choices":[],"section":"1) 고객 기본정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":""},{"coord":"B12","name":"주소","type":"textarea","choices":[],"section":"1) 고객 기본정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":""},{"coord":"B13","name":"보호자명","type":"text","choices":[],"section":"1) 고객 기본정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":"","note":"필요 시 입력"},{"coord":"B14","name":"보호자 연락처","type":"text","choices":[],"section":"1) 고객 기본정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":"","note":"필요 시 입력"},{"coord":"B19","name":"암종","type":"text","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"예: 유방암, 전립선암 등"},{"coord":"B20","name":"병기","type":"text","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":"","note":"확인 가능 시 입력"},{"coord":"B21","name":"치료상태","type":"select","choices":["수술 후","항암 중","항암 종료","방사선 치료 중","방사선 치료 종료","치료 종료","추적관찰","기타"],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"수술 후/항암 중/방사선 중/치료 종료 등"},{"coord":"B22","name":"주 진료병원","type":"text","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"진단, 수술, 관리"},{"coord":"B23","name":"최근 병원 방문일","type":"date","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"yyyy-mm-dd"},{"coord":"B24","name":"다음 병원 예약일","type":"date","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"yyyy-mm-dd"},{"coord":"B25","name":"수술 내역","type":"textarea","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":""},{"coord":"B26","name":"항암치료 내역","type":"textarea","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":""},{"coord":"B27","name":"방사선치료 내역","type":"textarea","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":""},{"coord":"B28","name":"주요 처방약","type":"textarea","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"처방전/복약지도서 기준"},{"coord":"B29","name":"특이 부작용","type":"textarea","choices":[],"section":"2) 의료·치료 정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":""},{"coord":"B34","name":"프로그램 시작일","type":"date","choices":[],"section":"3) 케어관리 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"yyyy-mm-dd"},{"coord":"B35","name":"최근 방문일","type":"date","choices":[],"section":"3) 케어관리 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"yyyy-mm-dd"},{"coord":"B36","name":"최근 제공 케어 내용","type":"textarea","choices":[],"section":"3) 케어관리 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"최근 방문/상담에서 제공한 업무 요약"},{"coord":"B37","name":"다음 방문 예정일","type":"date","choices":[],"section":"3) 케어관리 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":"","note":"yyyy-mm-dd"},{"coord":"B38","name":"담당 간호사","type":"text","choices":[],"section":"3) 케어관리 정보","domain":"","ref":"","source":"","inputkind":"필수","criteria":"","unit":""},{"coord":"B39","name":"응급 연락처","type":"text","choices":[],"section":"3) 케어관리 정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":""},{"coord":"B40","name":"현재 가장 불편한 점","type":"text","choices":[],"section":"3) 케어관리 정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":"","note":"자유 서술: 통증, 식욕저하, 피로 등"},{"coord":"B41","name":"특이사항","type":"textarea","choices":[],"section":"3) 케어관리 정보","domain":"","ref":"","source":"","inputkind":"선택","criteria":"","unit":"","note":"알레르기, 주의사항, 보호자 요청 등 자유기재"}],"02_첫방문회복상태확인":[{"coord":"E7","name":"식사량","type":"select","choices":["정상","경도 감소","중등 감소","심한 감소"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"영양","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"","note":"정상: 평소/퇴원 직후 대비 90% 이상\n경도 감소: 75~89%\n중등 감소: 50~74%\n심한 감소: 50% 미만"},{"coord":"E8","name":"식욕","type":"select","choices":["정상","감소","심한 감소"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"영양","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"","note":"정상: 식욕 저하 없음\n감소: 식욕 저하가 있으나 식사는 가능\n심한 감소: 하루 대부분 식욕 없거나 식사 거부"},{"coord":"E9","name":"체중변화","type":"select","choices":["감소 없음","2~5% 감소","5~10% 감소","10% 이상 감소","5% 이상 증가"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"영양","ref":"퇴원 시 또는 1개월 전 대비 현재","source":"","inputkind":"","criteria":"","unit":"","note":"감소 없음: 기준체중 대비 2% 미만 변화\n2~5% 감소: 2% 이상 5% 미만 감소\n5~10% 감소: 5% 이상 10% 미만 감소\n10% 이상 감소: 10% 이상 감소\n5% 이상 증가: 부종/복수/스테로이드 등 확인"},{"coord":"E10","name":"활동량","type":"select","choices":["정상","감소","매우 감소"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"기능","ref":"최근 1주 vs 치료 전/퇴원 직후","source":"","inputkind":"","criteria":"","unit":"","note":"정상: 기존 활동 유지\n감소: 외출, 가사, 걷기 등 활동량 감소\n매우 감소: 대부분 앉거나 누워 지냄"},{"coord":"E11","name":"외출빈도","type":"select","choices":["주3회 이상","주1~2회","거의 없음"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"기능","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"","note":"주3회 이상: 주 3회 이상 외출\n주1~2회: 주 1~2회 외출\n거의 없음: 최근 1주 외출 0회 또는 병원 외 외출 없음"},{"coord":"E12","name":"보행상태","type":"select","choices":["안정","느림","불안정"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"기능","ref":"방문 당일 관찰/문진","source":"","inputkind":"","criteria":"","unit":"","note":"안정: 보조 없이 안정 보행\n느림: 속도 저하 또는 자주 쉬어야 함\n불안정: 휘청거림, 보조 필요, 낙상 우려"},{"coord":"E13","name":"불안감","type":"select","choices":["낮음","보통","높음","매우 높음"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"심리","ref":"최근 2주","source":"","inputkind":"","criteria":"","unit":"","note":"낮음: 걱정 거의 없음\n보통: 가끔 걱정되나 일상 유지\n높음: 자주 걱정되어 수면/활동 영향\n매우 높음: 불안으로 일상생활 어려움"},{"coord":"E14","name":"우울감","type":"select","choices":["없음","가끔","자주","대부분"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"심리","ref":"최근 2주","source":"","inputkind":"","criteria":"","unit":"","note":"없음: 우울감 거의 없음\n가끔: 가끔 기분 저하\n자주: 의욕저하/기분저하 자주\n대부분: 대부분 우울/무기력"},{"coord":"E15","name":"수면","type":"select","choices":["양호","보통","나쁨","매우 나쁨"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"심리","ref":"최근 2주","source":"","inputkind":"","criteria":"","unit":"","note":"양호: 수면 문제 없음\n보통: 가끔 입면/각성 문제\n나쁨: 주 3회 이상 수면 문제\n매우 나쁨: 수면 문제로 일상 기능 저하"},{"coord":"E16","name":"통증","type":"select","choices":["없음","경도","중등도","심함"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"증상","ref":"방문 당일/최근 1주","source":"","inputkind":"","criteria":"","unit":"","note":"없음: NRS 0\n경도: NRS 1~3\n중등도: NRS 4~6\n심함: NRS 7 이상"},{"coord":"E17","name":"피로","type":"select","choices":["낮음","보통","높음"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"증상","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"","note":"낮음: 일상 지장 거의 없음\n보통: 쉬면 회복 가능\n높음: 활동/수면에 영향"},{"coord":"E18","name":"증상악화","type":"select","choices":["없음","있음"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"증상","ref":"최근 1주/방문 당일","source":"","inputkind":"","criteria":"","unit":"","note":"없음: 최근 악화 증상 없음\n있음: 호흡곤란, 발열, 출혈, 심한 통증 등 악화 호소"},{"coord":"E19","name":"복약누락","type":"select","choices":["없음","1~2회","3회 이상"],"section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다","domain":"복약","ref":"최근 7일","source":"","inputkind":"","criteria":"","unit":"","note":"없음: 최근 7일 누락 없음\n1~2회: 최근 7일 1~2회 누락\n3회 이상: 최근 7일 3회 이상 누락"},{"coord":"J25","name":"비고","type":"textarea","choices":[],"section":"2) 선별 결과 요약 및 관리 우선순위","domain":"영양","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"비고","isNote":true},{"coord":"J26","name":"비고","type":"textarea","choices":[],"section":"2) 선별 결과 요약 및 관리 우선순위","domain":"기능","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"비고","isNote":true},{"coord":"J27","name":"비고","type":"textarea","choices":[],"section":"2) 선별 결과 요약 및 관리 우선순위","domain":"심리","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"비고","isNote":true},{"coord":"J28","name":"비고","type":"textarea","choices":[],"section":"2) 선별 결과 요약 및 관리 우선순위","domain":"증상·활력","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"비고","isNote":true},{"coord":"J29","name":"비고","type":"textarea","choices":[],"section":"2) 선별 결과 요약 및 관리 우선순위","domain":"복약","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"비고","isNote":true}],"04_증상활력복약평가":[{"coord":"C7","name":"혈압","type":"text","choices":[],"section":"1) 활력·증상·검사정보","domain":"활력","ref":"방문 당일","source":"현장측정","inputkind":"","criteria":"","unit":"mmHg","action":"수축기 ≥160 또는 이완기 ≥100 위험 검토","note":"동일 팔, 안정 후 측정"},{"coord":"C8","name":"맥박","type":"number","choices":[],"section":"1) 활력·증상·검사정보","domain":"활력","ref":"방문 당일","source":"현장측정","inputkind":"","criteria":"","unit":"회/분","action":"<50 또는 >110 위험 검토","note":"안정 시 측정"},{"coord":"C9","name":"체온","type":"number","choices":[],"section":"1) 활력·증상·검사정보","domain":"활력","ref":"방문 당일","source":"현장측정","inputkind":"","criteria":"","unit":"℃","action":"37.5 이상 주의, 38.0 이상 위험 검토","note":"체온계 기준"},{"coord":"C10","name":"산소포화도","type":"number","choices":[],"section":"1) 활력·증상·검사정보","domain":"활력","ref":"방문 당일","source":"현장측정","inputkind":"","criteria":"","unit":"%","action":"94% 이하 주의, 호흡곤란 동반 시 위험","note":"손가락 산소포화도"},{"coord":"C11","name":"통증 NRS","type":"number","choices":[],"section":"1) 활력·증상·검사정보","domain":"증상","ref":"방문 당일/최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"0~10","action":"7 이상 Red 검토","note":"0 없음, 10 최악"},{"coord":"C12","name":"피로 BFI 평균","type":"number","choices":[],"section":"1) 활력·증상·검사정보","domain":"증상","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"0~10","action":"7 이상 주의","note":"0 없음, 10 최악"},{"coord":"C13","name":"호흡곤란","type":"select","choices":["없음","있음","악화"],"section":"1) 활력·증상·검사정보","domain":"증상","ref":"최근 1주/현재","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","action":"악화 시 Red 검토","note":"새로운 호흡곤란/악화 여부"},{"coord":"D13","name":"호흡곤란","type":"select","choices":["없음","있음","악화"],"section":"1) 활력·증상·검사정보","domain":"증상","ref":"최근 1주/현재","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","action":"악화 시 Red 검토","note":"새로운 호흡곤란/악화 여부"},{"coord":"C14","name":"감염 의심","type":"select","choices":["없음","의심","뚜렷함"],"section":"1) 활력·증상·검사정보","domain":"증상","ref":"최근 1주/현재","source":"고객 문진/현장관찰","inputkind":"","criteria":"","unit":"선택","action":"뚜렷하면 Red 검토","note":"발열, 오한, 상처 악화, 기침 악화 등"},{"coord":"D14","name":"감염 의심","type":"select","choices":["없음","의심","뚜렷함"],"section":"1) 활력·증상·검사정보","domain":"증상","ref":"최근 1주/현재","source":"고객 문진/현장관찰","inputkind":"","criteria":"","unit":"선택","action":"뚜렷하면 Red 검토","note":"발열, 오한, 상처 악화, 기침 악화 등"},{"coord":"C15","name":"최근 Hb","type":"text","choices":[],"section":"1) 활력·증상·검사정보","domain":"병원기록","ref":"최근 검사일","source":"병원기록","inputkind":"","criteria":"","unit":"g/dL","note":"선택","action":"빈혈 관련 피로 해석 참고"},{"coord":"C16","name":"최근 Albumin","type":"text","choices":[],"section":"1) 활력·증상·검사정보","domain":"병원기록","ref":"최근 검사일","source":"병원기록","inputkind":"","criteria":"","unit":"g/dL","note":"선택","action":"영양상태 참고"},{"coord":"C17","name":"최근 CRP","type":"text","choices":[],"section":"1) 활력·증상·검사정보","domain":"병원기록","ref":"최근 검사일","source":"병원기록","inputkind":"","criteria":"","unit":"mg/L","note":"선택","action":"감염/염증 참고"},{"coord":"C18","name":"의료진 주의사항","type":"text","choices":[],"section":"1) 활력·증상·검사정보","domain":"병원기록","ref":"퇴원요약/외래기록","source":"병원기록","inputkind":"","criteria":"","unit":"문장","action":"회복계획 보정","note":"퇴원교육 또는 외래 지침"},{"coord":"C19","name":"보호자 특이소견","type":"text","choices":[],"section":"1) 활력·증상·검사정보","domain":"기타","ref":"최근 1주","source":"보호자 진술","inputkind":"","criteria":"","unit":"문장","action":"필요 시 확인","note":"보호자가 관찰한 변화"},{"coord":"B25","name":"최근 7일 예정 복약횟수","type":"number","choices":[],"section":"2) 복약순응도 자동계산","domain":"","ref":"최근 7일","source":"처방전/고객 문진","inputkind":"","criteria":"","unit":"회","interp":"분모","note":"처방 빈도×7일 기준"},{"coord":"B26","name":"최근 7일 실제 복약횟수","type":"number","choices":[],"section":"2) 복약순응도 자동계산","domain":"","ref":"최근 7일","source":"고객 문진/복약기록","inputkind":"","criteria":"","unit":"회","interp":"분자","note":"실제로 복용한 횟수"},{"coord":"B30","name":"부작용 의심","type":"select","choices":["없음","의심","심함"],"section":"2) 복약순응도 자동계산","domain":"","ref":"최근 7일","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"있으면 확인","note":"복용 후 새롭게 발생한 불편감"},{"coord":"B31","name":"복약도움 필요","type":"select","choices":["불필요","필요"],"section":"2) 복약순응도 자동계산","domain":"","ref":"현재","source":"간호사 판단","inputkind":"","criteria":"","unit":"선택","interp":"필요 시 보정","note":"약 정리, 알림, 보호자 확인 필요 여부"},{"coord":"F47","name":"유방암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"4) 암종 관련 증상 보정","domain":"유방암","ref":"현장관찰/문진","source":"팔/손 붓기, 무거움, 둘레 증가, 열감 여부","inputkind":"","criteria":"","unit":"최근 1주","action":"입력값","note":"입력값"},{"coord":"F48","name":"유방암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"4) 암종 관련 증상 보정","domain":"유방암","ref":"고객 문진","source":"팔/어깨/흉벽 통증 또는 악화 여부","inputkind":"","criteria":"","unit":"최근 1주","action":"선택하세요","note":"선택하세요"},{"coord":"F49","name":"전립선암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"4) 암종 관련 증상 보정","domain":"전립선암","ref":"고객 문진","source":"패드 사용, 소변 샘, 외출 제한 여부","inputkind":"","criteria":"","unit":"최근 1주","action":"선택하세요","note":"선택하세요"},{"coord":"F50","name":"전립선암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"4) 암종 관련 증상 보정","domain":"전립선암","ref":"고객 문진","source":"빈뇨, 야간뇨, 잔뇨감 등","inputkind":"","criteria":"","unit":"최근 1주","action":"없음","note":"없음"},{"coord":"F51","name":"간암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"4) 암종 관련 증상 보정","domain":"간암","ref":"현장관찰/문진","source":"눈/피부 노란 변화, 소변색 변화","inputkind":"","criteria":"","unit":"최근 1주","action":"없음","note":"없음"},{"coord":"F52","name":"간암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"4) 암종 관련 증상 보정","domain":"간암","ref":"고객 문진","source":"멍, 코피, 잇몸출혈 등","inputkind":"","criteria":"","unit":"최근 1주","action":"선택하세요","note":"선택하세요"}],"05_영양평가":[{"coord":"E7","name":"키","type":"number","choices":[],"section":"1) 신체계측 및 체중 변화","domain":"","ref":"현재 또는 최근 병원기록","source":"현장측정/병원기록","inputkind":"","criteria":"","unit":"cm","interp":"BMI 계산용","note":"가능하면 현장 측정, 어려우면 최근 병원기록 사용"},{"coord":"E8","name":"현재 체중","type":"number","choices":[],"section":"1) 신체계측 및 체중 변화","domain":"","ref":"방문 당일","source":"현장측정","inputkind":"","criteria":"","unit":"kg","interp":"BMI·체중변화율 계산용","note":"방문 당일 동일 저울/유사 조건 측정 권장"},{"coord":"E11","name":"기준체중 기준일","type":"number","choices":[],"section":"1) 신체계측 및 체중 변화","domain":"","ref":"퇴원일 또는 비교일","source":"병원기록/고객문진","inputkind":"","criteria":"","unit":"YYYY-MM-DD","interp":"변화율 해석 기준","note":"기준체중이 언제의 체중인지 날짜 입력"},{"coord":"E12","name":"기준체중","type":"number","choices":[],"section":"1) 신체계측 및 체중 변화","domain":"","ref":"기준체중 기준일","source":"병원기록/고객문진","inputkind":"","criteria":"","unit":"kg","interp":"체중 변화율 계산용","note":"퇴원 시 체중 우선. 없으면 1개월 전 체중, 평소체중 순으로 입력"},{"coord":"E17","name":"체중 증가 원인","type":"select","choices":["회복성 증가","부종 의심","복수 의심","스테로이드","기타"],"section":"1) 신체계측 및 체중 변화","domain":"","ref":"5% 이상 증가 시","source":"현장관찰/문진","inputkind":"","criteria":"","unit":"선택","interp":"체중증가 보정","note":"5% 이상 증가 시 원인 선택. 체중증가는 MUST 점수가 아니라 별도 알림으로 해석"},{"coord":"E25","name":"급성질환 영향","type":"select","choices":["아니오","예"],"section":"2) MUST 및 영양행동","domain":"MUST","ref":"최근 5일 전망","source":"","inputkind":"","criteria":"","unit":"선택","interp":"MUST 급성질환 영향 점수","note":"최근 5일 이상 영양섭취가 거의 불가능할 것으로 예상되면 예"},{"coord":"E26","name":"식사량","type":"select","choices":["정상","경도 감소","중등 감소","심한 감소"],"section":"2) MUST 및 영양행동","domain":"영양행동","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"섭취량 저하 확인","note":"정상 90% 이상 / 경도 감소 75~89% / 중등 감소 50~74% / 심한 감소 50% 미만"},{"coord":"E27","name":"식욕","type":"select","choices":["정상","감소","심한 감소"],"section":"2) MUST 및 영양행동","domain":"영양행동","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"식욕저하 확인","note":"정상: 저하 없음 / 감소: 식욕저하 있으나 식사 가능 / 심한 감소: 하루 대부분 식욕 없음 또는 식사 거부"},{"coord":"E28","name":"단백질 섭취","type":"select","choices":["충분","보통","부족"],"section":"2) MUST 및 영양행동","domain":"영양행동","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"회복·근감소 위험 보정","note":"충분: 하루 2회 이상 / 보통: 하루 1회 / 부족: 거의 섭취 안함 또는 주 2회 이하"},{"coord":"E29","name":"수분 섭취","type":"select","choices":["충분","부족","매우 부족"],"section":"2) MUST 및 영양행동","domain":"영양행동","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"탈수 위험 확인","note":"충분: 탈수 우려 낮음 / 부족: 섭취 적거나 소변 감소 / 매우 부족: 탈수 의심"},{"coord":"E35","name":"오심/구토","type":"select","choices":["없음","있음","심함"],"section":"3) 위장관 증상","domain":"위장관","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"식사량 저하 원인","note":"없음 / 있음: 식사량 일부 영향 / 심함: 식사 유지 어려움"},{"coord":"E36","name":"조기포만감","type":"select","choices":["없음","있음","심함"],"section":"3) 위장관 증상","domain":"위장관","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"특히 위암·상부위장관 수술 후 확인","note":"없음 / 있음: 식사 초반 포만감 / 심함: 대부분 식사 방해"},{"coord":"E37","name":"설사","type":"select","choices":["없음","있음","심함"],"section":"3) 위장관 증상","domain":"위장관","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"수분·영양 흡수 위험","note":"없음 / 있음: 배변 증가 또는 묽은 변 / 심함: 탈수·활동 제한 우려"},{"coord":"E38","name":"변비","type":"select","choices":["없음","있음","심함"],"section":"3) 위장관 증상","domain":"위장관","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"식사량 저하 원인","note":"없음 / 있음: 배변 어려움 / 심함: 복부불편·식사저하 동반"},{"coord":"E39","name":"연하곤란","type":"select","choices":["없음","있음","심함"],"section":"3) 위장관 증상","domain":"위장관","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"섭취 안전성 확인","note":"없음 / 있음: 삼킴 불편 / 심함: 식사·수분 섭취 곤란"},{"coord":"E45","name":"근력","type":"select","choices":["0","1","2"],"section":"4) 근감소 위험 SARC-F (영양 연계 선별)","domain":"SARC-F","ref":"현재","source":"","inputkind":"","criteria":"","unit":"0~2","interp":"영양불량과 동반되는 근감소 위험 선별","note":"0=어려움 없음, 1=약간 어려움, 2=매우 어려움/불가능  ·  기능평가에서는 SPPB로 실제 기능을 정밀 확인"},{"coord":"E46","name":"보행보조","type":"select","choices":["0","1","2"],"section":"4) 근감소 위험 SARC-F (영양 연계 선별)","domain":"SARC-F","ref":"현재","source":"","inputkind":"","criteria":"","unit":"0~2","interp":"영양불량과 동반되는 근감소 위험 선별","note":"0=어려움 없음, 1=약간 어려움, 2=매우 어려움/보조 필요"},{"coord":"E47","name":"의자에서 일어나기","type":"select","choices":["0","1","2"],"section":"4) 근감소 위험 SARC-F (영양 연계 선별)","domain":"SARC-F","ref":"현재","source":"","inputkind":"","criteria":"","unit":"0~2","interp":"영양불량과 동반되는 근감소 위험 선별","note":"0=어려움 없음, 1=약간 어려움, 2=매우 어려움/도움 필요"},{"coord":"E48","name":"계단 오르기","type":"select","choices":["0","1","2"],"section":"4) 근감소 위험 SARC-F (영양 연계 선별)","domain":"SARC-F","ref":"현재","source":"","inputkind":"","criteria":"","unit":"0~2","interp":"영양불량과 동반되는 근감소 위험 선별","note":"0=어려움 없음, 1=약간 어려움, 2=매우 어려움/불가능"},{"coord":"E49","name":"낙상","type":"select","choices":["0","1","2"],"section":"4) 근감소 위험 SARC-F (영양 연계 선별)","domain":"SARC-F","ref":"최근 1년","source":"","inputkind":"","criteria":"","unit":"0~2","interp":"영양불량과 동반되는 근감소 위험 선별","note":"0=없음, 1=1~3회, 2=4회 이상"},{"coord":"E55","name":"덤핑 의심 증상","type":"select","choices":["해당없음","없음","있음","심함"],"section":"5) 암종 관련 영양 보정","domain":"위암/상부위장관","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"식사방법 교육·소량빈번식 보정","note":"식후 어지럼, 식은땀, 설사, 심계항진 등 여부  ·  해당 암종/수술력이 없으면 해당없음"},{"coord":"E56","name":"식후 불편감","type":"select","choices":["해당없음","없음","있음","심함"],"section":"5) 암종 관련 영양 보정","domain":"위암/상부위장관","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"식사량·증상 관리 보정","note":"복부팽만, 오심, 통증 등 식후 불편감"},{"coord":"E57","name":"장루 여부","type":"select","choices":["해당없음","없음","있음","심함"],"section":"5) 암종 관련 영양 보정","domain":"대장암/장루","ref":"현재","source":"","inputkind":"","criteria":"","unit":"선택","interp":"장루관리 교육·수분관리 보정","note":"장루 보유 및 관리 어려움 확인"},{"coord":"E58","name":"배변 변화","type":"select","choices":["해당없음","없음","있음","심함"],"section":"5) 암종 관련 영양 보정","domain":"대장암/장루","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"수분·식이 보정","note":"설사/변비/배변빈도 변화"},{"coord":"E59","name":"복수·부종 의심","type":"select","choices":["해당없음","없음","있음","심함"],"section":"5) 암종 관련 영양 보정","domain":"간암/복수","ref":"최근 1주","source":"","inputkind":"","criteria":"","unit":"선택","interp":"체중증가 해석 보정","note":"복부팽만, 하지부종, 급격한 체중증가 여부"},{"coord":"F65","name":"비고","type":"textarea","choices":[],"section":"6) 영양평가 요약 및 회복설계 반영","domain":"MUST 총점","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"영양불량 위험을 보는 핵심 지표","isNote":true},{"coord":"F66","name":"비고","type":"textarea","choices":[],"section":"6) 영양평가 요약 및 회복설계 반영","domain":"SARC-F 총점","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"영양과 연계된 근감소 위험 선별","isNote":true},{"coord":"F67","name":"비고","type":"textarea","choices":[],"section":"6) 영양평가 요약 및 회복설계 반영","domain":"암종 영양 보정","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"암종·수술 특성에 따른 영양관리 보정 필요성","isNote":true},{"coord":"F68","name":"비고","type":"textarea","choices":[],"section":"6) 영양평가 요약 및 회복설계 반영","domain":"영양위험점수","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"영양영역 전체 위험도","isNote":true},{"coord":"F69","name":"비고","type":"textarea","choices":[],"section":"6) 영양평가 요약 및 회복설계 반영","domain":"체중증가 알림","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"체중증가가 회복인지 위험신호인지 확인","isNote":true},{"coord":"F70","name":"비고","type":"textarea","choices":[],"section":"6) 영양평가 요약 및 회복설계 반영","domain":"추천 영양유형","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"표준관리 라이브러리와 연결되는 영양 관리유형","isNote":true},{"coord":"F71","name":"비고","type":"textarea","choices":[],"section":"6) 영양평가 요약 및 회복설계 반영","domain":"영양관리 우선순위","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"이번 3개월 동안 영양을 어느 수준으로 관리할지 결정","isNote":true},{"coord":"F72","name":"비고","type":"textarea","choices":[],"section":"6) 영양평가 요약 및 회복설계 반영","domain":"미입력 수","ref":"비고","source":"","inputkind":"","criteria":"","unit":"","note":"판정 신뢰도 확인","isNote":true}],"06_기능평가":[{"coord":"C7","name":"균형검사 결과","type":"select","choices":["불가능","Side-by-side 10초 미만","Side-by-side 10초 이상","Semi-tandem 10초 이상","Tandem 3~9.99초","Tandem 10초 이상"],"section":"1) SPPB 하위검사","domain":"균형","ref":"방문 당일","source":"현장 평가","inputkind":"","criteria":"","unit":"선택","note":"Side-by-side, semi-tandem, tandem 단계 확인"},{"coord":"C8","name":"4m 보행 시간","type":"number","choices":[],"section":"1) SPPB 하위검사","domain":"보행","ref":"방문 당일","source":"현장 평가","inputkind":"","criteria":"","unit":"초","note":"평소 속도로 4m 걷기 시간"},{"coord":"C10","name":"5회 의자 일어서기 시간","type":"number","choices":[],"section":"1) SPPB 하위검사","domain":"하지근력","ref":"방문 당일","source":"현장 평가","inputkind":"","criteria":"","unit":"초","note":"양팔 사용 없이 의자에서 5회 일어서기 소요 시간(수식 없이 직접 입력, SPPB 총점에 자동 반영)"},{"coord":"C12","name":"최근 1주 외출","type":"select","choices":["주3회 이상","주1~2회","거의 없음"],"section":"1) SPPB 하위검사","domain":"활동","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","note":"주간 외출 빈도"},{"coord":"C13","name":"운동실천","type":"select","choices":["3회 이상","1~2회","0회"],"section":"1) SPPB 하위검사","domain":"활동","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","note":"주간 운동 실천 횟수"},{"coord":"C14","name":"최근 낙상","type":"select","choices":["아니오","예"],"section":"1) SPPB 하위검사","domain":"낙상","ref":"최근 3개월","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","note":"실제 넘어짐 여부"},{"coord":"C15","name":"낙상 두려움","type":"select","choices":["없음","있음"],"section":"1) SPPB 하위검사","domain":"낙상","ref":"현재","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","note":"두려움으로 외출/보행 회피 여부"},{"coord":"E30","name":"어깨 ROM 제한","type":"select","choices":["해당없음","없음","있음","심함"],"section":"3) 암종 관련 기능 보정","domain":"유방암","ref":"선택하세요","source":"선택","inputkind":"","criteria":"","unit":"어깨 올림/벌림 제한 또는 통증으로 상지 사용 제한","interp":"입력값","note":"어깨 올림/벌림 제한 또는 통증으로 상지 사용 제한  ·  해당없으면 해당없음"},{"coord":"E31","name":"상지 사용 불편","type":"select","choices":["해당없음","없음","있음","심함"],"section":"3) 암종 관련 기능 보정","domain":"유방암","ref":"선택하세요","source":"선택","inputkind":"","criteria":"","unit":"팔/손 무거움, 움직임 회피, 일상동작 제한","interp":"선택하세요","note":"팔/손 무거움, 움직임 회피, 일상동작 제한"},{"coord":"E32","name":"근력저하·피로로 활동 제한","type":"select","choices":["해당없음","없음","있음","심함"],"section":"3) 암종 관련 기능 보정","domain":"전립선암/ADT","ref":"심함","source":"선택","inputkind":"","criteria":"","unit":"호르몬치료 또는 치료 후 피로/근력저하로 걷기·운동 제한","interp":"선택하세요","note":"호르몬치료 또는 치료 후 피로/근력저하로 걷기·운동 제한"},{"coord":"E33","name":"장루로 인한 활동 제한","type":"select","choices":["해당없음","없음","있음","심함"],"section":"3) 암종 관련 기능 보정","domain":"대장암/장루","ref":"선택하세요","source":"선택","inputkind":"","criteria":"","unit":"외출/운동 회피, 장루관리 불안으로 활동 제한","interp":"심함","note":"외출/운동 회피, 장루관리 불안으로 활동 제한"}],"07_심리평가":[{"coord":"C7","name":"흥미 또는 즐거움 감소","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"1","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C8","name":"우울감/절망감","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"2","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C9","name":"수면 문제","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"3","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C10","name":"피로감","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"4","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C11","name":"식욕 변화","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"5","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C12","name":"자기비난/실패감","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"6","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C13","name":"집중 어려움","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"7","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C14","name":"느려짐 또는 초조함","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"8","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C15","name":"자해·자살 생각","type":"select","choices":["0","1","2","3"],"section":"1) PHQ-9 우울 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"9","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C21","name":"초조/불안","type":"select","choices":["0","1","2","3"],"section":"2) GAD-7 불안 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"1","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C22","name":"걱정 조절 어려움","type":"select","choices":["0","1","2","3"],"section":"2) GAD-7 불안 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"2","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C23","name":"여러 가지 걱정","type":"select","choices":["0","1","2","3"],"section":"2) GAD-7 불안 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"3","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C24","name":"이완 어려움","type":"select","choices":["0","1","2","3"],"section":"2) GAD-7 불안 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"4","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C25","name":"가만히 있기 어려움","type":"select","choices":["0","1","2","3"],"section":"2) GAD-7 불안 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"5","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C26","name":"쉽게 짜증","type":"select","choices":["0","1","2","3"],"section":"2) GAD-7 불안 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"6","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C27","name":"두려운 느낌","type":"select","choices":["0","1","2","3"],"section":"2) GAD-7 불안 선별: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"7","note":"0=전혀 없음, 1=며칠, 2=절반 이상, 3=거의 매일"},{"coord":"C33","name":"잠들기 어려움","type":"select","choices":["0","1","2","3","4"],"section":"3) ISI 수면 평가: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"1","note":"0=문제 없음, 4=매우 심함"},{"coord":"C34","name":"수면 유지 어려움","type":"select","choices":["0","1","2","3","4"],"section":"3) ISI 수면 평가: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"2","note":"0=문제 없음, 4=매우 심함"},{"coord":"C35","name":"너무 일찍 깸","type":"select","choices":["0","1","2","3","4"],"section":"3) ISI 수면 평가: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"3","note":"0=문제 없음, 4=매우 심함"},{"coord":"C36","name":"수면 만족도 저하","type":"select","choices":["0","1","2","3","4"],"section":"3) ISI 수면 평가: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"4","note":"0=문제 없음, 4=매우 심함"},{"coord":"C37","name":"일상 기능 방해","type":"select","choices":["0","1","2","3","4"],"section":"3) ISI 수면 평가: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"5","note":"0=문제 없음, 4=매우 심함"},{"coord":"C38","name":"주변에서 알아차림","type":"select","choices":["0","1","2","3","4"],"section":"3) ISI 수면 평가: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"6","note":"0=문제 없음, 4=매우 심함"},{"coord":"C39","name":"수면 걱정","type":"select","choices":["0","1","2","3","4"],"section":"3) ISI 수면 평가: 최근 2주 기준","domain":"","ref":"최근 2주","source":"고객 자가보고/문진","inputkind":"","criteria":"","unit":"","qnum":"7","note":"0=문제 없음, 4=매우 심함"},{"coord":"B45","name":"Distress Thermometer","type":"select","choices":["0","1","2","3","4","5","6","7","8","9","10"],"section":"4) Distress 및 재발걱정","domain":"","ref":"방문 당일/최근 1주","source":"고객 자가보고","inputkind":"","criteria":"","unit":"","note":"0~10점: 0=없음, 10=극심함"},{"coord":"B46","name":"재발걱정 빈도","type":"select","choices":["없음","가끔","자주","거의 매일"],"section":"4) Distress 및 재발걱정","domain":"","ref":"최근 2주","source":"고객 문진","inputkind":"","criteria":"","unit":"","note":"없음=0, 가끔=1, 자주=2, 거의 매일=3"},{"coord":"B47","name":"신체감각 과해석","type":"select","choices":["없음","가끔","자주","거의 매일"],"section":"4) Distress 및 재발걱정","domain":"","ref":"최근 2주","source":"고객 문진","inputkind":"","criteria":"","unit":"","note":"증상 발생 시 재발로 걱정하는 정도"},{"coord":"B48","name":"검사/외래 불안","type":"select","choices":["없음","가끔","자주","거의 매일"],"section":"4) Distress 및 재발걱정","domain":"","ref":"최근 2주","source":"고객 문진","inputkind":"","criteria":"","unit":"","note":"검사·외래 전 불안 정도"},{"coord":"B49","name":"사회적 위축","type":"select","choices":["없음","가끔","자주","거의 매일"],"section":"4) Distress 및 재발걱정","domain":"","ref":"최근 2주","source":"고객 문진","inputkind":"","criteria":"","unit":"","note":"불안/우울로 외출·대인관계 회피 여부"},{"coord":"E69","name":"재발 불안","type":"select","choices":["없음","가끔","자주","거의 매일"],"section":"6) 암종 관련 심리 보정","domain":"","ref":"최근 2주","source":"고객 문진","inputkind":"","criteria":"","unit":"","note":"검사, 신체증상, 통증 등을 재발로 걱정하는 정도"},{"coord":"E70","name":"검사/외래 불안","type":"select","choices":["없음","가끔","자주","거의 매일"],"section":"6) 암종 관련 심리 보정","domain":"","ref":"최근 2주","source":"고객 문진","inputkind":"","criteria":"","unit":"","note":"검사나 외래 방문 전 불안이 일상에 영향을 주는 정도"},{"coord":"E71","name":"사회복귀 부담","type":"select","choices":["없음","가끔","자주","거의 매일"],"section":"6) 암종 관련 심리 보정","domain":"","ref":"최근 2주","source":"고객 문진","inputkind":"","criteria":"","unit":"","note":"직장/가정/대인관계 복귀에 대한 부담 또는 회피"},{"coord":"E72","name":"신체상 변화 부담","type":"select","choices":["없음","가끔","자주","거의 매일"],"section":"6) 암종 관련 심리 보정","domain":"","ref":"최근 2주","source":"고객 문진","inputkind":"","criteria":"","unit":"","note":"수술흉터, 장루, 탈모, 림프부종 등으로 인한 위축"}],"08_암종별평가":[{"coord":"C5","name":"위암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"영양 A-01/A-02 보정","note":"식사 초반 포만감으로 섭취량 감소"},{"coord":"C6","name":"위암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"식사방법 교육","note":"식후 어지럼, 식은땀, 설사, 심계항진"},{"coord":"C7","name":"위암","type":"text","choices":[],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"회","interp":"영양계획 보정","note":"소량 빈번 식사 여부"},{"coord":"C8","name":"위암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"영양/증상 보정","note":"복부팽만, 오심, 통증 등"},{"coord":"C9","name":"대장암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"수분/식이 보정","note":"설사/변비/빈도 변화"},{"coord":"C10","name":"대장암","type":"select","choices":["해당없음","아니오","예"],"section":"","domain":"","ref":"현재","source":"병원기록/문진","inputkind":"","criteria":"","unit":"선택","interp":"장루관리 교육","note":"장루 보유 여부"},{"coord":"C11","name":"대장암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"증상관리","note":"복통, 팽만, 가스 등"},{"coord":"C12","name":"간암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"현장관찰/문진","inputkind":"","criteria":"","unit":"선택","interp":"체중증가 해석 보정","note":"복부팽만, 하지부종, 급격한 체중증가"},{"coord":"C13","name":"간암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"현장관찰/문진","inputkind":"","criteria":"","unit":"선택","interp":"의료연계 검토","note":"눈/피부 노란 변화, 소변색 변화"},{"coord":"C14","name":"간암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"의료연계 검토","note":"멍, 코피, 잇몸출혈 등"},{"coord":"C15","name":"유방암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"현장관찰/문진","inputkind":"","criteria":"","unit":"선택","interp":"상지관리/의료연계","note":"팔/손 붓기, 무거움, 둘레 증가"},{"coord":"C16","name":"유방암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"현재","source":"현장관찰/문진","inputkind":"","criteria":"","unit":"선택","interp":"기능 B-01 보정","note":"어깨 올림/벌림 제한"},{"coord":"C17","name":"유방암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"통증 보정","note":"팔/어깨/흉벽 통증"},{"coord":"C18","name":"전립선암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"골반저근/생활교육","note":"패드 사용, 소변 샘"},{"coord":"C19","name":"전립선암","type":"select","choices":["해당없음","없음","있음","심함"],"section":"","domain":"","ref":"최근 1주","source":"고객 문진","inputkind":"","criteria":"","unit":"선택","interp":"증상관리","note":"빈뇨, 야간뇨, 잔뇨감"},{"coord":"C20","name":"전립선암","type":"select","choices":["해당없음","아니오","예"],"section":"","domain":"","ref":"현재 치료","source":"병원기록/문진","inputkind":"","criteria":"","unit":"선택","interp":"근감소/피로 보정","note":"호르몬치료 여부"}],"09_핵심평가요약":[{"coord":"F15","name":"기본평가","type":"text","choices":[],"section":"3) 실제 평가결과 요약","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"F16","name":"상세평가","type":"select","choices":["자동추천 유지","영양","기능","심리","집중관리 없음","없음"],"section":"3) 실제 평가결과 요약","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"F17","name":"2순위 후보","type":"select","choices":["자동추천 유지","영양","기능","심리","집중관리 없음","없음"],"section":"3) 실제 평가결과 요약","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"F18","name":"3순위 후보","type":"select","choices":["자동추천 유지","영양","기능","심리","집중관리 없음","없음"],"section":"3) 실제 평가결과 요약","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"F19","name":"암종 특이","type":"text","choices":[],"section":"3) 실제 평가결과 요약","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C31","name":"기본관리 목표","type":"text","choices":[],"section":"5) 회복목표","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C32","name":"집중관리 목표","type":"text","choices":[],"section":"5) 회복목표","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C33","name":"보조관리 목표","type":"text","choices":[],"section":"5) 회복목표","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C34","name":"암종 특이 목표","type":"select","choices":["유지","수정"],"section":"5) 회복목표","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C40","name":"기본관리 방향","type":"text","choices":[],"section":"6) 회복 방향성","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C41","name":"집중관리 방향","type":"text","choices":[],"section":"6) 회복 방향성","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C42","name":"보조관리 방향","type":"text","choices":[],"section":"6) 회복 방향성","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C43","name":"고객 설명용 한 줄 요약","type":"text","choices":[],"section":"6) 회복 방향성","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""},{"coord":"C44","name":"최종 특이사항","type":"text","choices":[],"section":"6) 회복 방향성","domain":"","ref":"","source":"","inputkind":"","criteria":"","unit":""}]},"sections":{"01_고객기본정보":[[4,"1) 고객 기본정보"],[16,"2) 의료·치료 정보"],[31,"3) 케어관리 정보"]],"02_첫방문회복상태확인":[[4,"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"],[22,"2) 선별 결과 요약 및 관리 우선순위"]],"04_증상활력복약평가":[[4,"1) 활력·증상·검사정보"],[22,"2) 복약순응도 자동계산"],[34,"3) 증상·활력·복약 요약"],[44,"4) 암종 관련 증상 보정"]],"05_영양평가":[[4,"1) 신체계측 및 체중 변화"],[20,"2) MUST 및 영양행동"],[32,"3) 위장관 증상"],[42,"4) 근감소 위험 SARC-F (영양 연계 선별)"],[52,"5) 암종 관련 영양 보정"],[62,"6) 영양평가 요약 및 회복설계 반영"]],"06_기능평가":[[4,"1) SPPB 하위검사"],[18,"2) 기능평가 요약"],[27,"3) 암종 관련 기능 보정"]],"07_심리평가":[[4,"1) PHQ-9 우울 선별: 최근 2주 기준"],[18,"2) GAD-7 불안 선별: 최근 2주 기준"],[30,"3) ISI 수면 평가: 최근 2주 기준"],[42,"4) Distress 및 재발걱정"],[52,"5) 심리평가 요약"],[66,"6) 암종 관련 심리 보정"]],"08_암종별평가":[],"09_핵심평가요약":[[4,"1) 선별결과 요약 및 관리 우선순위"],[12,"3) 실제 평가결과 요약"],[21,"4) 핵심 문제 정의"],[28,"5) 회복목표"],[37,"6) 회복 방향성"],[47,"7) 회복유형 및 목표/계획 라이브러리 매칭"]]},"calc":{"01_고객기본정보":[{"coord":"B10","name":"나이","section":"1) 고객 기본정보"}],"02_첫방문회복상태확인":[{"coord":"F7","name":"식사량","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G7","name":"식사량","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H7","name":"식사량","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I7","name":"식사량","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F8","name":"식욕","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G8","name":"식욕","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H8","name":"식욕","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I8","name":"식욕","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F9","name":"체중변화","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G9","name":"체중변화","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H9","name":"체중변화","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I9","name":"체중변화","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F10","name":"활동량","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G10","name":"활동량","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H10","name":"활동량","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I10","name":"활동량","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F11","name":"외출빈도","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G11","name":"외출빈도","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H11","name":"외출빈도","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I11","name":"외출빈도","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F12","name":"보행상태","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G12","name":"보행상태","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H12","name":"보행상태","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I12","name":"보행상태","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F13","name":"불안감","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G13","name":"불안감","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H13","name":"불안감","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I13","name":"불안감","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F14","name":"우울감","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G14","name":"우울감","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H14","name":"우울감","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I14","name":"우울감","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F15","name":"수면","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G15","name":"수면","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H15","name":"수면","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I15","name":"수면","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F16","name":"통증","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G16","name":"통증","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H16","name":"통증","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I16","name":"통증","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F17","name":"피로","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G17","name":"피로","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H17","name":"피로","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I17","name":"피로","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F18","name":"증상악화","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G18","name":"증상악화","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H18","name":"증상악화","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I18","name":"증상악화","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"F19","name":"복약누락","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"G19","name":"복약누락","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"H19","name":"복약누락","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"I19","name":"복약누락","section":"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다"},{"coord":"B25","name":"미입력 수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"C25","name":"초기 위험도 점수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"D25","name":"상세평가 필요여부","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"E25","name":"관리 우선순위","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"F25","name":"이번 3개월 관리상태","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"H25","name":"운영 판단","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"I25","name":"재평가 시점","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"B26","name":"미입력 수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"C26","name":"초기 위험도 점수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"D26","name":"상세평가 필요여부","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"E26","name":"관리 우선순위","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"F26","name":"이번 3개월 관리상태","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"H26","name":"운영 판단","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"I26","name":"재평가 시점","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"B27","name":"미입력 수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"C27","name":"초기 위험도 점수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"D27","name":"상세평가 필요여부","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"E27","name":"관리 우선순위","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"F27","name":"이번 3개월 관리상태","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"H27","name":"운영 판단","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"I27","name":"재평가 시점","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"B28","name":"미입력 수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"C28","name":"초기 위험도 점수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"D28","name":"상세평가 필요여부","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"E28","name":"관리 우선순위","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"F28","name":"이번 3개월 관리상태","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"H28","name":"운영 판단","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"I28","name":"재평가 시점","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"B29","name":"미입력 수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"C29","name":"초기 위험도 점수","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"D29","name":"상세평가 필요여부","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"E29","name":"관리 우선순위","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"F29","name":"이번 3개월 관리상태","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"H29","name":"운영 판단","section":"2) 선별 결과 요약 및 관리 우선순위"},{"coord":"I29","name":"재평가 시점","section":"2) 선별 결과 요약 및 관리 우선순위"}],"04_증상활력복약평가":[{"coord":"G7","name":"혈압","section":"1) 활력·증상·검사정보"},{"coord":"G8","name":"맥박","section":"1) 활력·증상·검사정보"},{"coord":"G9","name":"체온","section":"1) 활력·증상·검사정보"},{"coord":"G10","name":"산소포화도","section":"1) 활력·증상·검사정보"},{"coord":"G11","name":"통증 NRS","section":"1) 활력·증상·검사정보"},{"coord":"G12","name":"피로 BFI 평균","section":"1) 활력·증상·검사정보"},{"coord":"G13","name":"호흡곤란","section":"1) 활력·증상·검사정보"},{"coord":"G14","name":"감염 의심","section":"1) 활력·증상·검사정보"},{"coord":"G15","name":"최근 Hb","section":"1) 활력·증상·검사정보"},{"coord":"G16","name":"최근 Albumin","section":"1) 활력·증상·검사정보"},{"coord":"G17","name":"최근 CRP","section":"1) 활력·증상·검사정보"},{"coord":"G18","name":"의료진 주의사항","section":"1) 활력·증상·검사정보"},{"coord":"G19","name":"보호자 특이소견","section":"1) 활력·증상·검사정보"},{"coord":"F27","name":"누락횟수","section":"2) 복약순응도 자동계산"},{"coord":"F28","name":"복약순응도","section":"2) 복약순응도 자동계산"},{"coord":"F29","name":"순응도 판정","section":"2) 복약순응도 자동계산"},{"coord":"F30","name":"부작용 의심","section":"2) 복약순응도 자동계산"},{"coord":"F31","name":"복약도움 필요","section":"2) 복약순응도 자동계산"},{"coord":"B37","name":"Red Flag 수","section":"3) 증상·활력·복약 요약"},{"coord":"C37","name":"Red Flag 수","section":"3) 증상·활력·복약 요약"},{"coord":"F37","name":"Red Flag 수","section":"3) 증상·활력·복약 요약"},{"coord":"B38","name":"주의 Flag 수","section":"3) 증상·활력·복약 요약"},{"coord":"C38","name":"주의 Flag 수","section":"3) 증상·활력·복약 요약"},{"coord":"F38","name":"주의 Flag 수","section":"3) 증상·활력·복약 요약"},{"coord":"B39","name":"증상·활력 위험등급","section":"3) 증상·활력·복약 요약"},{"coord":"F39","name":"증상·활력 위험등급","section":"3) 증상·활력·복약 요약"},{"coord":"B40","name":"복약위험등급","section":"3) 증상·활력·복약 요약"},{"coord":"F40","name":"복약위험등급","section":"3) 증상·활력·복약 요약"},{"coord":"B41","name":"복약순응도","section":"3) 증상·활력·복약 요약"},{"coord":"F41","name":"복약순응도","section":"3) 증상·활력·복약 요약"},{"coord":"B42","name":"우선 조치","section":"3) 증상·활력·복약 요약"},{"coord":"F42","name":"우선 조치","section":"3) 증상·활력·복약 요약"},{"coord":"H47","name":"유방암","section":"4) 암종 관련 증상 보정"},{"coord":"I47","name":"유방암","section":"4) 암종 관련 증상 보정"},{"coord":"H48","name":"유방암","section":"4) 암종 관련 증상 보정"},{"coord":"I48","name":"유방암","section":"4) 암종 관련 증상 보정"},{"coord":"H49","name":"전립선암","section":"4) 암종 관련 증상 보정"},{"coord":"I49","name":"전립선암","section":"4) 암종 관련 증상 보정"},{"coord":"H50","name":"전립선암","section":"4) 암종 관련 증상 보정"},{"coord":"I50","name":"전립선암","section":"4) 암종 관련 증상 보정"},{"coord":"H51","name":"간암","section":"4) 암종 관련 증상 보정"},{"coord":"I51","name":"간암","section":"4) 암종 관련 증상 보정"},{"coord":"H52","name":"간암","section":"4) 암종 관련 증상 보정"},{"coord":"I52","name":"간암","section":"4) 암종 관련 증상 보정"}],"05_영양평가":[{"coord":"E9","name":"현재 체중 측정일","section":"1) 신체계측 및 체중 변화"},{"coord":"G13","name":"BMI","section":"1) 신체계측 및 체중 변화"},{"coord":"G14","name":"체중 변화량","section":"1) 신체계측 및 체중 변화"},{"coord":"G15","name":"체중 변화율","section":"1) 신체계측 및 체중 변화"},{"coord":"G16","name":"체중 변화 판정","section":"1) 신체계측 및 체중 변화"},{"coord":"G17","name":"체중 증가 원인","section":"1) 신체계측 및 체중 변화"},{"coord":"G23","name":"BMI 점수","section":"2) MUST 및 영양행동"},{"coord":"G24","name":"체중감소 점수","section":"2) MUST 및 영양행동"},{"coord":"G25","name":"급성질환 영향","section":"2) MUST 및 영양행동"},{"coord":"G26","name":"식사량","section":"2) MUST 및 영양행동"},{"coord":"G27","name":"식욕","section":"2) MUST 및 영양행동"},{"coord":"G28","name":"단백질 섭취","section":"2) MUST 및 영양행동"},{"coord":"G29","name":"수분 섭취","section":"2) MUST 및 영양행동"},{"coord":"G35","name":"오심/구토","section":"3) 위장관 증상"},{"coord":"G36","name":"조기포만감","section":"3) 위장관 증상"},{"coord":"G37","name":"설사","section":"3) 위장관 증상"},{"coord":"G38","name":"변비","section":"3) 위장관 증상"},{"coord":"G39","name":"연하곤란","section":"3) 위장관 증상"},{"coord":"G45","name":"근력","section":"4) 근감소 위험 SARC-F (영양 연계 선별)"},{"coord":"G46","name":"보행보조","section":"4) 근감소 위험 SARC-F (영양 연계 선별)"},{"coord":"G47","name":"의자에서 일어나기","section":"4) 근감소 위험 SARC-F (영양 연계 선별)"},{"coord":"G48","name":"계단 오르기","section":"4) 근감소 위험 SARC-F (영양 연계 선별)"},{"coord":"G49","name":"낙상","section":"4) 근감소 위험 SARC-F (영양 연계 선별)"},{"coord":"G55","name":"덤핑 의심 증상","section":"5) 암종 관련 영양 보정"},{"coord":"G56","name":"식후 불편감","section":"5) 암종 관련 영양 보정"},{"coord":"G57","name":"장루 여부","section":"5) 암종 관련 영양 보정"},{"coord":"G58","name":"배변 변화","section":"5) 암종 관련 영양 보정"},{"coord":"G59","name":"복수·부종 의심","section":"5) 암종 관련 영양 보정"},{"coord":"B65","name":"결과","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"C65","name":"자동판정","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"E65","name":"회복설계 반영","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"B66","name":"결과","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"C66","name":"자동판정","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"E66","name":"회복설계 반영","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"B67","name":"결과","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"C67","name":"자동판정","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"E67","name":"회복설계 반영","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"B68","name":"결과","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"C68","name":"자동판정","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"E68","name":"회복설계 반영","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"B69","name":"결과","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"C69","name":"자동판정","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"E69","name":"회복설계 반영","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"B70","name":"결과","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"C70","name":"자동판정","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"E70","name":"회복설계 반영","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"B71","name":"결과","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"C71","name":"자동판정","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"E71","name":"회복설계 반영","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"B72","name":"결과","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"C72","name":"자동판정","section":"6) 영양평가 요약 및 회복설계 반영"},{"coord":"E72","name":"회복설계 반영","section":"6) 영양평가 요약 및 회복설계 반영"}],"06_기능평가":[{"coord":"G7","name":"균형검사 결과","section":"1) SPPB 하위검사"},{"coord":"G8","name":"4m 보행 시간","section":"1) SPPB 하위검사"},{"coord":"G9","name":"4m 보행속도","section":"1) SPPB 하위검사"},{"coord":"G10","name":"5회 의자 일어서기","section":"1) SPPB 하위검사"},{"coord":"G11","name":"SPPB 총점","section":"1) SPPB 하위검사"},{"coord":"G12","name":"최근 1주 외출","section":"1) SPPB 하위검사"},{"coord":"G13","name":"운동실천","section":"1) SPPB 하위검사"},{"coord":"G14","name":"최근 낙상","section":"1) SPPB 하위검사"},{"coord":"G15","name":"낙상 두려움","section":"1) SPPB 하위검사"},{"coord":"B21","name":"값","section":"2) 기능평가 요약"},{"coord":"F21","name":"기능계획 반영","section":"2) 기능평가 요약"},{"coord":"B22","name":"값","section":"2) 기능평가 요약"},{"coord":"F22","name":"기능계획 반영","section":"2) 기능평가 요약"},{"coord":"B23","name":"값","section":"2) 기능평가 요약"},{"coord":"F23","name":"기능계획 반영","section":"2) 기능평가 요약"},{"coord":"B24","name":"값","section":"2) 기능평가 요약"},{"coord":"F24","name":"기능계획 반영","section":"2) 기능평가 요약"},{"coord":"B25","name":"값","section":"2) 기능평가 요약"},{"coord":"F25","name":"기능계획 반영","section":"2) 기능평가 요약"},{"coord":"G30","name":"어깨 ROM 제한","section":"3) 암종 관련 기능 보정"},{"coord":"H30","name":"어깨 ROM 제한","section":"3) 암종 관련 기능 보정"},{"coord":"G31","name":"상지 사용 불편","section":"3) 암종 관련 기능 보정"},{"coord":"H31","name":"상지 사용 불편","section":"3) 암종 관련 기능 보정"},{"coord":"G32","name":"근력저하·피로로 활동 제한","section":"3) 암종 관련 기능 보정"},{"coord":"H32","name":"근력저하·피로로 활동 제한","section":"3) 암종 관련 기능 보정"},{"coord":"G33","name":"장루로 인한 활동 제한","section":"3) 암종 관련 기능 보정"},{"coord":"H33","name":"장루로 인한 활동 제한","section":"3) 암종 관련 기능 보정"}],"07_심리평가":[{"coord":"C45","name":"Distress Thermometer","section":"4) Distress 및 재발걱정"},{"coord":"C46","name":"재발걱정 빈도","section":"4) Distress 및 재발걱정"},{"coord":"C47","name":"신체감각 과해석","section":"4) Distress 및 재발걱정"},{"coord":"C48","name":"검사/외래 불안","section":"4) Distress 및 재발걱정"},{"coord":"C49","name":"사회적 위축","section":"4) Distress 및 재발걱정"},{"coord":"B55","name":"PHQ-9 총점","section":"5) 심리평가 요약"},{"coord":"F55","name":"PHQ-9 총점","section":"5) 심리평가 요약"},{"coord":"B56","name":"PHQ-9 9번","section":"5) 심리평가 요약"},{"coord":"F56","name":"PHQ-9 9번","section":"5) 심리평가 요약"},{"coord":"B57","name":"GAD-7 총점","section":"5) 심리평가 요약"},{"coord":"F57","name":"GAD-7 총점","section":"5) 심리평가 요약"},{"coord":"B58","name":"ISI 총점","section":"5) 심리평가 요약"},{"coord":"F58","name":"ISI 총점","section":"5) 심리평가 요약"},{"coord":"B59","name":"Distress","section":"5) 심리평가 요약"},{"coord":"F59","name":"Distress","section":"5) 심리평가 요약"},{"coord":"B60","name":"재발걱정 점수","section":"5) 심리평가 요약"},{"coord":"F60","name":"재발걱정 점수","section":"5) 심리평가 요약"},{"coord":"B61","name":"심리위험점수","section":"5) 심리평가 요약"},{"coord":"F61","name":"심리위험점수","section":"5) 심리평가 요약"},{"coord":"B62","name":"심리위험등급","section":"5) 심리평가 요약"},{"coord":"F62","name":"심리위험등급","section":"5) 심리평가 요약"},{"coord":"B63","name":"추천 심리유형","section":"5) 심리평가 요약"},{"coord":"F63","name":"추천 심리유형","section":"5) 심리평가 요약"},{"coord":"B64","name":"Red Flag","section":"5) 심리평가 요약"},{"coord":"F64","name":"Red Flag","section":"5) 심리평가 요약"},{"coord":"F69","name":"재발 불안","section":"6) 암종 관련 심리 보정"},{"coord":"G69","name":"재발 불안","section":"6) 암종 관련 심리 보정"},{"coord":"F70","name":"검사/외래 불안","section":"6) 암종 관련 심리 보정"},{"coord":"G70","name":"검사/외래 불안","section":"6) 암종 관련 심리 보정"},{"coord":"F71","name":"사회복귀 부담","section":"6) 암종 관련 심리 보정"},{"coord":"G71","name":"사회복귀 부담","section":"6) 암종 관련 심리 보정"},{"coord":"F72","name":"신체상 변화 부담","section":"6) 암종 관련 심리 보정"},{"coord":"G72","name":"신체상 변화 부담","section":"6) 암종 관련 심리 보정"}],"08_암종별평가":[{"coord":"G5","name":"위암","section":""},{"coord":"G6","name":"위암","section":""},{"coord":"G7","name":"위암","section":""},{"coord":"G8","name":"위암","section":""},{"coord":"G9","name":"대장암","section":""},{"coord":"G10","name":"대장암","section":""},{"coord":"G11","name":"대장암","section":""},{"coord":"G12","name":"간암","section":""},{"coord":"G13","name":"간암","section":""},{"coord":"G14","name":"간암","section":""},{"coord":"G15","name":"유방암","section":""},{"coord":"G16","name":"유방암","section":""},{"coord":"G17","name":"유방암","section":""},{"coord":"G18","name":"전립선암","section":""},{"coord":"G19","name":"전립선암","section":""},{"coord":"G20","name":"전립선암","section":""},{"coord":"B27","name":"위암","section":""},{"coord":"C27","name":"위암","section":""},{"coord":"B28","name":"대장암","section":""},{"coord":"C28","name":"대장암","section":""},{"coord":"B29","name":"간암","section":""},{"coord":"C29","name":"간암","section":""},{"coord":"B30","name":"유방암","section":""},{"coord":"C30","name":"유방암","section":""},{"coord":"B31","name":"전립선암","section":""},{"coord":"C31","name":"전립선암","section":""}],"09_핵심평가요약":[{"coord":"B7","name":"영양","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"C7","name":"영양","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"D7","name":"영양","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"E7","name":"영양","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"F7","name":"영양","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"G7","name":"영양","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"B8","name":"기능","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"C8","name":"기능","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"D8","name":"기능","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"E8","name":"기능","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"F8","name":"기능","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"G8","name":"기능","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"B9","name":"심리","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"C9","name":"심리","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"D9","name":"심리","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"E9","name":"심리","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"F9","name":"심리","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"G9","name":"심리","section":"1) 선별결과 요약 및 관리 우선순위"},{"coord":"B15","name":"기본평가","section":"3) 실제 평가결과 요약"},{"coord":"C15","name":"기본평가","section":"3) 실제 평가결과 요약"},{"coord":"D15","name":"기본평가","section":"3) 실제 평가결과 요약"},{"coord":"E15","name":"기본평가","section":"3) 실제 평가결과 요약"},{"coord":"G15","name":"기본평가","section":"3) 실제 평가결과 요약"},{"coord":"B16","name":"상세평가","section":"3) 실제 평가결과 요약"},{"coord":"C16","name":"상세평가","section":"3) 실제 평가결과 요약"},{"coord":"D16","name":"상세평가","section":"3) 실제 평가결과 요약"},{"coord":"E16","name":"상세평가","section":"3) 실제 평가결과 요약"},{"coord":"G16","name":"상세평가","section":"3) 실제 평가결과 요약"},{"coord":"B17","name":"2순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"C17","name":"2순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"D17","name":"2순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"E17","name":"2순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"G17","name":"2순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"B18","name":"3순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"C18","name":"3순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"D18","name":"3순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"E18","name":"3순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"G18","name":"3순위 후보","section":"3) 실제 평가결과 요약"},{"coord":"A23","name":"","section":"4) 핵심 문제 정의"},{"coord":"B31","name":"기본관리 목표","section":"5) 회복목표"},{"coord":"B32","name":"집중관리 목표","section":"5) 회복목표"},{"coord":"B33","name":"보조관리 목표","section":"5) 회복목표"},{"coord":"B40","name":"기본관리 방향","section":"6) 회복 방향성"},{"coord":"B41","name":"집중관리 방향","section":"6) 회복 방향성"},{"coord":"B42","name":"보조관리 방향","section":"6) 회복 방향성"},{"coord":"B43","name":"고객 설명용 한 줄 요약","section":"6) 회복 방향성"},{"coord":"B50","name":"집중관리 회복유형","section":"7) 회복유형 및 목표/계획 라이브러리 매칭"},{"coord":"D50","name":"집중관리 회복유형","section":"7) 회복유형 및 목표/계획 라이브러리 매칭"},{"coord":"B51","name":"보조관리 회복유형","section":"7) 회복유형 및 목표/계획 라이브러리 매칭"},{"coord":"D51","name":"보조관리 회복유형","section":"7) 회복유형 및 목표/계획 라이브러리 매칭"},{"coord":"B52","name":"암종보정","section":"7) 회복유형 및 목표/계획 라이브러리 매칭"}]},"example":{"01_고객기본정보!B7":"서지은","01_고객기본정보!B8":"여","01_고객기본정보!B9":"1998-05-18","01_고객기본정보!B11":"010-6343-6791","01_고객기본정보!B12":"서울시 서초구 반포대로 222","01_고객기본정보!B13":"","01_고객기본정보!B14":"","01_고객기본정보!B19":"유방암","01_고객기본정보!B20":"","01_고객기본정보!B21":"항암 중","01_고객기본정보!B22":"서울성모병원","01_고객기본정보!B23":"2026-05-21","01_고객기본정보!B24":"","01_고객기본정보!B25":"","01_고객기본정보!B26":"","01_고객기본정보!B27":"","01_고객기본정보!B28":"","01_고객기본정보!B29":"","01_고객기본정보!B34":"2026-06-12","01_고객기본정보!B35":"2026-06-12","01_고객기본정보!B36":"","01_고객기본정보!B37":"","01_고객기본정보!B38":"서지은","01_고객기본정보!B39":"02-3478-9125","01_고객기본정보!B40":"","01_고객기본정보!B41":"","02_첫방문회복상태확인!E7":"경도 감소","02_첫방문회복상태확인!E8":"감소","02_첫방문회복상태확인!E9":"5~10% 감소","02_첫방문회복상태확인!E10":"매우 감소","02_첫방문회복상태확인!E11":"거의 없음","02_첫방문회복상태확인!E12":"불안정","02_첫방문회복상태확인!E13":"낮음","02_첫방문회복상태확인!E14":"없음","02_첫방문회복상태확인!E15":"양호","02_첫방문회복상태확인!E16":"없음","02_첫방문회복상태확인!E17":"높음","02_첫방문회복상태확인!E18":"없음","02_첫방문회복상태확인!E19":"없음","02_첫방문회복상태확인!J25":"","02_첫방문회복상태확인!J26":"","02_첫방문회복상태확인!J27":"","02_첫방문회복상태확인!J28":"","02_첫방문회복상태확인!J29":"","04_증상활력복약평가!C7":"136/84","04_증상활력복약평가!C8":82,"04_증상활력복약평가!C9":36.4,"04_증상활력복약평가!C10":97,"04_증상활력복약평가!C11":1,"04_증상활력복약평가!C12":7,"04_증상활력복약평가!C13":"없음","04_증상활력복약평가!D13":"선택","04_증상활력복약평가!C14":"없음","04_증상활력복약평가!D14":"선택","04_증상활력복약평가!C15":11.8,"04_증상활력복약평가!C16":3.7,"04_증상활력복약평가!C17":0.5,"04_증상활력복약평가!C18":"ADT 관련 근감소, 골밀도 관리 필요","04_증상활력복약평가!C19":"계단 오르기 힘들어함","04_증상활력복약평가!B25":14,"04_증상활력복약평가!B26":14,"04_증상활력복약평가!B30":"없음","04_증상활력복약평가!B31":"불필요","04_증상활력복약평가!F47":"선택하세요","04_증상활력복약평가!F48":"선택하세요","04_증상활력복약평가!F49":"없음","04_증상활력복약평가!F50":"없음","04_증상활력복약평가!F51":"선택하세요","04_증상활력복약평가!F52":"선택하세요","05_영양평가!B7":"현재 또는 최근 병원기록","05_영양평가!E7":167,"05_영양평가!B8":"방문 당일","05_영양평가!E8":66,"05_영양평가!B9":"방문 당일","05_영양평가!B10":"표준 운영 기준","05_영양평가!B11":"퇴원일 또는 비교일","05_영양평가!E11":"","05_영양평가!E12":"","05_영양평가!E17":"선택하세요","05_영양평가!C23":"현재","05_영양평가!C24":"기준체중→현재","05_영양평가!C25":"최근 5일 전망","05_영양평가!E25":"선택하세요","05_영양평가!C26":"최근 1주","05_영양평가!E26":"선택하세요","05_영양평가!C27":"최근 1주","05_영양평가!E27":"선택하세요","05_영양평가!C28":"최근 1주","05_영양평가!E28":"선택하세요","05_영양평가!C29":"최근 1주","05_영양평가!E29":"선택하세요","05_영양평가!E35":"선택하세요","05_영양평가!E36":"선택하세요","05_영양평가!E37":"선택하세요","05_영양평가!E38":"선택하세요","05_영양평가!E39":"선택하세요","05_영양평가!E45":"선택하세요","05_영양평가!E46":"선택하세요","05_영양평가!E47":"선택하세요","05_영양평가!E48":"선택하세요","05_영양평가!E49":"선택하세요","05_영양평가!E55":"선택하세요","05_영양평가!E56":"선택하세요","05_영양평가!E57":"선택하세요","05_영양평가!E58":"선택하세요","05_영양평가!E59":"선택하세요","05_영양평가!F65":"","05_영양평가!F66":"","05_영양평가!F67":"","05_영양평가!F68":"","05_영양평가!F69":"","05_영양평가!F70":"","05_영양평가!F71":"","05_영양평가!F72":"","06_기능평가!C7":"Semi-tandem 10초 이상","06_기능평가!C8":5.3,"06_기능평가!C12":"거의 없음","06_기능평가!C13":"0회","06_기능평가!C14":"예","06_기능평가!C15":"있음","06_기능평가!E30":"선택하세요","06_기능평가!E31":"선택하세요","06_기능평가!E32":"심함","06_기능평가!E33":"선택하세요","07_심리평가!C7":"선택하세요","07_심리평가!C8":"선택하세요","07_심리평가!C9":"선택하세요","07_심리평가!C10":"선택하세요","07_심리평가!C11":"선택하세요","07_심리평가!C12":"선택하세요","07_심리평가!C13":"선택하세요","07_심리평가!C14":"선택하세요","07_심리평가!C15":"선택하세요","07_심리평가!C21":"선택하세요","07_심리평가!C22":"선택하세요","07_심리평가!C23":"선택하세요","07_심리평가!C24":"선택하세요","07_심리평가!C25":"선택하세요","07_심리평가!C26":"선택하세요","07_심리평가!C27":"선택하세요","07_심리평가!C33":"선택하세요","07_심리평가!C34":"선택하세요","07_심리평가!C35":"선택하세요","07_심리평가!C36":"선택하세요","07_심리평가!C37":"선택하세요","07_심리평가!C38":"선택하세요","07_심리평가!C39":"선택하세요","07_심리평가!B45":"","07_심리평가!B46":"선택하세요","07_심리평가!B47":"선택하세요","07_심리평가!B48":"선택하세요","07_심리평가!B49":"선택하세요","07_심리평가!E69":"선택하세요","07_심리평가!E70":"선택하세요","07_심리평가!E71":"선택하세요","07_심리평가!E72":"선택하세요","08_암종별평가!C5":"선택하세요","08_암종별평가!C6":"선택하세요","08_암종별평가!C7":"","08_암종별평가!C8":"선택하세요","08_암종별평가!C9":"선택하세요","08_암종별평가!C10":"선택하세요","08_암종별평가!C11":"선택하세요","08_암종별평가!C12":"선택하세요","08_암종별평가!C13":"선택하세요","08_암종별평가!C14":"선택하세요","08_암종별평가!C15":"선택하세요","08_암종별평가!C16":"선택하세요","08_암종별평가!C17":"선택하세요","08_암종별평가!C18":"없음","08_암종별평가!C19":"없음","08_암종별평가!C20":"예","09_핵심평가요약!F15":"","09_핵심평가요약!F16":"","09_핵심평가요약!F17":"","09_핵심평가요약!F18":"","09_핵심평가요약!F19":"","09_핵심평가요약!C31":"","09_핵심평가요약!C32":"","09_핵심평가요약!C33":"","09_핵심평가요약!C34":"","09_핵심평가요약!C40":"","09_핵심평가요약!C41":"","09_핵심평가요약!C42":"","09_핵심평가요약!C43":"","09_핵심평가요약!C44":"","06_기능평가!C10":18},"empty":{"01_고객기본정보!B7":"","01_고객기본정보!B8":"","01_고객기본정보!B9":"","01_고객기본정보!B11":"","01_고객기본정보!B12":"","01_고객기본정보!B13":"","01_고객기본정보!B14":"","01_고객기본정보!B19":"","01_고객기본정보!B20":"","01_고객기본정보!B21":"","01_고객기본정보!B22":"","01_고객기본정보!B23":"","01_고객기본정보!B24":"","01_고객기본정보!B25":"","01_고객기본정보!B26":"","01_고객기본정보!B27":"","01_고객기본정보!B28":"","01_고객기본정보!B29":"","01_고객기본정보!B34":"","01_고객기본정보!B35":"","01_고객기본정보!B36":"","01_고객기본정보!B37":"","01_고객기본정보!B38":"","01_고객기본정보!B39":"","01_고객기본정보!B40":"","01_고객기본정보!B41":"","02_첫방문회복상태확인!E7":"","02_첫방문회복상태확인!E8":"","02_첫방문회복상태확인!E9":"","02_첫방문회복상태확인!E10":"","02_첫방문회복상태확인!E11":"","02_첫방문회복상태확인!E12":"","02_첫방문회복상태확인!E13":"","02_첫방문회복상태확인!E14":"","02_첫방문회복상태확인!E15":"","02_첫방문회복상태확인!E16":"","02_첫방문회복상태확인!E17":"","02_첫방문회복상태확인!E18":"","02_첫방문회복상태확인!E19":"","02_첫방문회복상태확인!J25":"","02_첫방문회복상태확인!J26":"","02_첫방문회복상태확인!J27":"","02_첫방문회복상태확인!J28":"","02_첫방문회복상태확인!J29":"","04_증상활력복약평가!C7":"","04_증상활력복약평가!C8":"","04_증상활력복약평가!C9":"","04_증상활력복약평가!C10":"","04_증상활력복약평가!C11":"","04_증상활력복약평가!C12":"","04_증상활력복약평가!C13":"","04_증상활력복약평가!D13":"","04_증상활력복약평가!C14":"","04_증상활력복약평가!D14":"","04_증상활력복약평가!C15":"","04_증상활력복약평가!C16":"","04_증상활력복약평가!C17":"","04_증상활력복약평가!C18":"","04_증상활력복약평가!C19":"","04_증상활력복약평가!B25":"","04_증상활력복약평가!B26":"","04_증상활력복약평가!B30":"","04_증상활력복약평가!B31":"","04_증상활력복약평가!F47":"","04_증상활력복약평가!F48":"","04_증상활력복약평가!F49":"","04_증상활력복약평가!F50":"","04_증상활력복약평가!F51":"","04_증상활력복약평가!F52":"","05_영양평가!B7":"","05_영양평가!E7":"","05_영양평가!B8":"","05_영양평가!E8":"","05_영양평가!B9":"","05_영양평가!B10":"","05_영양평가!B11":"","05_영양평가!E11":"","05_영양평가!E12":"","05_영양평가!E17":"","05_영양평가!C23":"","05_영양평가!C24":"","05_영양평가!C25":"","05_영양평가!E25":"","05_영양평가!C26":"","05_영양평가!E26":"","05_영양평가!C27":"","05_영양평가!E27":"","05_영양평가!C28":"","05_영양평가!E28":"","05_영양평가!C29":"","05_영양평가!E29":"","05_영양평가!E35":"","05_영양평가!E36":"","05_영양평가!E37":"","05_영양평가!E38":"","05_영양평가!E39":"","05_영양평가!E45":"","05_영양평가!E46":"","05_영양평가!E47":"","05_영양평가!E48":"","05_영양평가!E49":"","05_영양평가!E55":"","05_영양평가!E56":"","05_영양평가!E57":"","05_영양평가!E58":"","05_영양평가!E59":"","05_영양평가!F65":"","05_영양평가!F66":"","05_영양평가!F67":"","05_영양평가!F68":"","05_영양평가!F69":"","05_영양평가!F70":"","05_영양평가!F71":"","05_영양평가!F72":"","06_기능평가!C7":"","06_기능평가!C8":"","06_기능평가!C12":"","06_기능평가!C13":"","06_기능평가!C14":"","06_기능평가!C15":"","06_기능평가!E30":"","06_기능평가!E31":"","06_기능평가!E32":"","06_기능평가!E33":"","07_심리평가!C7":"","07_심리평가!C8":"","07_심리평가!C9":"","07_심리평가!C10":"","07_심리평가!C11":"","07_심리평가!C12":"","07_심리평가!C13":"","07_심리평가!C14":"","07_심리평가!C15":"","07_심리평가!C21":"","07_심리평가!C22":"","07_심리평가!C23":"","07_심리평가!C24":"","07_심리평가!C25":"","07_심리평가!C26":"","07_심리평가!C27":"","07_심리평가!C33":"","07_심리평가!C34":"","07_심리평가!C35":"","07_심리평가!C36":"","07_심리평가!C37":"","07_심리평가!C38":"","07_심리평가!C39":"","07_심리평가!B45":"","07_심리평가!B46":"","07_심리평가!B47":"","07_심리평가!B48":"","07_심리평가!B49":"","07_심리평가!E69":"","07_심리평가!E70":"","07_심리평가!E71":"","07_심리평가!E72":"","08_암종별평가!C5":"","08_암종별평가!C6":"","08_암종별평가!C7":"","08_암종별평가!C8":"","08_암종별평가!C9":"","08_암종별평가!C10":"","08_암종별평가!C11":"","08_암종별평가!C12":"","08_암종별평가!C13":"","08_암종별평가!C14":"","08_암종별평가!C15":"","08_암종별평가!C16":"","08_암종별평가!C17":"","08_암종별평가!C18":"","08_암종별평가!C19":"","08_암종별평가!C20":"","09_핵심평가요약!F15":"","09_핵심평가요약!F16":"","09_핵심평가요약!F17":"","09_핵심평가요약!F18":"","09_핵심평가요약!F19":"","09_핵심평가요약!C31":"","09_핵심평가요약!C32":"","09_핵심평가요약!C33":"","09_핵심평가요약!C34":"","09_핵심평가요약!C40":"","09_핵심평가요약!C41":"","09_핵심평가요약!C42":"","09_핵심평가요약!C43":"","09_핵심평가요약!C44":"","06_기능평가!C10":""},"calchdr":{"01_고객기본정보":{"B10":"여"},"02_첫방문회복상태확인":{"F7":"점수","G7":"상세평가 추천","H7":"상세평가 시트","I7":"입력상태","F8":"점수","G8":"상세평가 추천","H8":"상세평가 시트","I8":"입력상태","F9":"점수","G9":"상세평가 추천","H9":"상세평가 시트","I9":"입력상태","F10":"점수","G10":"상세평가 추천","H10":"상세평가 시트","I10":"입력상태","F11":"점수","G11":"상세평가 추천","H11":"상세평가 시트","I11":"입력상태","F12":"점수","G12":"상세평가 추천","H12":"상세평가 시트","I12":"입력상태","F13":"점수","G13":"상세평가 추천","H13":"상세평가 시트","I13":"입력상태","F14":"점수","G14":"상세평가 추천","H14":"상세평가 시트","I14":"입력상태","F15":"점수","G15":"상세평가 추천","H15":"상세평가 시트","I15":"입력상태","F16":"점수","G16":"상세평가 추천","H16":"상세평가 시트","I16":"입력상태","F17":"점수","G17":"상세평가 추천","H17":"상세평가 시트","I17":"입력상태","F18":"점수","G18":"상세평가 추천","H18":"상세평가 시트","I18":"입력상태","F19":"점수","G19":"상세평가 추천","H19":"상세평가 시트","I19":"입력상태","B25":"미입력 수","C25":"초기 위험도 점수","D25":"상세평가 필요여부","E25":"관리 우선순위","F25":"이번 3개월 관리상태","H25":"운영 판단","I25":"재평가 시점","B26":"미입력 수","C26":"초기 위험도 점수","D26":"상세평가 필요여부","E26":"관리 우선순위","F26":"이번 3개월 관리상태","H26":"운영 판단","I26":"재평가 시점","B27":"미입력 수","C27":"초기 위험도 점수","D27":"상세평가 필요여부","E27":"관리 우선순위","F27":"이번 3개월 관리상태","H27":"운영 판단","I27":"재평가 시점","B28":"미입력 수","C28":"초기 위험도 점수","D28":"상세평가 필요여부","E28":"관리 우선순위","F28":"이번 3개월 관리상태","H28":"운영 판단","I28":"재평가 시점","B29":"미입력 수","C29":"초기 위험도 점수","D29":"상세평가 필요여부","E29":"관리 우선순위","F29":"이번 3개월 관리상태","H29":"운영 판단","I29":"재평가 시점"},"04_증상활력복약평가":{"G7":"Flag","G8":"Flag","G9":"Flag","G10":"Flag","G11":"Flag","G12":"Flag","G13":"Flag","G14":"Flag","G15":"Flag","G16":"Flag","G17":"Flag","G18":"Flag","G19":"Flag","F27":"자동계산","F28":"자동계산","F29":"자동계산","F30":"자동계산","F31":"자동계산","B37":"값","C37":"자동판정","F37":"증상·복약계획 반영","B38":"값","C38":"자동판정","F38":"증상·복약계획 반영","B39":"값","F39":"증상·복약계획 반영","B40":"값","F40":"증상·복약계획 반영","B41":"값","F41":"증상·복약계획 반영","B42":"값","F42":"증상·복약계획 반영","H47":"Flag","I47":"조치/계획 반영","H48":"Flag","I48":"조치/계획 반영","H49":"Flag","I49":"조치/계획 반영","H50":"Flag","I50":"조치/계획 반영","H51":"Flag","I51":"조치/계획 반영","H52":"Flag","I52":"조치/계획 반영"},"05_영양평가":{"E9":"입력값","G13":"자동계산/판정","G14":"자동계산/판정","G15":"자동계산/판정","G16":"자동계산/판정","G17":"자동계산/판정","G23":"자동점수","G24":"자동점수","G25":"자동점수","G26":"자동점수","G27":"자동점수","G28":"자동점수","G29":"자동점수","G35":"자동점수","G36":"자동점수","G37":"자동점수","G38":"자동점수","G39":"자동점수","G45":"자동점수","G46":"자동점수","G47":"자동점수","G48":"자동점수","G49":"자동점수","G55":"자동점수","G56":"자동점수","G57":"자동점수","G58":"자동점수","G59":"자동점수","B65":"결과","C65":"자동판정","E65":"회복설계 반영","B66":"결과","C66":"자동판정","E66":"회복설계 반영","B67":"결과","C67":"자동판정","E67":"회복설계 반영","B68":"결과","C68":"자동판정","E68":"회복설계 반영","B69":"결과","C69":"자동판정","E69":"회복설계 반영","B70":"결과","C70":"자동판정","E70":"회복설계 반영","B71":"결과","C71":"자동판정","E71":"회복설계 반영","B72":"결과","C72":"자동판정","E72":"회복설계 반영"},"06_기능평가":{"G7":"자동점수","G8":"자동점수","G9":"자동점수","G10":"자동점수","G11":"자동점수","G12":"자동점수","G13":"자동점수","G14":"자동점수","G15":"자동점수","B21":"값","F21":"기능계획 반영","B22":"값","F22":"기능계획 반영","B23":"값","F23":"기능계획 반영","B24":"값","F24":"기능계획 반영","B25":"값","F25":"기능계획 반영","G30":"자동점수","H30":"기능계획 반영","G31":"자동점수","H31":"기능계획 반영","G32":"자동점수","H32":"기능계획 반영","G33":"자동점수","H33":"기능계획 반영"},"07_심리평가":{"C45":"점수","C46":"점수","C47":"점수","C48":"점수","C49":"점수","B55":"값","F55":"심리계획 반영","B56":"값","F56":"심리계획 반영","B57":"값","F57":"심리계획 반영","B58":"값","F58":"심리계획 반영","B59":"값","F59":"심리계획 반영","B60":"값","F60":"심리계획 반영","B61":"값","F61":"심리계획 반영","B62":"값","F62":"심리계획 반영","B63":"값","F63":"심리계획 반영","B64":"값","F64":"심리계획 반영","F69":"자동점수","G69":"심리계획 반영","F70":"자동점수","G70":"심리계획 반영","F71":"자동점수","G71":"심리계획 반영","F72":"자동점수","G72":"심리계획 반영"},"08_암종별평가":{"G5":"점수","G6":"점수","G7":"점수","G8":"","G9":"","G10":"","G11":"","G12":"","G13":"","G14":"","G15":"","G16":"","G17":"","G18":"","G19":"","G20":"","B27":"점수합계","C27":"관리강도","B28":"점수합계","C28":"관리강도","B29":"점수합계","C29":"관리강도","B30":"","C30":"","B31":"","C31":""},"09_핵심평가요약":{"B7":"미입력 수","C7":"초기 위험도","D7":"상세평가 필요","E7":"관리 우선순위","F7":"이번 3개월 관리상태","G7":"운영 판단","B8":"미입력 수","C8":"초기 위험도","D8":"상세평가 필요","E8":"관리 우선순위","F8":"이번 3개월 관리상태","G8":"운영 판단","B9":"미입력 수","C9":"초기 위험도","D9":"상세평가 필요","E9":"관리 우선순위","F9":"이번 3개월 관리상태","G9":"운영 판단","B15":"평가영역","C15":"결과요약","D15":"관리구분","E15":"핵심 근거/주의","G15":"고객 설명","B16":"평가영역","C16":"결과요약","D16":"관리구분","E16":"핵심 근거/주의","G16":"고객 설명","B17":"평가영역","C17":"결과요약","D17":"관리구분","E17":"핵심 근거/주의","G17":"고객 설명","B18":"평가영역","C18":"결과요약","D18":"관리구분","E18":"핵심 근거/주의","G18":"고객 설명","A23":"4) 핵심 문제 정의","B31":"자동추천 목표","B32":"자동추천 목표","B33":"자동추천 목표","B40":"자동추천 방향성","B41":"자동추천 방향성","B42":"자동추천 방향성","B43":"자동추천 방향성","B50":"자동결과","D50":"코드","B51":"자동결과","D51":"코드","B52":"자동결과"}},"inlinePolicy":{"01_고객기본정보":{"1) 고객 기본정보":{"mode":"ROW"}},"02_첫방문회복상태확인":{"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다":{"mode":"ROW"},"2) 선별 결과 요약 및 관리 우선순위":{"mode":"SUMMARY","firstcol":true,"mergeInputs":true}},"04_증상활력복약평가":{"1) 활력·증상·검사정보":{"mode":"ROW"},"2) 복약순응도 자동계산":{"mode":"SUMMARY"},"3) 증상·활력·복약 요약":{"mode":"SUMMARY"},"4) 암종 관련 증상 보정":{"mode":"ROW"}},"05_영양평가":{"1) 신체계측 및 체중 변화":{"mode":"ROW"},"6) 영양평가 요약 및 회복설계 반영":{"mode":"SUMMARY","mergeInputs":true}},"06_기능평가":{"2) 기능평가 요약":{"mode":"SUMMARY"},"3) 암종 관련 기능 보정":{"mode":"ROW","dropHdr":["자동점수"]}},"07_심리평가":{"5) 심리평가 요약":{"mode":"SUMMARY"},"6) 암종 관련 심리 보정":{"mode":"ROW"}},"08_암종별평가":{"__mgmt_inline":true},"09_핵심평가요약":{"1) 선별결과 요약 및 관리 우선순위":{"mode":"SUMMARY","firstcol":true}}},"rowAlabel":{"01_고객기본정보":{"10":"나이"},"02_첫방문회복상태확인":{"7":"영양","8":"영양","9":"영양","10":"기능","11":"기능","12":"기능","13":"심리","14":"심리","15":"심리","16":"증상","17":"증상","18":"증상","19":"복약","25":"영양","26":"기능","27":"심리","28":"증상·활력","29":"복약"},"04_증상활력복약평가":{"7":"활력","8":"활력","9":"활력","10":"활력","11":"증상","12":"증상","13":"증상","14":"증상","15":"병원기록","16":"병원기록","17":"병원기록","18":"병원기록","19":"기타","27":"누락횟수","28":"복약순응도","29":"순응도 판정","30":"부작용 의심","31":"복약도움 필요","37":"Red Flag 수","38":"주의 Flag 수","39":"증상·활력 위험등급","40":"복약위험등급","41":"복약순응도","42":"우선 조치","47":"유방암","48":"유방암","49":"전립선암","50":"전립선암","51":"간암","52":"간암"},"05_영양평가":{"9":"현재 체중 측정일","13":"BMI","14":"체중 변화량","15":"체중 변화율","16":"체중 변화 판정","17":"체중 증가 원인","23":"MUST","24":"MUST","25":"MUST","26":"영양행동","27":"영양행동","28":"영양행동","29":"영양행동","35":"위장관","36":"위장관","37":"위장관","38":"위장관","39":"위장관","45":"SARC-F","46":"SARC-F","47":"SARC-F","48":"SARC-F","49":"SARC-F","55":"위암/상부위장관","56":"위암/상부위장관","57":"대장암/장루","58":"대장암/장루","59":"간암/복수","65":"MUST 총점","66":"SARC-F 총점","67":"암종 영양 보정","68":"영양위험점수","69":"체중증가 알림","70":"추천 영양유형","71":"영양관리 우선순위","72":"미입력 수"},"06_기능평가":{"7":"균형","8":"보행","9":"보행","10":"의자","11":"SPPB","12":"활동","13":"활동","14":"낙상","15":"낙상","21":"SPPB 총점","22":"SPPB 등급","23":"기능위험점수","24":"추천 기능유형","25":"Red Flag","30":"유방암","31":"유방암","32":"전립선암/ADT","33":"대장암/장루"},"07_심리평가":{"45":"Distress Thermometer","46":"재발걱정 빈도","47":"신체감각 과해석","48":"검사/외래 불안","49":"사회적 위축","55":"PHQ-9 총점","56":"PHQ-9 9번","57":"GAD-7 총점","58":"ISI 총점","59":"Distress","60":"재발걱정 점수","61":"심리위험점수","62":"심리위험등급","63":"추천 심리유형","64":"Red Flag","69":"재발 불안","70":"검사/외래 불안","71":"사회복귀 부담","72":"신체상 변화 부담"},"08_암종별평가":{"5":"위암","6":"위암","7":"위암","8":"위암","9":"대장암","10":"대장암","11":"대장암","12":"간암","13":"간암","14":"간암","15":"유방암","16":"유방암","17":"유방암","18":"전립선암","19":"전립선암","20":"전립선암","27":"위암","28":"대장암","29":"간암","30":"유방암","31":"전립선암"},"09_핵심평가요약":{"7":"영양","8":"기능","9":"심리","15":"기본평가","16":"상세평가","17":"2순위 후보","18":"3순위 후보","31":"기본관리 목표","32":"집중관리 목표","33":"보조관리 목표","40":"기본관리 방향","41":"집중관리 방향","42":"보조관리 방향","43":"고객 설명용 한 줄 요약","50":"집중관리 회복유형","51":"보조관리 회복유형","52":"암종보정"}},"secAhdr":{"01_고객기본정보":{"1) 고객 기본정보":"항목","2) 의료·치료 정보":"항목","3) 케어관리 정보":"항목"},"02_첫방문회복상태확인":{"1) 선별평가: 평가기준을 먼저 확인한 뒤 노란색 입력값을 선택합니다":"영역","2) 선별 결과 요약 및 관리 우선순위":"영역"},"04_증상활력복약평가":{"1) 활력·증상·검사정보":"구분","2) 복약순응도 자동계산":"항목","3) 증상·활력·복약 요약":"요약항목","4) 암종 관련 증상 보정":"암종/상황"},"05_영양평가":{"1) 신체계측 및 체중 변화":"항목","2) MUST 및 영양행동":"구분","3) 위장관 증상":"구분","4) 근감소 위험 SARC-F (영양 연계 선별)":"구분","5) 암종 관련 영양 보정":"암종/상황","6) 영양평가 요약 및 회복설계 반영":"요약항목"},"06_기능평가":{"1) SPPB 하위검사":"구분","2) 기능평가 요약":"요약항목","3) 암종 관련 기능 보정":"암종/상황"},"07_심리평가":{"1) PHQ-9 우울 선별: 최근 2주 기준":"번호","2) GAD-7 불안 선별: 최근 2주 기준":"번호","3) ISI 수면 평가: 최근 2주 기준":"번호","4) Distress 및 재발걱정":"항목","5) 심리평가 요약":"요약항목","6) 암종 관련 심리 보정":"항목"},"08_암종별평가":{},"09_핵심평가요약":{"1) 선별결과 요약 및 관리 우선순위":"영역","3) 실제 평가결과 요약":"구분","4) 핵심 문제 정의":"","5) 회복목표":"구분","6) 회복 방향성":"항목","7) 회복유형 및 목표/계획 라이브러리 매칭":"항목"}}}</script>
@@ -1270,13 +1309,28 @@ function patientPriorityCare(p){
   recalc(); // 엔진 오버라이드를 현재 화면(cp/cv) 기준으로 복원
   return result;
 }
+// [v34.28] 대시보드 = 예전 일정메뉴 '대상자체크' 화면 + 폴더 + 우선순위 케어·선물제공·관리 열
+//          (행은 등록된 대상자 자동, 체크값은 대상자별 p.check에 저장. 방문케어 시작일·F/U 일정·주소 데이터는 화면에서만 빠지고 그대로 보관)
+const CHECK_COLS=[
+  {key:'record', label:'기록작성', options:['작성완료','미작성']},
+  {key:'consent', label:'동의서 수령', options:['수령완료','미수령','해당없음'], flag:{'미수령':'cellFlagRed'}},
+  {key:'submit', label:'부대표 제출', options:['제출완료','미제출','해당없음'], flag:{'미제출':'cellFlagYellow'}},
+  {key:'nutriConnect', label:'영양사 연결', options:['연결완료','미연결'], flag:{'미연결':'cellFlagPink'}},
+  {key:'nutriProgress', label:'영양 상담 진행', options:['진행완료','미진행'], flag:{'미진행':'cellFlagAmber'}},
+  {key:'nutriGuide', label:'영양안내문 전달', options:['전달완료','미전달'], flag:{'미전달':'cellFlagPurple'}},
+  {key:'giftProvided', label:'선물제공여부', options:['제공','미제공'], flag:{'미제공':'cellFlagAmber'}},
+  {key:'nutriDiaryProvided', label:'영양일지제공(3회차)', options:['제공','미제공'], flag:{'미제공':'cellFlagTeal'}},
+  {key:'nutriDiaryCollected', label:'영양일지수거(4회차)', options:['수거완료','미수거'], flag:{'미수거':'cellFlagIndigo'}},
+  {key:'exerciseDiary', label:'운동일지제공', options:['제공','미제공'], flag:{'미제공':'cellFlagOrange'}},
+  {key:'midEval', label:'중간평가', options:['시행','미시행'], flag:{'미시행':'cellFlagCyan'}},
+  {key:'sleepWatch', label:'수면시계제공', options:['제공','비제공'], flag:{'비제공':'cellFlagPurple'}},
+  {key:'finalEval', label:'최종평가', options:['시행','미시행'], flag:{'미시행':'cellFlagRose'}}
+];
+window.REG_CHECK_KEYS=CHECK_COLS.map(c=>c.key);
 function renderDashboard(){
   const wrap=document.getElementById('panel-dashboard'); if(!wrap) return;
   if(!Array.isArray(state.folderList)) state.folderList=[];
-  // 환자별 fuCount 사용; 전역 state.fuCount는 더 이상 사용하지 않음
-  const getPatFuCount=p=>Math.max(1, typeof p.fuCount==='number'?p.fuCount:5);
-  const maxFuCount=state.patients.length?Math.max(...state.patients.map(getPatFuCount)):5;
-  // [v33.6] 폴더 사이드바 HTML
+  // 폴더 사이드바 (기존 대시보드 폴더 기능)
   let sideHtml='<div class="folderSidebar">'
     +'<div class="folderSidebarTitle">폴더</div>'
     +'<div class="folderItem'+(dashSelectedFolder==='all'?' active':'')+'" data-folder="all">📂 전체</div>';
@@ -1284,105 +1338,59 @@ function renderDashboard(){
     sideHtml+='<div class="folderItem'+(dashSelectedFolder===fn?' active':'')+'" data-folder="'+esc(fn)+'">📁 '+esc(fn)+'</div>';
   });
   sideHtml+='<button class="addFolderBtn" id="dashAddFolderBtn">+ 폴더 추가</button></div>';
-  // [v33.6] 선택된 폴더로 환자 필터링 (원래 index 유지)
   const filtered=state.patients
     .map((p,idx)=>({p,idx}))
     .filter(({p})=>dashSelectedFolder==='all'||p.folder===dashSelectedFolder);
-  const rows=filtered.map(({p,idx})=>{
-    const {gender,birth}=patientDemo(p);
-    const age=computeAge(birth);
-    const startTBD=!!p.startDateTBD;
-    const startRaw=p.visits[0]?p.visits[0].date:"";
-    const start=startTBD?"":startRaw;
-    const pFuCount=getPatFuCount(p);
-    if(!Array.isArray(p.fuOverride)) p.fuOverride=[];
-    while(p.fuOverride.length<pFuCount) p.fuOverride.push(null);
-    if(!Array.isArray(p.fuDone)) p.fuDone=[];
-    while(p.fuDone.length<pFuCount) p.fuDone.push(false);
-    if(!Array.isArray(p.fuCancelled)) p.fuCancelled=[];
-    while(p.fuCancelled.length<pFuCount) p.fuCancelled.push(false);
-    if(!Array.isArray(p.fuTime)) p.fuTime=[];
-    while(p.fuTime.length<pFuCount) p.fuTime.push('');
-    const fu=[]; let prevDate=start;
-    for(let k=0;k<pFuCount;k++){
-      const ov=p.fuOverride[k];
-      const val=ov||addDaysStr(prevDate,14);
-      fu.push(val);
-      if(val) prevDate=val;
-    }
+  let html='<div class="dashHead"><h2>📝 대상자체크</h2></div>';
+  html+='<div class="dashTableWrap"><table class="dashTbl schedTbl regCheckTbl"><thead><tr>';
+  html+='<th>번호</th><th>이름</th>';
+  CHECK_COLS.forEach(c=>html+='<th>'+esc(c.label)+'</th>');
+  html+='<th class="dashPriorityHdr">우선순위 케어</th><th>선물제공</th><th>관리</th>';
+  html+='</tr></thead><tbody>';
+  if(filtered.length===0){
+    html+='<tr><td colspan="'+(CHECK_COLS.length+5)+'" class="dashEmpty">이 폴더에 등록된 대상자가 없습니다.</td></tr>';
+  }
+  filtered.forEach(({p,idx})=>{
+    if(!p.check||typeof p.check!=='object') p.check={};
     if(typeof p.priorityOverride!=='string') p.priorityOverride='';
-    const autoPriority=patientPriorityCare(p);
-    const effPriority=p.priorityOverride?(p.priorityOverride==='기능'?'운동':p.priorityOverride):autoPriority;
     if(typeof p.priorityComment!=='string') p.priorityComment='';
     if(typeof p.giftGiven3!=='boolean') p.giftGiven3=(typeof p.giftGiven==='boolean'? p.giftGiven : false);
     if(typeof p.giftGiven6!=='boolean') p.giftGiven6=false;
     if(typeof p.giftItem!=='string') p.giftItem='';
-    if(typeof p.address!=='string') p.address='';
-    if(typeof p.startTime!=='string') p.startTime='';
-    return {idx,name:p.name,gender:gender||"—",age:(age===""?"—":age+"세"),start,startRaw,startTBD,fu,fuDone:p.fuDone,fuCancelled:p.fuCancelled,priority:effPriority,priorityOverride:p.priorityOverride,priorityComment:p.priorityComment,giftGiven3:p.giftGiven3,giftGiven6:p.giftGiven6,giftItem:p.giftItem,address:p.address,startTime:p.startTime,fuTime:p.fuTime,pFuCount};
+    const autoPriority=patientPriorityCare(p);
+    const priority=p.priorityOverride?(p.priorityOverride==='기능'?'운동':p.priorityOverride):autoPriority;
+    html+='<tr>';
+    html+='<td>'+(idx+1)+'</td>';
+    html+='<td><input type="text" class="schedCell regNameInput" data-idx="'+idx+'" value="'+esc(p.name)+'" title="이름 수정"></td>';
+    CHECK_COLS.forEach(c=>{
+      const v=p.check[c.key]||'';
+      const cls=(c.flag&&c.flag[v])?' class="'+c.flag[v]+'"':'';
+      let opts='<option value=""></option>';
+      c.options.forEach(op=>{ opts+='<option value="'+esc(op)+'"'+(v===op?' selected':'')+'>'+esc(op)+'</option>'; });
+      html+='<td'+cls+'><select class="schedCell regCheckSel" data-idx="'+idx+'" data-k="'+c.key+'">'+opts+'</select></td>';
+    });
+    // 우선순위 케어 (기존 대시보드와 동일)
+    html+='<td class="dashPriority"><span class="prioWrap" data-idx="'+idx+'">'
+      +(priority?('<span class="prioTag">'+esc(priority)+'</span>'):'<span class="dashMuted">—</span>')
+      +'<button class="prioEditBtn" data-idx="'+idx+'" title="우선순위 케어 직접 수정">수정</button>'
+      +(p.priorityComment? '<div class="prioComment">'+esc(p.priorityComment)+'</div>' : '')
+      +'</span></td>';
+    // 선물제공 (기존 대시보드와 동일)
+    html+='<td class="dashGift">'
+      +'<label class="giftChkLbl"><input type="checkbox" class="giftChk" data-idx="'+idx+'" data-round="3" '+(p.giftGiven3?'checked':'')+'>3차 제공</label>'
+      +'<label class="giftChkLbl"><input type="checkbox" class="giftChk" data-idx="'+idx+'" data-round="6" '+(p.giftGiven6?'checked':'')+'>6차 제공</label>'
+      +'<textarea class="giftItemInput" data-idx="'+idx+'" placeholder="선물 항목/메모">'+esc(p.giftItem||"")+'</textarea>'
+      +'</td>';
+    // 관리 (기존 대시보드와 동일)
+    html+='<td class="dashAct">'
+      +'<button class="dashBtn open" data-idx="'+idx+'">열기</button>'
+      +'<button class="dashBtn del" data-idx="'+idx+'">삭제</button>'
+      +'</td>';
+    html+='</tr>';
   });
-  // 동적 헤더 생성 (2차 F/U ~ (maxFuCount+1)차 F/U)
-  let fuHeaders='';
-  for(let k=0;k<maxFuCount;k++){
-    const n=k+2;
-    const sub=(n===3||n===6)?'<br><span class="fusub">(선물제공)</span>':'';
-    fuHeaders+='<th>'+n+'차 F/U'+sub+'</th>';
-  }
-  fuHeaders+='<th style="min-width:64px;font-size:13px;color:#64748b">회차</th>';
-  const colspanAll=5+maxFuCount+1+3; // 5고정 + maxFuCount + 회차열 + 우선순위+선물+관리
-  let tableHtml='<div class="dashHead"><h2>📋 등록 대상자 대시보드</h2></div>';
-  tableHtml+='<div class="dashTblOuter">'
-    +'<div class="dashScrollTop" id="dashScrollTop"><div class="dashScrollInner" id="dashScrollInner"></div></div>'
-    +'<div class="dashTableWrap" id="dashTableWrap"><table class="dashTbl" id="dashMainTbl"><thead><tr>'
-    +'<th>번호</th><th>이름</th><th>성별</th><th>나이</th><th>방문케어 시작일<br><span class="fusub">(1차·첫방문)</span></th>'
-    +fuHeaders
-    +'<th class="dashPriorityHdr">우선순위 케어</th><th>선물제공</th><th>관리</th>'
-    +'</tr></thead><tbody>';
-  if(rows.length===0){
-    tableHtml+='<tr><td colspan="'+colspanAll+'" class="dashEmpty">이 폴더에 등록된 대상자가 없습니다.</td></tr>';
-  }
-  rows.forEach(r=>{
-    tableHtml+='<tr>'
-      +'<td class="dashNo">'+(r.idx+1)+'</td>'
-      +'<td class="dashName"><span class="nameWrap" data-idx="'+r.idx+'"><span class="nameText">'+esc(r.name)+'</span><button class="nameEditBtn" data-idx="'+r.idx+'" title="이름 수정">수정</button><input type="text" class="dashAddressInput" data-idx="'+r.idx+'" placeholder="주소" value="'+esc(r.address||"")+'"></span></td>'
-      +'<td>'+esc(r.gender)+'</td>'
-      +'<td>'+esc(r.age)+'</td>'
-      +'<td class="dashStart'+(r.startTBD?' startTBDCell':'')+'">'
-        +'<input type="date" class="startDateInput" data-idx="'+r.idx+'" value="'+esc(r.startRaw||"")+'"'+(r.startTBD?' disabled':'')+'>'
-        +'<input type="time" class="startTimeInput" data-idx="'+r.idx+'" value="'+esc(r.startTime||"")+'"'+(r.startTBD?' disabled':'')+'>'
-        +'<label class="startTBDLbl"><input type="checkbox" class="startTBDChk" data-idx="'+r.idx+'" '+(r.startTBD?'checked':'')+'>미정</label>'
-      +'</td>'
-      +r.fu.map((d,i)=>'<td class="fuCell'+(r.fuDone[i]?' fuDoneCell':'')+(r.fuCancelled[i]?' fuCancelledCell':'')+'">'
-          +'<input type="date" class="fuDateInput" data-idx="'+r.idx+'" data-k="'+i+'" value="'+esc(d||"")+'"'+(r.fuCancelled[i]?' disabled':'')+'>'
-          +'<input type="time" class="fuTimeInput" data-idx="'+r.idx+'" data-k="'+i+'" value="'+esc(r.fuTime[i]||"")+'"'+(r.fuCancelled[i]?' disabled':'')+'>'
-          +'<label class="fuDoneLbl"><input type="checkbox" class="fuDoneChk" data-idx="'+r.idx+'" data-k="'+i+'" '+(r.fuDone[i]?'checked':'')+(r.fuCancelled[i]?' disabled':'')+'>완료</label>'
-          +'<button class="fuCancelBtn'+(r.fuCancelled[i]?' active':'')+'" data-idx="'+r.idx+'" data-k="'+i+'">'+(r.fuCancelled[i]?'취소 해제':'취소')+'</button>'
-        +'</td>').join('')
-      +(maxFuCount>r.pFuCount?'<td colspan="'+(maxFuCount-r.pFuCount)+'"></td>':'')
-      +'<td style="text-align:center;white-space:nowrap;vertical-align:middle">'
-        +'<button class="fuAddBtn" data-idx="'+r.idx+'" title="이 환자 회차 추가" style="margin-bottom:4px">＋</button>'
-        +(r.pFuCount>1?'<button class="fuDelBtn" data-idx="'+r.idx+'" title="이 환자 마지막 회차 삭제" style="display:block;margin:0 auto;border:2px dashed #dc2626;background:#fff5f5;color:#dc2626;border-radius:8px;padding:3px 10px;font-size:14px;font-weight:700;cursor:pointer">－</button>':'')
-      +'</td>'
-      +'<td class="dashPriority"><span class="prioWrap" data-idx="'+r.idx+'">'
-        +(r.priority?('<span class="prioTag">'+esc(r.priority)+'</span>'):'<span class="dashMuted">—</span>')
-        +'<button class="prioEditBtn" data-idx="'+r.idx+'" title="우선순위 케어 직접 수정">수정</button>'
-        +(r.priorityComment? '<div class="prioComment">'+esc(r.priorityComment)+'</div>' : '')
-      +'</span></td>'
-      +'<td class="dashGift">'
-        +'<label class="giftChkLbl"><input type="checkbox" class="giftChk" data-idx="'+r.idx+'" data-round="3" '+(r.giftGiven3?'checked':'')+'>3차 제공</label>'
-        +'<label class="giftChkLbl"><input type="checkbox" class="giftChk" data-idx="'+r.idx+'" data-round="6" '+(r.giftGiven6?'checked':'')+'>6차 제공</label>'
-        +'<textarea class="giftItemInput" data-idx="'+r.idx+'" placeholder="선물 항목/메모">'+esc(r.giftItem||"")+'</textarea>'
-      +'</td>'
-      +'<td class="dashAct">'
-        +'<button class="dashBtn open" data-idx="'+r.idx+'">열기</button>'
-        +'<button class="dashBtn del" data-idx="'+r.idx+'">삭제</button>'
-      +'</td>'
-      +'</tr>';
-  });
-  tableHtml+='</tbody></table></div></div>'; // dashTableWrap + dashTblOuter 닫기
-  // [v33.6] 폴더 레이아웃으로 조합
-  wrap.innerHTML='<div class="folderLayout">'+sideHtml+'<div class="folderContent">'+tableHtml+'</div></div>';
-  // 폴더 클릭 핸들러
+  html+='</tbody></table></div>';
+  wrap.innerHTML='<div class="folderLayout">'+sideHtml+'<div class="folderContent">'+html+'</div></div>';
+  // 폴더
   wrap.querySelectorAll('.folderItem').forEach(el=>{
     el.onclick=()=>{ dashSelectedFolder=el.dataset.folder; renderDashboard(); };
   });
@@ -1396,23 +1404,44 @@ function renderDashboard(){
     autosave();
     renderDashboard();
   };
+  // 이름
+  wrap.querySelectorAll('.regNameInput').forEach(inp=>{
+    inp.onchange=()=>{
+      const p=state.patients[+inp.dataset.idx]; if(!p) return;
+      const trimmed=(inp.value||'').trim();
+      if(!trimmed){ alert('이름은 비워둘 수 없습니다.'); inp.value=p.name; return; }
+      p.name=trimmed;
+      autosave();
+      renderSelectors();
+    };
+  });
+  // 체크 항목
+  wrap.querySelectorAll('.regCheckSel').forEach(sel=>{
+    sel.onchange=()=>{
+      const p=state.patients[+sel.dataset.idx]; if(!p) return;
+      if(!p.check||typeof p.check!=='object') p.check={};
+      p.check[sel.dataset.k]=sel.value;
+      autosave();
+      const col=CHECK_COLS.find(c=>c.key===sel.dataset.k);
+      const td=sel.closest('td'); if(td){ td.className=(col&&col.flag&&col.flag[sel.value])||''; }
+    };
+  });
+  // 선물제공
   wrap.querySelectorAll('.giftChk').forEach(chk=>{
     chk.onchange=()=>{
-      const idx=+chk.dataset.idx, round=chk.dataset.round;
-      const p=state.patients[idx]; if(!p) return;
-      if(round==='3') p.giftGiven3=chk.checked; else p.giftGiven6=chk.checked;
+      const p=state.patients[+chk.dataset.idx]; if(!p) return;
+      if(chk.dataset.round==='3') p.giftGiven3=chk.checked; else p.giftGiven6=chk.checked;
       autosave();
-      renderDashboard();
     };
   });
   wrap.querySelectorAll('.giftItemInput').forEach(inp=>{
     inp.onchange=()=>{
-      const idx=+inp.dataset.idx;
-      const p=state.patients[idx]; if(!p) return;
+      const p=state.patients[+inp.dataset.idx]; if(!p) return;
       p.giftItem=inp.value;
       autosave();
     };
   });
+  // 관리: 열기·삭제
   wrap.querySelectorAll('.dashBtn.open').forEach(btn=>{
     btn.onclick=()=>{
       cp=+btn.dataset.idx; cv=0;
@@ -1423,129 +1452,7 @@ function renderDashboard(){
   wrap.querySelectorAll('.dashBtn.del').forEach(btn=>{
     btn.onclick=()=>deletePatient(+btn.dataset.idx);
   });
-  wrap.querySelectorAll('.startDateInput').forEach(inp=>{
-    inp.onchange=()=>{
-      const idx=+inp.dataset.idx;
-      const p=state.patients[idx]; if(!p) return;
-      if(!p.visits[0]) return;
-      p.visits[0].date=inp.value||"";
-      autosave();
-      renderDashboard();
-    };
-  });
-  wrap.querySelectorAll('.startTimeInput').forEach(inp=>{
-    inp.onchange=()=>{
-      const idx=+inp.dataset.idx;
-      const p=state.patients[idx]; if(!p) return;
-      p.startTime=inp.value||"";
-      autosave();
-    };
-  });
-  wrap.querySelectorAll('.dashAddressInput').forEach(inp=>{
-    inp.onchange=()=>{
-      const idx=+inp.dataset.idx;
-      const p=state.patients[idx]; if(!p) return;
-      p.address=inp.value||"";
-      autosave();
-    };
-  });
-  wrap.querySelectorAll('.startTBDChk').forEach(chk=>{
-    chk.onchange=()=>{
-      const idx=+chk.dataset.idx;
-      const p=state.patients[idx]; if(!p) return;
-      p.startDateTBD=chk.checked;
-      autosave();
-      renderDashboard();
-    };
-  });
-  wrap.querySelectorAll('.nameEditBtn').forEach(btn=>{
-    btn.onclick=()=>{
-      const idx=+btn.dataset.idx;
-      const p=state.patients[idx]; if(!p) return;
-      const nv=prompt('대상자 이름을 수정합니다.', p.name);
-      if(nv===null) return;
-      const trimmed=nv.trim();
-      if(!trimmed){ alert('이름은 비워둘 수 없습니다.'); return; }
-      p.name=trimmed;
-      autosave();
-      renderDashboard();
-    };
-  });
-  wrap.querySelectorAll('.fuDateInput').forEach(inp=>{
-    inp.onchange=()=>{
-      const idx=+inp.dataset.idx, k=+inp.dataset.k;
-      const p=state.patients[idx]; if(!p) return;
-      if(!Array.isArray(p.fuOverride)) p.fuOverride=[];
-      while(p.fuOverride.length<=k) p.fuOverride.push(null);
-      p.fuOverride[k]=inp.value||null;
-      autosave();
-      renderDashboard();
-    };
-  });
-  wrap.querySelectorAll('.fuTimeInput').forEach(inp=>{
-    inp.onchange=()=>{
-      const idx=+inp.dataset.idx, k=+inp.dataset.k;
-      const p=state.patients[idx]; if(!p) return;
-      if(!Array.isArray(p.fuTime)) p.fuTime=[];
-      while(p.fuTime.length<=k) p.fuTime.push('');
-      p.fuTime[k]=inp.value||"";
-      autosave();
-    };
-  });
-  wrap.querySelectorAll('.fuDoneChk').forEach(chk=>{
-    chk.onchange=()=>{
-      const idx=+chk.dataset.idx, k=+chk.dataset.k;
-      const p=state.patients[idx]; if(!p) return;
-      if(!Array.isArray(p.fuDone)) p.fuDone=[];
-      while(p.fuDone.length<=k) p.fuDone.push(false);
-      p.fuDone[k]=chk.checked;
-      autosave();
-      renderDashboard();
-    };
-  });
-  wrap.querySelectorAll('.fuCancelBtn').forEach(btn=>{
-    btn.onclick=()=>{
-      const idx=+btn.dataset.idx, k=+btn.dataset.k;
-      const p=state.patients[idx]; if(!p) return;
-      if(!Array.isArray(p.fuCancelled)) p.fuCancelled=[];
-      while(p.fuCancelled.length<=k) p.fuCancelled.push(false);
-      p.fuCancelled[k]=!p.fuCancelled[k];
-      autosave();
-      renderDashboard();
-    };
-  });
-  // 환자별 회차 추가/삭제
-  wrap.querySelectorAll('.fuAddBtn[data-idx]').forEach(btn=>{
-    btn.onclick=()=>{
-      const p=state.patients[+btn.dataset.idx]; if(!p) return;
-      p.fuCount=getPatFuCount(p)+1;
-      autosave(); renderDashboard();
-    };
-  });
-  wrap.querySelectorAll('.fuDelBtn').forEach(btn=>{
-    btn.onclick=()=>{
-      const p=state.patients[+btn.dataset.idx]; if(!p) return;
-      const fc=getPatFuCount(p); if(fc<=1) return;
-      p.fuCount=fc-1;
-      // 마지막 회차 데이터 제거
-      if(Array.isArray(p.fuOverride)) p.fuOverride=p.fuOverride.slice(0,p.fuCount);
-      if(Array.isArray(p.fuDone)) p.fuDone=p.fuDone.slice(0,p.fuCount);
-      if(Array.isArray(p.fuCancelled)) p.fuCancelled=p.fuCancelled.slice(0,p.fuCount);
-      if(Array.isArray(p.fuTime)) p.fuTime=p.fuTime.slice(0,p.fuCount);
-      autosave(); renderDashboard();
-    };
-  });
-  // 상단 스크롤바 동기화
-  const dashScrollTop=document.getElementById('dashScrollTop');
-  const dashTableWrap=document.getElementById('dashTableWrap');
-  const dashMainTbl=document.getElementById('dashMainTbl');
-  if(dashScrollTop && dashTableWrap && dashMainTbl){
-    const inner=document.getElementById('dashScrollInner');
-    if(inner) inner.style.width=dashMainTbl.scrollWidth+'px';
-    let syncingTop=false, syncingBot=false;
-    dashScrollTop.onscroll=()=>{ if(syncingTop) return; syncingBot=true; dashTableWrap.scrollLeft=dashScrollTop.scrollLeft; syncingBot=false; };
-    dashTableWrap.onscroll=()=>{ if(syncingBot) return; syncingTop=true; dashScrollTop.scrollLeft=dashTableWrap.scrollLeft; syncingTop=false; };
-  }
+  // 우선순위 케어 수정
   wrap.querySelectorAll('.prioEditBtn').forEach(btn=>{
     btn.onclick=()=>{
       const idx=+btn.dataset.idx;
@@ -2207,7 +2114,28 @@ function dl(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:"ap
         const idx=newState.patients.findIndex(p=>p.name===name);
         if(idx>=0){ newState.patients[idx]=parsed.patient; }
         else{ newState.patients.push(parsed.patient); }
-      } else { alert("지원하지 않는 JSON 형식입니다.\n(등록 앱 백업 파일을 선택해주세요)"); return; }
+      } else if(parsed.type==='schedAll' && parsed.state && Array.isArray(parsed.state.visits)){
+        // [v34.28] 일정메뉴 백업(JSON)의 '대상자체크' 값을 이름이 같은 대상자에게 채움
+        newState=JSON.parse(JSON.stringify(state));
+        const keys=window.REG_CHECK_KEYS||[];
+        const byName={};
+        parsed.state.visits.forEach(r=>{ if(r && r.name && !byName[String(r.name).trim()]) byName[String(r.name).trim()]=r; });
+        const hit=[], miss=[];
+        newState.patients.forEach(p=>{
+          const r=byName[String(p.name||'').trim()];
+          if(!r){ miss.push(p.name); return; }
+          if(!p.check||typeof p.check!=='object') p.check={};
+          keys.forEach(k=>{ if(r[k]!==undefined && r[k]!==null && r[k]!=='') p.check[k]=String(r[k]); });
+          hit.push(p.name);
+        });
+        const extraNames=Object.keys(byName).filter(n=>!newState.patients.some(p=>String(p.name||'').trim()===n));
+        let msg='일정메뉴 대상자체크 값을 '+hit.length+'명에게 채울게요.';
+        if(miss.length) msg+='\n\n일정메뉴에 없어서 빈칸으로 두는 대상자: '+miss.join(', ');
+        if(extraNames.length) msg+='\n\n등록 대상자에 없어서 건너뛰는 이름: '+extraNames.join(', ');
+        msg+='\n\n진행할까요?';
+        if(window.RegFB && window.RegFB.ready()){ window.RegFB.importState(newState, msg, true); return; }
+        if(!confirm(msg)) return;
+      } else { alert("지원하지 않는 JSON 형식입니다.\n(등록 앱 백업 파일 또는 일정메뉴 백업 파일을 선택해주세요)"); return; }
       // [v34.23] Firebase에 연결돼 있으면 Firebase 데이터를 파일 내용으로 교체
       if(window.RegFB && window.RegFB.ready()){ window.RegFB.importState(newState); return; }
       try{ localStorage.setItem(LS_KEY, JSON.stringify({v:CFG.version, ts:Date.now(), cp:0, cv:0, state:newState})); localStorage.setItem(LS_KEY+"__fbpending","1"); }catch(e2){}
@@ -2774,6 +2702,12 @@ function gate(show, title, msg, btns) {
 let noticeT = null;
 function notice(html, ms = 6000) { const n = $('regNotice'); n.innerHTML = html; n.style.display = 'block'; clearTimeout(noticeT); if (ms) noticeT = setTimeout(() => n.style.display = 'none', ms); }
 $('regNotice').onclick = () => { $('regNotice').style.display = 'none'; };
+// [v34.26] 저장 실패·연결 끊김 알림 — 빨간(실패)/주황(오프라인) 띠로 눈에 띄게, 저장에 성공할 때까지 유지
+let failKind = null;
+function showFail(html, kind) { failKind = kind || 'fail'; $('regFailMsg').innerHTML = html; $('regFail').style.background = failKind === 'offline' ? '#c2410c' : '#dc2626'; $('regFail').style.display = 'block'; }
+function clearFail(kind) { if (!kind || failKind === kind) { failKind = null; $('regFail').style.display = 'none'; } }
+$('regFailX').onclick = () => { $('regFail').style.display = 'none'; };
+const SLOW_MS = 15000;
 const tm = () => new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 function stat(t, bad) { const el = $('fbSyncStatus'); if (el) { el.textContent = t; el.style.color = bad ? '#fca5a5' : '#7dd3fc'; } }
 const EMPTY = { pats: [], meta: null };
@@ -2800,27 +2734,35 @@ async function saveNow() {
   S.saving = true; setPending(true);
   let result = 'fail';
   stat(S.online ? 'Firebase 저장 중…' : '오프라인 — 연결되면 Firebase에 올라가요', !S.online);
+  const slowT = setTimeout(() => {   // 오래 걸리면(연결 문제) 실패로 알림 — 연결되면 계속 올라감
+    stat('⚠ Firebase 저장 안 됨 — 인터넷 확인', true);
+    showFail('⚠ Firebase 저장이 안 되고 있어요 (15초 넘게 응답 없음)<br><span style="font-weight:500;font-size:14px">입력한 내용은 이 브라우저에 저장돼 있어요. 인터넷을 확인해 주세요. 연결되면 자동으로 다시 올라가요.</span>', 'slow');
+  }, SLOW_MS);
   try {
     await S.dbM.update(S.ref, upd);
     S.synced = cur;
+    if (!S.snapDuringSave) S.last = cur;   // 저장 중에 들어온 새 소식이 없으면 서버 = 방금 올린 내용
     stat('✔ Firebase 저장됨 · ' + tm());
     if (!S.again) setPending(false);
     result = 'saved';
+    clearFail('slow'); clearFail('fail');
   } catch (e) {
     console.error(e);
     stat('⚠ Firebase 저장 실패 — 인터넷·로그인 확인', true);
-    notice('Firebase 저장에 실패했어요: ' + (e.code || e.message || e) + '<br>이 브라우저에는 저장돼 있어요. 인터넷·로그인 상태를 확인해 주세요.', 0);
+    showFail('⚠ Firebase 저장에 실패했어요 (' + (e.code || e.message || e) + ')<br><span style="font-weight:500;font-size:14px">입력한 내용은 이 브라우저에 저장돼 있어요. 업무관리 로그인과 인터넷을 확인한 뒤 💾 저장을 다시 눌러 주세요.</span>', 'fail');
   } finally {
+    clearTimeout(slowT);
     S.saving = false;
+    const hadSnap = S.snapDuringSave; S.snapDuringSave = false;
     if (S.again) { S.again = false; saveNow(); }
-    else considerRemote();   // 저장하는 동안 다른 기기에서 바뀐 게 있으면 반영
+    else if (hadSnap) considerRemote();   // 저장하는 동안 다른 기기에서 바뀐 게 있으면 반영
   }
   return result;
 }
 // [v34.25] 💾 저장 버튼 — 누르면 바로 Firebase에 저장하고, 서버에 실제로 들어갔는지 다시 읽어서 확인
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let manualBusy = false, btnResetT = null;
-function btnState(t, bg) { const b = $('regSaveBtn'); if (!b) return; b.textContent = t; b.style.background = bg || '#16a34a'; clearTimeout(btnResetT); }
+function btnState(t, bg) { document.querySelectorAll('.tabSaveBtn').forEach(b => { b.textContent = t; b.style.background = bg || '#16a34a'; }); clearTimeout(btnResetT); }
 async function manualSave() {
   if (manualBusy) return;
   if (!S.uid || !S.loaded) { alert(S.uid ? '아직 Firebase에서 불러오는 중이에요. 잠시 후 다시 눌러 주세요.' : '업무관리 로그인 후 저장할 수 있어요.'); return; }
@@ -2829,17 +2771,17 @@ async function manualSave() {
   await sleep(80);
   btnState('저장 중…', '#64748b');
   try {
-    while (S.saving) await sleep(100);
+    const waitSaving = async () => { const t0 = Date.now(); while (S.saving && Date.now() - t0 < SLOW_MS) await sleep(100); return !S.saving; };
+    const failManual = msg => { btnState('⚠ 저장 실패', '#dc2626'); stat('⚠ Firebase 저장 실패', true); alert('⚠ 저장에 실패했어요.\n\n' + msg + '\n\n입력한 내용은 이 브라우저에 저장돼 있어요.'); };
+    if (!(await waitSaving())) { failManual('Firebase가 응답하지 않아요. 인터넷 연결을 확인해 주세요.\n(연결되면 자동으로 다시 올라가요)'); return; }
     if (!S.online) {
       saveNow();
-      btnState('⚠ 오프라인', '#b45309');
-      stat('오프라인 — 연결되면 Firebase에 올라가요', true);
-      alert('인터넷에 연결돼 있지 않아요.\n입력한 내용은 이 브라우저에 저장돼 있고, 인터넷이 다시 연결되면 Firebase에 자동으로 올라가요.');
+      failManual('인터넷에 연결돼 있지 않아서 Firebase에 저장하지 못했어요.\n인터넷이 다시 연결되면 자동으로 올라가요.');
       return;
     }
-    const r = await saveNow();
-    if (r === 'fail') { btnState('⚠ 저장 실패', '#dc2626'); return; }
-    while (S.saving) await sleep(100);
+    const r = await Promise.race([saveNow(), sleep(SLOW_MS).then(() => 'timeout')]);
+    if (r === 'fail') { failManual('Firebase 저장 중 오류가 났어요. 업무관리 로그인과 인터넷을 확인한 뒤 다시 눌러 주세요.'); return; }
+    if (r === 'timeout' || !(await waitSaving())) { failManual('Firebase가 15초 넘게 응답하지 않아요. 인터넷 연결을 확인해 주세요.\n(연결되면 자동으로 다시 올라가요)'); return; }
     // 서버에서 다시 읽어 확인
     const n = state.patients.length;
     let ok = false;
@@ -2850,16 +2792,33 @@ async function manualSave() {
     if (ok) {
       btnState('✔ 저장됨', '#16a34a');
       stat('✔ Firebase 저장 확인됨 · ' + tm() + ' (대상자 ' + n + '명)');
+      clearFail();
     } else {
-      btnState('⚠ 확인 안 됨', '#b45309');
-      stat('⚠ Firebase 저장 확인이 안 됐어요 — 새로고침 후 다시 확인해 주세요', true);
+      failManual('저장은 보냈지만 Firebase에서 확인이 안 됐어요.\n잠시 후 💾 저장을 다시 눌러 주세요.');
     }
   } finally {
     manualBusy = false;
-    btnResetT = setTimeout(() => { const b = $('regSaveBtn'); if (b) { b.textContent = '💾 저장'; b.style.background = '#16a34a'; } }, 3000);
+    btnResetT = setTimeout(() => { document.querySelectorAll('.tabSaveBtn').forEach(b => { b.textContent = '💾 저장'; b.style.background = '#16a34a'; }); }, 3000);
   }
 }
-if ($('regSaveBtn')) $('regSaveBtn').onclick = e => { e.preventDefault(); manualSave(); };
+// [v34.27] 탭마다 제목 옆에 💾 저장 버튼 — 화면이 다시 그려져도 자동으로 다시 붙음
+const SAVE_BTN_CSS = 'background:#16a34a;color:#fff;border:none;border-radius:8px;padding:5px 13px;font-size:14px;font-weight:700;cursor:pointer;vertical-align:middle;box-shadow:0 1px 3px rgba(0,0,0,.15)';
+function makeSaveBtn(extra) { const b = document.createElement('button'); b.type = 'button'; b.className = 'tabSaveBtn no-print'; b.title = '이 탭에 입력한 내용을 지금 바로 Firebase에 저장 (Ctrl+S)'; b.textContent = '💾 저장'; b.style.cssText = SAVE_BTN_CSS + ';' + (extra || ''); return b; }
+function ensureSaveBtns() {
+  document.querySelectorAll('#appRoot .panel').forEach(pn => {
+    if (pn.id === 'panels') return;
+    if (pn.querySelector('.tabSaveBtn')) return;
+    const h2 = pn.querySelector('.dashHead h2');
+    if (h2) { h2.appendChild(makeSaveBtn('margin-left:12px')); return; }
+    const desc = pn.querySelector(':scope > .desc');
+    if (desc) { desc.insertBefore(makeSaveBtn('float:right;margin:-3px 0 0 10px'), desc.firstChild); }
+  });
+}
+let ensureQueued = false;
+new MutationObserver(() => { if (ensureQueued) return; ensureQueued = true; requestAnimationFrame(() => { ensureQueued = false; ensureSaveBtns(); }); }).observe($('appRoot'), { childList: true, subtree: true });
+ensureSaveBtns();
+document.addEventListener('mousedown', e => { if (e.target.closest && e.target.closest('.tabSaveBtn')) e.preventDefault(); }, true);   // 버튼 누를 때 화면이 다시 그려져 클릭이 사라지지 않게
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('.tabSaveBtn'); if (b) { e.preventDefault(); manualSave(); } });
 document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); manualSave(); } });
 function schedule() { if (!S.loaded) return; clearTimeout(S.timer); S.timer = setTimeout(saveNow, 1200); }
 const prevHook = window.hilmaruFileSave;
@@ -2884,6 +2843,7 @@ document.addEventListener('focusout', () => setTimeout(() => { if (S.deferred &&
 function onSnap(snap) {
   const cloud = cloudParts(snap.val());
   S.last = cloud;
+  if (S.saving) S.snapDuringSave = true;
   if (S.loaded) { considerRemote(); return; }
   S.loaded = true;
   const owner = lsGet(OWNER_KEY);
@@ -2915,9 +2875,9 @@ function onSnap(snap) {
 // 📥 JSON 불러오기 → Firebase 데이터를 파일 내용으로 교체
 window.RegFB = {
   ready: () => !!(S.uid && S.loaded),
-  importState: st => {
-    if (!confirm('Firebase에 저장된 등록 데이터를 이 파일 내용으로 바꿀까요?\n(되돌릴 수 없어요. 필요하면 먼저 📤 JSON 내보내기로 백업해 두세요.)')) return;
-    cp = 0; cv = 0;
+  importState: (st, msg, keepPos) => {
+    if (!confirm(msg || 'Firebase에 저장된 등록 데이터를 이 파일 내용으로 바꿀까요?\n(되돌릴 수 없어요. 필요하면 먼저 📤 JSON 내보내기로 백업해 두세요.)')) return;
+    if (!keepPos) { cp = 0; cv = 0; }
     window.RegApp.apply(window.RegApp.partsOf(st));
     saveNow().then(() => notice('불러온 내용을 Firebase에 저장했어요 (대상자 ' + state.patients.length + '명)'));
   },
@@ -2937,7 +2897,16 @@ if (location.protocol === 'file:') {
     const app = appM.initializeApp(firebaseConfig);
     const auth = authM.getAuth(app), db = dbM.getDatabase(app);
     S.dbM = dbM;
-    dbM.onValue(dbM.ref(db, '.info/connected'), s => { S.online = !!s.val(); if (S.loaded && !S.online) stat('오프라인 — 연결되면 Firebase에 올라가요', true); });
+    let wasOffline = false, offT = null;
+    dbM.onValue(dbM.ref(db, '.info/connected'), s => {
+      S.online = !!s.val();
+      clearTimeout(offT);
+      if (!S.online) {   // 잠깐 끊겼다 붙는 건 무시하고 5초 이상 끊기면 알림
+        offT = setTimeout(() => { if (S.online || !S.loaded) return; wasOffline = true; stat('⚠ 오프라인 — Firebase에 저장 안 됨', true); showFail('⚠ 인터넷 연결이 끊겨서 Firebase에 저장되지 않고 있어요<br><span style="font-weight:500;font-size:14px">입력한 내용은 이 브라우저에만 저장돼요. 다시 연결되면 자동으로 올라가요.</span>', 'offline'); }, 5000);
+      } else if (wasOffline) {
+        wasOffline = false; clearFail('offline'); stat('✔ Firebase 다시 연결됨 · ' + tm()); notice('인터넷이 다시 연결됐어요. 저장 안 된 내용이 있으면 Firebase에 올려요.'); if (S.loaded) saveNow();
+      }
+    });
     authM.onAuthStateChanged(auth, user => {
       if (S.unsub) { S.unsub(); S.unsub = null; }
       S.loaded = false; S.synced = null; S.last = null; S.deferred = false;
